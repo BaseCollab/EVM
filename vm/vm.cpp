@@ -4,7 +4,7 @@ namespace evm {
 
 void VirtualMachine::Execute(const byte_t *bytecode)
 {
-    interpreter_.Run(bytecode);
+    interpreter_.Run(this, bytecode);
 }
 
 } // namespace evm

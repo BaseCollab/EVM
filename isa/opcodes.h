@@ -3,8 +3,7 @@
 
 #include "common/constants.h"
 
-namespace evm
-{
+namespace evm {
 // clang-format off
 enum Opcode {
     EXIT = 0x0,
@@ -23,14 +22,17 @@ enum Opcode {
     MOVR = 0x9,
 
     // Comparison operations
-    CMPS = 0xa,
-    CMPU = 0xb,
+    SLTS = 0xa,
+    SLTU = 0xb,
+    SMES = 0xc,
+    SMEU = 0xd,
+    EQ   = 0xe,
 
     // Intrinsics
-    PRINT = 0xc,
-    SCAN  = 0xd,
+    PRINT = 0xf,
+    SCAN  = 0x10,
 
-    INVALID = 0xe,
+    INVALID = 0x11,
 };
 // clang-format on
 
@@ -43,22 +45,16 @@ using insn_size_t = word_t;
 //                  |        |       |       |
 //                opcode    rd     rs1     rs1
 
-#define PUT_A_INSN(opcode, rd, rs1, rs2) \
-    opcode, rd, rs1, rs2
+#define PUT_A_INSN(opcode, rd, rs1, rs2) opcode, rd, rs1, rs2
 
-#define PUT_R_INSN(opcode, rd, rs1) \
-    opcode, rd, rs1, 0
+#define PUT_R_INSN(opcode, rd, rs1) opcode, rd, rs1, 0
 
-#define PUT_IND_INSN(opcode, rd) \
-    opcode, rd, 0, 0
+#define PUT_IND_INSN(opcode, rd) opcode, rd, 0, 0
 
-#define PUT_INS_INSN(opcode, rs1) \
-    opcode, 0, rs1, 0
+#define PUT_INS_INSN(opcode, rs1) opcode, 0, rs1, 0
 
-#define PUT_INSN(opcode) \
-    opcode, 0, 0, 0
+#define PUT_INSN(opcode) opcode, 0, 0, 0
 
 } // namespace evm
 
 #endif // EVM_ISA_OPCODES_ISA_OPCODES_H
-

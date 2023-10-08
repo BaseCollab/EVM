@@ -36,14 +36,14 @@ add_custom_target(clang-force-format
 
 # --------------------------google-tests--------------------------------------
 
-# enable_testing()
-# find_package(GTest REQUIRED)
+enable_testing()
+find_package(GTest REQUIRED)
 
-# add_executable(unit_tests)
+add_executable(unit_tests)
 
-# target_link_libraries(unit_tests PUBLIC evm_static GTest::gtest_main)
+target_link_libraries(unit_tests PUBLIC evm_static GTest::gtest_main)
 
-# add_subdirectory(tests)
+add_subdirectory(tests)
 
 # ----------------------------------------------------------------------------
 

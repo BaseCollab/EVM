@@ -3,8 +3,7 @@
 
 #include "common/config.h"
 
-namespace evm
-{
+namespace evm {
 
 using reg_idx_t = byte_t;
 static constexpr size_t N_REG = (1 << 5);

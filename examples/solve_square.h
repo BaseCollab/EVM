@@ -7,6 +7,7 @@
 
 namespace evm::examples {
 
+// clang-format off
 static constexpr byte_t EXAMPLE_BYTES_SOLVE_SQUARE[] = {
     PUT_A_INSN(XOR, X6, X6, X6), // a = 0
     PUT_A_INSN(XOR, X7, X7, X7), // b = 0
@@ -16,16 +17,21 @@ static constexpr byte_t EXAMPLE_BYTES_SOLVE_SQUARE[] = {
     PUT_IND_INSN(SCAN, X7), // scan(b)
     PUT_IND_INSN(SCAN, X8), // scan(c)
 
+    PUT_INS_INSN(PRINT, X6), // print(b^2 - 4ac)
+    PUT_INS_INSN(PRINT, X7), // print(b^2 - 4ac)
+    PUT_INS_INSN(PRINT, X8), // print(b^2 - 4ac)
+
     PUT_A_INSN(MUL, XB, X7, X7), // XB = b^2
     PUT_A_INSN(MUL, XC, X6, X8), // XC = a * c
     PUT_IND_INSN(MOVI, XE), 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x4, // XE = 4
     PUT_A_INSN(MUL, XC, XC, XE), // XC = XC * 4
     PUT_A_INSN(SUB, XA, XB, XC), // XC = XC * 4
 
-    PUT_IND_INSN(PRINT, XA), // print(b^2 - 4ac)
+    PUT_INS_INSN(PRINT, XA), // print(b^2 - 4ac)
 
     PUT_INSN(EXIT), // exit
 };
+// clang-format on
 
 } // evm
 
