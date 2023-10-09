@@ -24,12 +24,12 @@ namespace evm {
 
 #define GET_RS2() bytecode[pc_ + 3]
 
-#define GET_IMM()                                                               \
-    ({                                                                          \
-        uint64_t val = 0;                                                       \
-        std::memcpy(&val, bytecode + pc_ + sizeof(insn_size_t), sizeof(reg_t)); \
-        pc_ += sizeof(reg_t);                                                   \
-        val;                                                                    \
+#define GET_IMM()                                                                 \
+    ({                                                                            \
+        reg_t val_ = 0;                                                           \
+        std::memcpy(&val_, bytecode + pc_ + sizeof(insn_size_t), sizeof(reg_t));  \
+        pc_ += sizeof(reg_t);                                                     \
+        val_;                                                                     \
     })
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
@@ -38,6 +38,9 @@ void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
                                      &&MOVR, &&SLTS, &&SLTU, &&SMES, &&SMEU, &&EQ,  &&PRINT, &&SCAN, &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
+
+    reg_idx_t reg_idx = -1;
+    reg_t value = 0;
 
     pc_ = 0;
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
@@ -90,7 +93,9 @@ XOR:
 MOVI:
     PRINT_DEBUG(MOVI);
 
-    vm->SetReg(GET_RD(), GET_IMM());
+    reg_idx = GET_RD();
+    value = GET_IMM();
+    vm->SetReg(reg_idx, value);
 
     DISPATCH();
 MOVR:
@@ -140,9 +145,8 @@ PRINT:
 SCAN:
     PRINT_DEBUG(SCAN);
 
-    reg_t val = 0;
-    scanf("%lu", &val);
-    vm->SetReg(GET_RD(), val);
+    scanf("%lu", &value);
+    vm->SetReg(GET_RD(), value);
 
     DISPATCH();
 INVALID:
