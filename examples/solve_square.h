@@ -22,7 +22,6 @@ static constexpr byte_t EXAMPLE_BYTES_SOLVE_SQUARE[] = {
     PUT_IND_INSN(MOVI, XE), 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // XE = 4
     PUT_A_INSN(MUL, XC, XC, XE), // XC = XC * 4
     PUT_A_INSN(SUB, XA, XB, XC), // XA = b^2 - 4ac
-    PUT_INS_INSN(PRINT, XC),
 
     PUT_INS_INSN(PRINT, XA), // print(XA)
 
