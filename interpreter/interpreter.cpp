@@ -12,10 +12,10 @@ namespace evm {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-#ifdef N_DEBUG
-#define PRINT_DEBUG(name)
-#else
+#ifdef DEBUG_LOG
 #define PRINT_DEBUG(name) std::cerr << #name << std::endl;
+#else
+#define PRINT_DEBUG(name)
 #endif
 
 #define GET_RD() bytecode[pc_ + 1]
@@ -34,10 +34,11 @@ namespace evm {
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
-    static void *dispatch_table[] = {
-        &&EXIT, &&ADD, &&SUB,  &&MUL,    &&DIV,    &&AND,   &&OR,     &&XOR,    &&MULU, &&DIVU,  &&MOVR,  &&MOVI,
-        &&MOVF, &&MOVFR, &&SLT, &&SLTU, &&SME,    &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&SLTF,
-        &&SMEF, &&EQF, &&NEQF, &&CONVRSF, &&CONVFRS, &&CONVRUF, &&CONVFRU, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
+    static void *dispatch_table[] = {&&EXIT,  &&ADD,    &&SUB,    &&MUL,  &&DIV,     &&AND,     &&OR,      &&XOR,
+                                     &&MULU,  &&DIVU,   &&MOVR,   &&MOVI, &&MOVF,    &&MOVFR,   &&SLT,     &&SLTU,
+                                     &&SME,   &&SMEU,   &&EQ,     &&NEQ,  &&ADDF,    &&SUBF,    &&MULF,    &&DIVF,
+                                     &&SLTF,  &&SMEF,   &&EQF,    &&NEQF, &&CONVRSF, &&CONVFRS, &&CONVRUF, &&CONVFRU,
+                                     &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU,   &&SCANF,   &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
