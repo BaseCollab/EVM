@@ -34,10 +34,10 @@ namespace evm {
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
-    static void *dispatch_table[] = {&&EXIT,   &&ADD,   &&SUB,    &&MUL,    &&DIV,  &&AND,   &&OR,    &&XOR,
-                                     &&MULU,   &&DIVU,  &&MOVR,   &&MOVI,   &&MOVF, &&SLT,   &&SLTU,  &&SME,
-                                     &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&CONVRF,
-                                     &&CONVFR, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
+    static void *dispatch_table[] = {
+        &&EXIT, &&ADD, &&SUB,  &&MUL,    &&DIV,    &&AND,   &&OR,     &&XOR,    &&MULU, &&DIVU,  &&MOVR,  &&MOVI,
+        &&MOVF, &&SLT, &&SLTU, &&SME,    &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&SLTF,
+        &&SMEF, &&EQF, &&NEQF, &&CONVRF, &&CONVFR, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
@@ -191,6 +191,30 @@ DIVF:
     PRINT_DEBUG(DIVF);
 
     vm->SetFReg(GET_RD(), vm->GetFReg(GET_RS1()) / vm->GetFReg(GET_RS2()));
+
+    DISPATCH();
+SLTF:
+    PRINT_DEBUG(SLTF);
+
+    vm->SetReg(GET_RD(), vm->GetFReg(GET_RS1()) < vm->GetFReg(GET_RS2()));
+
+    DISPATCH();
+SMEF:
+    PRINT_DEBUG(SMEF);
+
+    vm->SetReg(GET_RD(), vm->GetFReg(GET_RS1()) >= vm->GetFReg(GET_RS2()));
+
+    DISPATCH();
+EQF:
+    PRINT_DEBUG(EQF);
+
+    vm->SetReg(GET_RD(), vm->GetFReg(GET_RS1()) == vm->GetFReg(GET_RS2()));
+
+    DISPATCH();
+NEQF:
+    PRINT_DEBUG(NEQF);
+
+    vm->SetReg(GET_RD(), vm->GetFReg(GET_RS1()) != vm->GetFReg(GET_RS2()));
 
     DISPATCH();
 CONVRF:
