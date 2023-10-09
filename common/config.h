@@ -10,6 +10,7 @@ namespace evm {
 
 // clang-format off
 
+using freg_t = double;
 using reg_t  = dword_t;
 using addr_t = reg_t;
 

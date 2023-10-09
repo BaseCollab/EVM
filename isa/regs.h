@@ -5,8 +5,10 @@
 
 namespace evm {
 
-using reg_idx_t = byte_t;
-static constexpr size_t N_REG = (1 << 5);
+using reg_idx_t  = byte_t;
+using freg_idx_t = reg_idx_t;
+static constexpr size_t N_REG  = (1 << 5);
+static constexpr size_t N_FREG = (1 << 4);
 
 // clang-format off
 enum Reg {
@@ -42,6 +44,25 @@ enum Reg {
     X1D = 0x1d,
     X1E = 0x1e,
     X1F = 0x1f,
+};
+
+enum FReg {
+    XF0  = 0x0,
+    XF1  = 0x1,
+    XF2  = 0x2,
+    XF3  = 0x3,
+    XF4  = 0x4,
+    XF5  = 0x5,
+    XF6  = 0x6,
+    XF7  = 0x7,
+    XF8  = 0x8,
+    XF9  = 0x9,
+    XFA  = 0xa,
+    XFB  = 0xb,
+    XFC  = 0xc,
+    XFD  = 0xd,
+    XFE  = 0xe,
+    XFF  = 0xf,
 };
 // clang-format on
 

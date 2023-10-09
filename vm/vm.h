@@ -33,10 +33,23 @@ public:
         reg_table_[reg_idx] = value;
     }
 
+    freg_t GetFReg(freg_idx_t freg_idx) const
+    {
+        assert(freg_idx < N_FREG);
+        return freg_table_[freg_idx];
+    }
+
+    void SetFReg(freg_idx_t freg_idx, freg_t value)
+    {
+        assert(freg_idx < N_FREG);
+        freg_table_[freg_idx] = value;
+    }
+
 private:
     Interpreter interpreter_;
 
     reg_t reg_table_[N_REG] = {0};
+    freg_t freg_table_[N_FREG] = {0};
 };
 
 } // namespace evm

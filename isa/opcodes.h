@@ -22,23 +22,37 @@ enum Opcode {
     DIVU = 0x9,
 
     // Movs operations
-    MOVI = 0xa,
-    MOVR = 0xb,
+    MOVR = 0xa,
+    MOVI = 0xb,
+    MOVF = 0xc,
 
     // Comparison operations
-    SLT  = 0xc,
-    SLTU = 0xd,
-    SME  = 0xe,
-    SMEU = 0xf,
-    EQ   = 0x10,
-    NEQ  = 0x11,
+    SLT  = 0xd,
+    SLTU = 0xe,
+    SME  = 0xf,
+    SMEU = 0x10,
+    EQ   = 0x11,
+    NEQ  = 0x12,
+
+    // Floating point operations
+    ADDF  = 0x13,
+    SUBF  = 0x14,
+    MULF  = 0x15,
+    DIVF  = 0x16,
+
+    // Register conversions
+    CONVRF = 0x17,
+    CONVFR = 0x18,
 
     // Intrinsics
-    PRINT  = 0x12,
-    PRINTU = 0x13,
-    SCAN   = 0x14,
+    PRINT  = 0x19,
+    PRINTU = 0x1a,
+    PRINTF = 0x1b,
+    SCAN   = 0x1c,
+    SCANU  = 0x1d,
+    SCANF  = 0x1e,
 
-    INVALID = 0x15,
+    INVALID = 0x1f,
 };
 // clang-format on
 
