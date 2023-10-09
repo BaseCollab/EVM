@@ -8,7 +8,7 @@ namespace evm {
 enum Opcode {
     EXIT = 0x0,
 
-    // Arithmetic unsigned operations
+    // Arithmetic signed operations
     ADD  = 0x1,
     SUB  = 0x2,
     MUL  = 0x3,
@@ -17,7 +17,7 @@ enum Opcode {
     OR   = 0x6,
     XOR  = 0x7,
 
-    // Arithmetic signed operations
+    // Arithmetic unsigned operations
     MULU = 0x8,
     DIVU = 0x9,
 
@@ -26,7 +26,7 @@ enum Opcode {
     MOVI = 0xb,
     MOVF = 0xc,
 
-    // Comparison operations
+    // Comparison integer operations
     SLT  = 0xd,
     SLTU = 0xe,
     SME  = 0xf,
@@ -40,19 +40,25 @@ enum Opcode {
     MULF  = 0x15,
     DIVF  = 0x16,
 
+    // Comparison floating point operations
+    SLTF  = 0x17,
+    SMEF  = 0x18,
+    EQF   = 0x19,
+    NEQF  = 0x1a,
+
     // Register conversions
-    CONVRF = 0x17,
-    CONVFR = 0x18,
+    CONVRF = 0x1b,
+    CONVFR = 0x1c,
 
     // Intrinsics
-    PRINT  = 0x19,
-    PRINTU = 0x1a,
-    PRINTF = 0x1b,
-    SCAN   = 0x1c,
-    SCANU  = 0x1d,
-    SCANF  = 0x1e,
+    PRINT  = 0x1d,
+    PRINTU = 0x1e,
+    PRINTF = 0x1f,
+    SCAN   = 0x20,
+    SCANU  = 0x21,
+    SCANF  = 0x22,
 
-    INVALID = 0x1f,
+    INVALID = 0x23,
 };
 // clang-format on
 

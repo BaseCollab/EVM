@@ -23,7 +23,6 @@ static constexpr byte_t EXAMPLE_BYTES_SOLVE_SQUARE[] = {
 
     PUT_INSN(EXIT), // exit
 };
-
 // clang-format on
 
 } // namespace evm::examples
