@@ -26,10 +26,10 @@ namespace evm {
 
 #define GET_IMM(type)                                                             \
     ({                                                                            \
-        type val_ = 0;                                                           \
-        std::memcpy(&val_, bytecode + pc_ + sizeof(insn_size_t), sizeof(type));  \
+        type __val = 0;                                                           \
+        std::memcpy(&__val, bytecode + pc_ + sizeof(insn_size_t), sizeof(type));  \
         pc_ += sizeof(type);                                                     \
-        val_;                                                                     \
+        __val;                                                                     \
     })
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
