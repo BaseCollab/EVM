@@ -321,4 +321,19 @@ TEST_F(InterpreterTest, NEQF1)
     ASSERT_EQ(vm_->GetReg(Reg::X8), 1);
 }
 
+TEST_F(InterpreterTest, MOVFR1)
+{
+    // clang-format off
+    byte_t bytecode[] = { Opcode::MOVFR, FReg::XF1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // XF1 = 0
+                          Opcode::EXIT };
+    // clang-format on
+
+    double put_value = 435435.34121346;
+    std::memcpy(bytecode + 4, &put_value, sizeof(put_value));
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetFReg(FReg::XF1), put_value);
+}
+
 } // namespace evm
