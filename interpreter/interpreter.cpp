@@ -36,8 +36,8 @@ void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
     static void *dispatch_table[] = {
         &&EXIT, &&ADD, &&SUB,  &&MUL,    &&DIV,    &&AND,   &&OR,     &&XOR,    &&MULU, &&DIVU,  &&MOVR,  &&MOVI,
-        &&MOVF, &&SLT, &&SLTU, &&SME,    &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&SLTF,
-        &&SMEF, &&EQF, &&NEQF, &&CONVRF, &&CONVFR, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
+        &&MOVF, &&MOVFR, &&SLT, &&SLTU, &&SME,    &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&SLTF,
+        &&SMEF, &&EQF, &&NEQF, &&CONVRSF, &&CONVFRS, &&CONVRUF, &&CONVFRU, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
@@ -125,6 +125,12 @@ MOVI:
     DISPATCH();
 MOVF:
     PRINT_DEBUG(MOVF);
+
+    vm->SetFReg(GET_RD(), vm->GetFReg(GET_RS1()));
+
+    DISPATCH();
+MOVFR:
+    PRINT_DEBUG(MOVFR);
 
     reg_idx = GET_RD();
     freg_value = GET_IMM(freg_t);
@@ -217,14 +223,26 @@ NEQF:
     vm->SetReg(GET_RD(), vm->GetFReg(GET_RS1()) != vm->GetFReg(GET_RS2()));
 
     DISPATCH();
-CONVRF:
-    PRINT_DEBUG(CONVRF);
+CONVRSF:
+    PRINT_DEBUG(CONVRSF);
+
+    vm->SetFReg(GET_RD(), static_cast<freg_t>(static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1()))));
+
+    DISPATCH();
+CONVFRS:
+    PRINT_DEBUG(CONVFRS);
+
+    vm->SetReg(GET_RD(), static_cast<reg_t>(static_cast<std::make_signed_t<reg_t>>(vm->GetFReg(GET_RS1()))));
+
+    DISPATCH();
+CONVRUF:
+    PRINT_DEBUG(CONVRUF);
 
     vm->SetFReg(GET_RD(), static_cast<freg_t>(vm->GetReg(GET_RS1())));
 
     DISPATCH();
-CONVFR:
-    PRINT_DEBUG(CONVFR);
+CONVFRU:
+    PRINT_DEBUG(CONVFRU);
 
     vm->SetReg(GET_RD(), static_cast<reg_t>(vm->GetFReg(GET_RS1())));
 
