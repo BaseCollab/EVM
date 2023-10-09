@@ -8,7 +8,7 @@ namespace evm {
 enum Opcode {
     EXIT = 0x0,
 
-    // Arithmetic operations
+    // Arithmetic unsigned operations
     ADD  = 0x1,
     SUB  = 0x2,
     MUL  = 0x3,
@@ -17,26 +17,31 @@ enum Opcode {
     OR   = 0x6,
     XOR  = 0x7,
 
+    // Arithmetic signed operations
+    MULU = 0x8,
+    DIVU = 0x9,
+
     // Movs operations
-    MOVI = 0x8,
-    MOVR = 0x9,
+    MOVI = 0xa,
+    MOVR = 0xb,
 
     // Comparison operations
-    SLTS = 0xa,
-    SLTU = 0xb,
-    SMES = 0xc,
-    SMEU = 0xd,
-    EQ   = 0xe,
+    SLT  = 0xc,
+    SLTU = 0xd,
+    SME  = 0xe,
+    SMEU = 0xf,
+    EQ   = 0x10,
+    NEQ  = 0x11,
 
     // Intrinsics
-    PRINT = 0xf,
-    SCAN  = 0x10,
+    PRINT  = 0x12,
+    PRINTU = 0x13,
+    SCAN   = 0x14,
 
-    INVALID = 0x11,
+    INVALID = 0x15,
 };
 // clang-format on
 
-static constexpr size_t N_OPCODES = Opcode::INVALID;
 using insn_size_t = word_t;
 
 // ISA Example:

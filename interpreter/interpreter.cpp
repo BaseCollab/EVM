@@ -34,8 +34,9 @@ namespace evm {
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
-    static void *dispatch_table[] = {&&EXIT, &&ADD,  &&SUB,  &&MUL,  &&DIV,  &&AND, &&OR,    &&XOR,  &&MOVI,
-                                     &&MOVR, &&SLTS, &&SLTU, &&SMES, &&SMEU, &&EQ,  &&PRINT, &&SCAN, &&INVALID};
+    static void *dispatch_table[] = {&&EXIT, &&ADD,  &&SUB,  &&MUL,  &&DIV, &&AND,  &&OR,  &&XOR,
+                                     &&MULU, &&DIVU, &&MOVI, &&MOVR, &&SLT, &&SLTU, &&SME, &&SMEU, &&EQ, &&NEQ,
+                                     &&PRINT, &&PRINTU, &&SCAN, &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
@@ -63,13 +64,15 @@ SUB:
 MUL:
     PRINT_DEBUG(MUL);
 
-    vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) * vm->GetReg(GET_RS2()));
+    vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) *
+                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 DIV:
     PRINT_DEBUG(DIV);
 
-    vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) / vm->GetReg(GET_RS2()));
+    vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) /
+                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 AND:
@@ -90,6 +93,18 @@ XOR:
     vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) ^ vm->GetReg(GET_RS2()));
 
     DISPATCH();
+MULU:
+    PRINT_DEBUG(MULU);
+
+    vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) * vm->GetReg(GET_RS2()));
+
+    DISPATCH();
+DIVU:
+    PRINT_DEBUG(DIVU);
+
+    vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) / vm->GetReg(GET_RS2()));
+
+    DISPATCH();
 MOVI:
     PRINT_DEBUG(MOVI);
 
@@ -104,11 +119,11 @@ MOVR:
     vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()));
 
     DISPATCH();
-SLTS:
+SLT:
     PRINT_DEBUG(SLTS);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) <
-                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 SLTU:
@@ -117,11 +132,11 @@ SLTU:
     vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) < vm->GetReg(GET_RS2()));
 
     DISPATCH();
-SMES:
+SME:
     PRINT_DEBUG(SMES);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) >=
-                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 SMEU:
@@ -136,7 +151,19 @@ EQ:
     vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) == vm->GetReg(GET_RS2()));
 
     DISPATCH();
+NEQ:
+    PRINT_DEBUG(EQ);
+
+    vm->SetReg(GET_RD(), vm->GetReg(GET_RS1()) != vm->GetReg(GET_RS2()));
+
+    DISPATCH();
 PRINT:
+    PRINT_DEBUG(PRINT);
+
+    printf("%ld\n", static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())));
+
+    DISPATCH();
+PRINTU:
     PRINT_DEBUG(PRINT);
 
     printf("%lu\n", vm->GetReg(GET_RS1()));
