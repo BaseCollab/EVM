@@ -124,7 +124,7 @@ MOVI:
 
     DISPATCH();
 MOVF:
-    PRINT_DEBUG(MOVI);
+    PRINT_DEBUG(MOVF);
 
     reg_idx = GET_RD();
     freg_value = GET_IMM(freg_t);
