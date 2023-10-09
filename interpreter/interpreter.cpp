@@ -262,7 +262,6 @@ PRINTU:
     DISPATCH();
 PRINTF:
     PRINT_DEBUG(PRINTF);
-
     printf("%lf\n", vm->GetFReg(GET_RS1()));
 
     DISPATCH();

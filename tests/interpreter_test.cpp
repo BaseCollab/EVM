@@ -1126,11 +1126,48 @@ TEST_F(InterpreterTest, MOVFR1)
     // clang-format on
 
     double put_value = 435435.34121346;
-    std::memcpy(bytecode + 4, &put_value, sizeof(put_value));
+    std::memcpy(bytecode + sizeof(insn_size_t), &put_value, sizeof(put_value));
 
     vm_->Execute(bytecode);
 
     ASSERT_EQ(vm_->GetFReg(FReg::XF1), put_value);
 }
+
+#ifndef N_DEBUG
+
+TEST_F(InterpreterTest, SOLVE_SQUARE)
+{
+    // clang-format off
+    byte_t bytecode[] =
+    {
+        Opcode::SCANF, FReg::XF6, 0, 0, // scan(a)
+        Opcode::SCANF, FReg::XF7, 0, 0, // scan(b)
+        Opcode::SCANF, FReg::XF8, 0, 0, // scan(c)
+
+        Opcode::MULF, FReg::XFB, FReg::XF7, FReg::XF7, // XFB = b^2
+        Opcode::MULF, FReg::XFC, FReg::XF6, FReg::XF8, // XFC = a * c
+        Opcode::MOVFR, FReg::XFE, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // XFE = 0
+        Opcode::MULF, FReg::XFC, FReg::XFC, FReg::XFE, // XFC = XFC * 4
+        Opcode::SUBF, FReg::XFA, FReg::XFB, FReg::XFC, // XFA = b^2 - 4ac
+
+        Opcode::PRINTF, 0, FReg::XFA, 0, // print(XFA)
+
+        Opcode::EXIT, 0, 0, 0
+    };
+    // clang-format on
+
+    double four = 4.0;
+    std::memcpy(bytecode + 6 * sizeof(insn_size_t), &four, sizeof(four));
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetFReg(FReg::XFE), four);
+    ASSERT_EQ(vm_->GetFReg(FReg::XFB), vm_->GetFReg(FReg::XF7) * vm_->GetFReg(FReg::XF7));
+    ASSERT_EQ(vm_->GetFReg(FReg::XFC), 4 * vm_->GetFReg(FReg::XF6) * vm_->GetFReg(FReg::XF8));
+    ASSERT_EQ(vm_->GetFReg(FReg::XFA), vm_->GetFReg(FReg::XF7) * vm_->GetFReg(FReg::XF7) -
+                                           4 * vm_->GetFReg(FReg::XF6) * vm_->GetFReg(FReg::XF8));
+}
+
+#endif
 
 } // namespace evm
