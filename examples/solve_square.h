@@ -26,6 +26,6 @@ static constexpr byte_t EXAMPLE_BYTES_SOLVE_SQUARE[] = {
 
 // clang-format on
 
-} // evm
+} // namespace evm::examples
 
 #endif // EVM_SOLVE_SQUARE_SOLVE_SQUARE_H

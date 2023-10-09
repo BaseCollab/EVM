@@ -24,27 +24,26 @@ namespace evm {
 
 #define GET_RS2() bytecode[pc_ + 3]
 
-#define GET_IMM(type)                                                             \
-    ({                                                                            \
-        type __val = 0;                                                           \
-        std::memcpy(&__val, bytecode + pc_ + sizeof(insn_size_t), sizeof(type));  \
+#define GET_IMM(type)                                                            \
+    ({                                                                           \
+        type __val = 0;                                                          \
+        std::memcpy(&__val, bytecode + pc_ + sizeof(insn_size_t), sizeof(type)); \
         pc_ += sizeof(type);                                                     \
-        __val;                                                                     \
+        __val;                                                                   \
     })
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
-    static void *dispatch_table[] = {
-        &&EXIT, &&ADD, &&SUB, &&MUL, &&DIV, &&AND, &&OR, &&XOR, &&MULU, &&DIVU, &&MOVR, &&MOVI, &&MOVF,
-        &&SLT, &&SLTU, &&SME, &&SMEU, &&EQ, &&NEQ, &&ADDF, &&SUBF, &&MULF, &&DIVF,
-        &&CONVRF, &&CONVFR, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID
-    };
+    static void *dispatch_table[] = {&&EXIT,   &&ADD,   &&SUB,    &&MUL,    &&DIV,  &&AND,   &&OR,    &&XOR,
+                                     &&MULU,   &&DIVU,  &&MOVR,   &&MOVI,   &&MOVF, &&SLT,   &&SLTU,  &&SME,
+                                     &&SMEU,   &&EQ,    &&NEQ,    &&ADDF,   &&SUBF, &&MULF,  &&DIVF,  &&CONVRF,
+                                     &&CONVFR, &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU, &&SCANF, &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
     reg_idx_t reg_idx = -1;
 
-    reg_t reg_value  = 0;
+    reg_t reg_value = 0;
     std::make_signed_t<reg_t> ireg_val = 0;
     double freg_value = 0;
 
@@ -70,14 +69,14 @@ MUL:
     PRINT_DEBUG(MUL);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) *
-                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 DIV:
     PRINT_DEBUG(DIV);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) /
-                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 AND:
@@ -136,7 +135,7 @@ SLT:
     PRINT_DEBUG(SLT);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) <
-                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 SLTU:
@@ -149,7 +148,7 @@ SME:
     PRINT_DEBUG(SME);
 
     vm->SetReg(GET_RD(), static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS1())) >=
-                         static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
+                             static_cast<std::make_signed_t<reg_t>>(vm->GetReg(GET_RS2())));
 
     DISPATCH();
 SMEU:

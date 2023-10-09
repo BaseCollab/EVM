@@ -5,9 +5,9 @@
 
 namespace evm {
 
-using reg_idx_t  = byte_t;
+using reg_idx_t = byte_t;
 using freg_idx_t = reg_idx_t;
-static constexpr size_t N_REG  = (1 << 5);
+static constexpr size_t N_REG = (1 << 5);
 static constexpr size_t N_FREG = (1 << 4);
 
 // clang-format off
