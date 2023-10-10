@@ -60,8 +60,10 @@ enum Opcode {
     SCAN   = 0x23,
     SCANU  = 0x24,
     SCANF  = 0x25,
+    SIN    = 0x26,
+    COS    = 0X27,
 
-    INVALID = 0x26,
+    INVALID = 0x28,
 };
 // clang-format on
 

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <type_traits>
 #include <cstdio>
+#include <cmath>
 
 namespace evm {
 
@@ -34,11 +35,11 @@ namespace evm {
 
 void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
 {
-    static void *dispatch_table[] = {&&EXIT,  &&ADD,    &&SUB,    &&MUL,  &&DIV,     &&AND,     &&OR,      &&XOR,
-                                     &&MULU,  &&DIVU,   &&MOVR,   &&MOVI, &&MOVF,    &&MOVFR,   &&SLT,     &&SLTU,
-                                     &&SME,   &&SMEU,   &&EQ,     &&NEQ,  &&ADDF,    &&SUBF,    &&MULF,    &&DIVF,
-                                     &&SLTF,  &&SMEF,   &&EQF,    &&NEQF, &&CONVRSF, &&CONVFRS, &&CONVRUF, &&CONVFRU,
-                                     &&PRINT, &&PRINTU, &&PRINTF, &&SCAN, &&SCANU,   &&SCANF,   &&INVALID};
+    static void *dispatch_table[] = {
+        &&EXIT,   &&ADD,    &&SUB,   &&MUL,   &&DIV,   &&AND,  &&OR,      &&XOR,     &&MULU,    &&DIVU,    &&MOVR,
+        &&MOVI,   &&MOVF,   &&MOVFR, &&SLT,   &&SLTU,  &&SME,  &&SMEU,    &&EQ,      &&NEQ,     &&ADDF,    &&SUBF,
+        &&MULF,   &&DIVF,   &&SLTF,  &&SMEF,  &&EQF,   &&NEQF, &&CONVRSF, &&CONVFRS, &&CONVRUF, &&CONVFRU, &&PRINT,
+        &&PRINTU, &&PRINTF, &&SCAN,  &&SCANU, &&SCANF, &&SIN,  &&COS,     &&INVALID};
 
 #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_ += sizeof(insn_size_t))])];
 
@@ -262,7 +263,6 @@ PRINTU:
     DISPATCH();
 PRINTF:
     PRINT_DEBUG(PRINTF);
-
     printf("%lf\n", vm->GetFReg(GET_RS1()));
 
     DISPATCH();
@@ -286,6 +286,18 @@ SCANF:
 
     scanf("%lf", &freg_value);
     vm->SetFReg(GET_RD(), freg_value);
+
+    DISPATCH();
+SIN:
+    PRINT_DEBUG(SIN);
+
+    vm->SetFReg(GET_RD(), std::sin(vm->GetFReg(GET_RS1())));
+
+    DISPATCH();
+COS:
+    PRINT_DEBUG(COS);
+
+    vm->SetFReg(GET_RD(), std::cos(vm->GetFReg(GET_RS1())));
 
     DISPATCH();
 INVALID:

@@ -1126,7 +1126,7 @@ TEST_F(InterpreterTest, MOVFR1)
     // clang-format on
 
     double put_value = 435435.34121346;
-    std::memcpy(bytecode + 4, &put_value, sizeof(put_value));
+    std::memcpy(bytecode + sizeof(insn_size_t), &put_value, sizeof(put_value));
 
     vm_->Execute(bytecode);
 
