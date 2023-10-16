@@ -1,0 +1,6 @@
+movi x1, 40
+movi x2, 43
+add ,x0,x1,x2,
+
+print x0
+exit
