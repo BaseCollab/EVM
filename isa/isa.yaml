@@ -1,0 +1,48 @@
+exit:
+    description: completes the program
+    opcode: 0x0
+    fields: []
+add:
+    description: "Add rs1 and rs2 and save result in rd"
+    opcode: 0x1
+    fields: [rd, rs1, rs2]
+sub:
+    description: "Substract rs1 - rs2 and save result in rd"
+    opcode: 0x2
+    fields: [rd, rs1, rs2]
+mul:
+    description: "Multiplicate rs1 and rs2 and save result in rd"
+    opcode: 0x3
+    fields: [rd, rs1, rs2]
+div:
+    description: "Divide rs1 / rs2 and save result in rd"
+    opcode: 0x4
+    fields: [rd, rs1, rs2]
+and:
+    description: ""
+    opcode: 0x5
+    fields: [rd, rs1, rs2]
+or:
+    description: ""
+    opcode: 0x6
+    fields: [rd, rs1, rs2]
+xor:
+    description: ""
+    opcode: 0x7
+    fields: [rd, rs1, rs2]
+mulu:
+    description: ""
+    opcode: 0x8
+    fields: [rd, rs1, rs2]
+divu:
+    description: ""
+    opcode: 0x9
+    fields: [rd, rs1, rs2]
+movr:
+    description: ""
+    opcode: 0xa
+    fields: [rd, rs1, rs2]
+movi:
+    description: ""
+    opcode: 0xb
+    fields: [rd, rs1, rs2]

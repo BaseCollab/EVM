@@ -18,6 +18,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/bin)
 add_subdirectory(interpreter)
 add_subdirectory(vm)
 add_subdirectory(assembler)
+add_subdirectory(isa)
 
 add_library(evm_static STATIC)
 target_link_libraries(evm_static PUBLIC

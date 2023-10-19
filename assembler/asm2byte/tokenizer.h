@@ -6,6 +6,7 @@
 #include "common/config.h"
 
 #include "isa/opcodes.h"
+#include "isa/opcode_name_map.h"
 
 #include <vector>
 #include <string>
@@ -26,15 +27,13 @@ public:
 
     void Parse()
     {
-        for (auto it: tokens_) {
-            std::cout << it << std::endl;
-        }
+        opcode_ = isa::NAME_OPCODE_MAP[tokens_[0]];
+        std::cout << "[" << tokens_[0] << "]" << " " << opcode_ << std::endl;
     }
 
     void PushToken(std::string_view token)
     {
         tokens_.push_back(std::move(token));
-        std::cout << "[" << token << "]" << std::endl;
     }
 
 private:
@@ -92,10 +91,6 @@ public:
 
     void PrepareBuffer(std::string &buffer)
     {
-        // push back \n to get valide last tokens in case of file without 
-        // \n after text lines
-        buffer.push_back('\n');
-
         for (size_t i = 0; i < buffer.size(); ++i) {
             if (buffer[i] == '\n') {
                 lines_idx_.push_back(i);
