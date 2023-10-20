@@ -5,8 +5,8 @@
 #include "common/constants.h"
 #include "common/config.h"
 
-#include "isa/opcodes.h"
-#include "isa/opcode_name_map.h"
+#include "isa/generated/opcode.h"
+#include "isa/generated/opcode_name_map.h"
 
 #include <vector>
 #include <string>
@@ -27,8 +27,8 @@ public:
 
     void Parse()
     {
-        opcode_ = isa::NAME_OPCODE_MAP[tokens_[0]];
-        std::cout << "[" << tokens_[0] << "]" << " " << opcode_ << std::endl;
+        opcode_ = isa::GetOpcodeByName(tokens_[0]);
+        
     }
 
     void PushToken(std::string_view token)
@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    Opcode opcode_ {Opcode::INVALID};
+    isa::Opcode opcode_ {isa::Opcode::INVALID};
 
     std::vector<uint64_t> args_vec_;
 

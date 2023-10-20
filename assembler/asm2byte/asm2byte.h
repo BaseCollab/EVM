@@ -8,7 +8,7 @@
 #include "instruction.h"
 #include "tokenizer.h"
 
-#include "isa/opcodes.h"
+#include "isa/generated/opcode.h"
 
 #include <vector>
 #include <string>
@@ -21,15 +21,11 @@ public:
     NO_COPY_SEMANTIC(AsmToByte);
     NO_MOVE_SEMANTIC(AsmToByte);
 
-    explicit AsmToByte();
+    AsmToByte() = default;
     ~AsmToByte() = default;
-
-    void FillInNameOpcodeMap();
 
     bool ParseAsmFile(const char *filename);
     bool OpenBytecodeFile(const char *filename);
-
-    Opcode GetOpcodeByName(const std::string &insn_name) const;
 
 private:
     std::string file_buffer_;
@@ -37,8 +33,6 @@ private:
     std::vector<byte_t> bytecode_;
 
     Tokenizer tokenizer_;
-
-    std::unordered_map<std::string, Opcode> name_opcode_map_;
 
     std::vector<Instruction> lines_info_;
 };

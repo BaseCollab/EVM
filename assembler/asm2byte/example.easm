@@ -1,2 +1,6 @@
 movi x1, 44
+movi x2, 443
+movi x3, 414
+movi x4, 424
+movi x5, 434
 exit

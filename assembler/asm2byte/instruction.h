@@ -5,7 +5,7 @@
 #include "common/constants.h"
 #include "common/config.h"
 
-#include "isa/opcodes.h"
+#include "isa/generated/opcode.h"
 
 #include <vector>
 #include <string>
@@ -18,7 +18,7 @@ public:
     explicit Instruction(std::string line);
     ~Instruction() = default;
 
-    void SetOpcode(Opcode opcode)
+    void SetOpcode(isa::Opcode opcode)
     {
         opcode_ = opcode;
     }
@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    Opcode opcode_ {Opcode::INVALID};
+    isa::Opcode opcode_ {isa::Opcode::INVALID};
 
     reg_t rd {0};
     reg_t rs1 {0};
