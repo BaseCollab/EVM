@@ -1,8 +1,9 @@
 #include "vm.h"
-#include "examples/solve_square.h"
 
 #include <cstring>
 #include <iostream>
+
+#include "isa/generated/opcode.h"
 
 namespace evm {
 
@@ -12,9 +13,9 @@ int Main(int argc, char *argv[])
     (void)argv;
 
     VirtualMachine vm;
-    
+
     std::cout << "[DISCRIMINANT EXAMPLE]" << std::endl;
-    // cllang-format off
+    // clang-format off
     byte_t bytecode_discr[] =
     {
         Opcode::SCANF, FReg::XF6, 0, 0, // scan(a)

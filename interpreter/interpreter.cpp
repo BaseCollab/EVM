@@ -2,6 +2,8 @@
 #include "interpreter.h"
 #include "vm/vm.h"
 
+#include "isa/generated/opcode.h"
+
 #include <iostream>
 #include <cstring>
 #include <type_traits>

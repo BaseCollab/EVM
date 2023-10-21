@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
 add_subdirectory(interpreter)
 add_subdirectory(vm)
+add_subdirectory(isa)
 
 add_library(evm_static STATIC)
 target_link_libraries(evm_static PUBLIC

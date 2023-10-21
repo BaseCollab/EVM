@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #include "interpreter/interpreter.h"
+#include "isa/generated/opcode.h"
 #include "vm/vm.h"
 
 namespace evm {

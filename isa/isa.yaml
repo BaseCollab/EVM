@@ -1,0 +1,205 @@
+exit:
+    description: "Completes the program"
+    type: ""
+    opcode: 0x0
+    fields: []
+add:
+    description: "Add rs1 and rs2 and save result in rd"
+    type: "Arithmetic signed operations"
+    opcode: 0x1
+    fields: [rd, rs1, rs2]
+sub:
+    description: "Substract rs1 - rs2 and save result in rd"
+    type: "Arithmetic signed operations"
+    opcode: 0x2
+    fields: [rd, rs1, rs2]
+mul:
+    description: "Multiplicate rs1 and rs2 and save result in rd"
+    type: "Arithmetic signed operations"
+    opcode: 0x3
+    fields: [rd, rs1, rs2]
+div:
+    description: "Divide rs1 / rs2 and save result in rd"
+    type: "Arithmetic signed operations"
+    opcode: 0x4
+    fields: [rd, rs1, rs2]
+and:
+    description: ""
+    type: "Arithmetic signed operations"
+    opcode: 0x5
+    fields: [rd, rs1, rs2]
+or:
+    description: ""
+    type: "Arithmetic signed operations"
+    opcode: 0x6
+    fields: [rd, rs1, rs2]
+xor:
+    description: ""
+    type: "Arithmetic signed operations"
+    opcode: 0x7
+    fields: [rd, rs1, rs2]
+mulu:
+    description: ""
+    type: "Arithmetic unsigned operations"
+    opcode: 0x8
+    fields: [rd, rs1, rs2]
+divu:
+    description: ""
+    type: "Arithmetic unsigned operations"
+    opcode: 0x9
+    fields: [rd, rs1, rs2]
+movr:
+    description: ""
+    type: "Movs operations"
+    opcode: 0xa
+    fields: []
+movi:
+    description: ""
+    type: "Movs operations"
+    opcode: 0xb
+    fields: []
+movf:
+    description: ""
+    type: "Movs operations"
+    opcode: 0xc
+    fields: []
+movfr:
+    description: ""
+    type: "Movs operations"
+    opcode: 0xd
+    fields: []
+slt:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0xe
+    fields: []
+sltu:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0xf
+    fields: []
+sme:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0x10
+    fields: []
+smeu:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0x11
+    fields: []
+eq:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0x12
+    fields: []
+neq:
+    description: ""
+    type: "Comparison integer operations"
+    opcode: 0x13
+    fields: []
+addf:
+    description: ""
+    type: "Floating point operations"
+    opcode: 0x14
+    fields: []
+subf:
+    description: ""
+    type: "Floating point operations"
+    opcode: 0x15
+    fields: []
+mulf:
+    description: ""
+    type: "Floating point operations"
+    opcode: 0x16
+    fields: []
+divf:
+    description: ""
+    type: "Floating point operations"
+    opcode: 0x17
+    fields: []
+sltf:
+    description: ""
+    type: "Comparison floating point operations"
+    opcode: 0x18
+    fields: []
+smef:
+    description: ""
+    type: "Comparison floating point operations"
+    opcode: 0x19
+    fields: []
+eqf:
+    description: ""
+    type: "Comparison floating point operations"
+    opcode: 0x1a
+    fields: []
+neqf:
+    description: ""
+    type: "Comparison floating point operations"
+    opcode: 0x1b
+    fields: []
+convrsf:
+    description: ""
+    type: "Register conversions"
+    opcode: 0x1c
+    fields: []
+convfrs:
+    description: ""
+    type: "Register conversions"
+    opcode: 0x1d
+    fields: []
+convruf:
+    description: ""
+    type: "Register conversions"
+    opcode: 0x1e
+    fields: []
+convfru:
+    description: ""
+    type: "Register conversions"
+    opcode: 0x1f
+    fields: []
+print:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x20
+    fields: [rd, rs1, rs2]
+printu:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x21
+    fields: []
+printf:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x22
+    fields: []
+scan:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x23
+    fields: []
+scanu:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x24
+    fields: []
+scanf:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x25
+    fields: []
+sin:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x26
+    fields: []
+cos:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x27
+    fields: []
+invalid:
+    description: ""
+    type: "Intrinsic"
+    opcode: 0x28
+    fields: []

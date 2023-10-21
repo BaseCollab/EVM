@@ -3,7 +3,6 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
-#include "isa/opcodes.h"
 
 #include <cstddef>
 

@@ -20,6 +20,8 @@ static constexpr size_t WORD_SIZE = sizeof(word_t);
 using dword_t = uint64_t;
 static constexpr size_t DWORD_SIZE = sizeof(dword_t);
 
+using insn_size_t = word_t;
+
 static constexpr size_t BITS_PER_BYTE = 1 << 3;
 static constexpr size_t KBYTE_SIZE    = 1 << 10;
 static constexpr size_t MBYTE_SIZE    = 1 << 20;
