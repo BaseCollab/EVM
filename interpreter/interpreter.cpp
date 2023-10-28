@@ -52,6 +52,8 @@ void Interpreter::Run(VirtualMachine *vm, const byte_t *bytecode)
     pc_ = 0;
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
 
+    #define RD_ASSIGN(value) vm->SetReg(GET_RD(), value);
+
 EXIT:
     PRINT_DEBUG(EXIT);
     return;

@@ -6,6 +6,7 @@
 #include "isa/opcodes.h"
 
 #include <cstddef>
+#include <stack>
 
 namespace evm {
 
@@ -23,6 +24,8 @@ public:
 
 private:
     size_t pc_ {0};
+
+    // std::stack<>
 };
 
 } // namespace evm
