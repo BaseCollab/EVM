@@ -5,9 +5,8 @@
 #include "common/config.h"
 #include "common/macros.h"
 #include "interpreter/interpreter.h"
-#include "isa/regs.h"
 
-#include "cassert"
+#include <cassert>
 
 namespace evm {
 
@@ -21,13 +20,8 @@ public:
 
     void Execute(const byte_t *bytecode);
 
-
-
 private:
     Interpreter interpreter_;
-
-    reg_t reg_table_[N_REG] = {0};
-    freg_t freg_table_[N_FREG] = {0};
 };
 
 } // namespace evm

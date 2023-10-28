@@ -1,23 +1,23 @@
 DEFINE_INSTR
 (
-    EXIT, 0x0,
+    EXIT, 0x0, 0x0,
     {
         return;
-    },
+    }   
 )
 
 DEFINE_INSTR
 (
-    ADD, 0x1,
+    ADD, 0x1, 0x0,
     {
-        RD_ASSIGN(RS1 + RS2);
-    },
+        RD_I_ASSIGN(RS1_I() + RS2_I());
+    }
 )
 
 DEFINE_INSTR
 (
-    SUB, 0x2,
+    SUB, 0x2, 0x0,
     {
-        RD_ASSIGN(RS1 - RS2);
-    },
+        RD_I_ASSIGN(RS1_I() - RS2_I());
+    }
 )

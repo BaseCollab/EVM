@@ -10,7 +10,21 @@ namespace evm {
 
 class Register {
 public:
-    Register() = default;
+    explicit Register(double value)
+    {
+        value_d = value;    
+    };
+
+    explicit Register(int64_t value)
+    {
+        value_i = value;    
+    };
+
+    explicit Register(byte_t *ptr)
+    {
+        value_ptr = ptr;    
+    };
+
     ~Register() = default;
 
     double GetDouble() const
