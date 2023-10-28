@@ -10,8 +10,18 @@
 
 namespace evm {
 
+// clang-format off
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
+
+#define DEBUG_LOG
+
+#ifdef DEBUG_LOG
+#define PRINT_DEBUG(name) std::cerr << #name << std::endl;
+#else
+#define PRINT_DEBUG(name)
+#endif
 
 #define RD_I_FRAME_ASSIGN(frame, value) frame->GetReg(RD_IDX())->SetInt64(value)
 #define RD_F_FRAME_ASSIGN(frame, value) frame->GetReg(RD_IDX())->SetDouble(value)
@@ -22,19 +32,12 @@ namespace evm {
 #define RS2_I_FRAME(frame) frame->GetReg(RS2_IDX())->GetInt64()
 #define RS2_F_FRAME(frame) frame->GetReg(RS2_IDX())->GetDouble()
 
-#ifdef DEBUG_LOG
-#define PRINT_DEBUG(name) std::cerr << #name << std::endl;
-#else
-#define PRINT_DEBUG(name)
-#endif
-
 void Interpreter::Run(const byte_t *bytecode)
 {
     #define DEFINE_INSTR(instr, opcode, imm_len, interpret) \
         &&instr,
 
-    static void *dispatch_table[] = 
-    {
+    static void *dispatch_table[] = {
         #include "isa/isa.def"
     };
 
@@ -44,9 +47,11 @@ void Interpreter::Run(const byte_t *bytecode)
     frame_cur_ = &frames_.top();
     pc_ = 0;
 
-    #define RD_IDX()  ISA_GET_RD(bytecode  + pc_)
+    #define RD_IDX()  ISA_GET_RD (bytecode + pc_)
     #define RS1_IDX() ISA_GET_RS1(bytecode + pc_)
     #define RS2_IDX() ISA_GET_RS2(bytecode + pc_)
+    #define IMM_I()   ISA_GET_IMM(bytecode + pc_, int64_t)
+    #define IMM_F()   ISA_GET_IMM(bytecode + pc_, double)
 
     #define RD_I_ASSIGN(value) RD_I_FRAME_ASSIGN(frame_cur_, value)
     #define RD_F_ASSIGN(value) RD_F_FRAME_ASSIGN(frame_cur_, value)
@@ -74,5 +79,7 @@ void Interpreter::Run(const byte_t *bytecode)
 }
 
 #pragma GCC diagnostic pop
+
+// clang-format on
 
 } // namespace evm

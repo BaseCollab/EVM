@@ -18,11 +18,8 @@ public:
     static constexpr size_t N_FRAME_LOCAL_REGS_DEFAULT = N_FRAME_REGS_DEFAULT - N_PASSED_ARGS_DEFAULT;
 
 public:
-    Frame(size_t pc, size_t n_local_vars, 
-        Register arg1 = Register(0.0), 
-        Register arg2 = Register(0.0),
-        Register arg3 = Register(0.0),
-        Register arg4 = Register(0.0));
+    Frame(size_t pc, size_t n_local_vars, Register arg1 = Register(0.0), Register arg2 = Register(0.0),
+          Register arg3 = Register(0.0), Register arg4 = Register(0.0));
 
     ~Frame() = default;
 

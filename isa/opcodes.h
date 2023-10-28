@@ -6,14 +6,17 @@
 
 namespace evm {
 
-#define DEFINE_INSTR(instr, opcode, imm_len, interpret) \
-    instr = opcode,
+// clang-format off
+
+#define DEFINE_INSTR(instr, opcode, imm_len, interpret) instr = opcode,
 
 enum Opcode {
     #include "isa/isa.def"
 };
 
 #undef DEFINE_INSTR
+
+// clang-format on
 
 } // namespace evm
 

@@ -27,7 +27,7 @@ private:
     std::stack<Frame> frames_;
 
     Frame *frame_cur_ {nullptr};
-    size_t pc_ {0}; // pc of the current frame 
+    size_t pc_ {0}; // pc of the current frame
 };
 
 } // namespace evm

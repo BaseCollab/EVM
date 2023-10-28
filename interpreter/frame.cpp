@@ -8,12 +8,7 @@
 
 namespace evm {
 
-Frame::Frame(size_t pc, size_t n_local_vars, 
-    Register arg1 = Register(0.0), 
-    Register arg2 = Register(0.0),
-    Register arg3 = Register(0.0),
-    Register arg4 = Register(0.0)) :
-    pc_{pc}
+Frame::Frame(size_t pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4) : pc_ {pc}
 {
     regs_.push_back(arg1);
     regs_.push_back(arg2);
@@ -25,11 +20,11 @@ Frame::Frame(size_t pc, size_t n_local_vars,
     }
 };
 
-Register *Frame::GetReg(size_t reg_idx) const
+Register *Frame::GetReg(size_t reg_idx)
 {
     assert(reg_idx < regs_.size());
     return &regs_[reg_idx];
-} 
+}
 
 size_t Frame::GetPC() const
 {

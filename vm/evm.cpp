@@ -11,31 +11,30 @@ int Main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    // VirtualMachine vm;
+    VirtualMachine vm;
 
-    // std::cout << "[DISCRIMINANT EXAMPLE]" << std::endl;
-    // // cllang-format off
-    // byte_t bytecode_discr[] =
-    // {
-    //     Opcode::SCANF, FReg::XF6, 0, 0, // scan(a)
-    //     Opcode::SCANF, FReg::XF7, 0, 0, // scan(b)
-    //     Opcode::SCANF, FReg::XF8, 0, 0, // scan(c)
+    std::cout << "[DISCRIMINANT EXAMPLE]" << std::endl;
 
-    //     Opcode::MULF, FReg::XFB, FReg::XF7, FReg::XF7, // XFB = b^2
-    //     Opcode::MULF, FReg::XFC, FReg::XF6, FReg::XF8, // XFC = a * c
-    //     Opcode::MOVFR, FReg::XFE, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // XFE = 0
-    //     Opcode::MULF, FReg::XFC, FReg::XFC, FReg::XFE, // XFC = XFC * 4
-    //     Opcode::SUBF, FReg::XFA, FReg::XFB, FReg::XFC, // XFA = b^2 - 4ac
+    // clang-format off
 
-    //     Opcode::PRINTF, 0, FReg::XFA, 0, // print(XFA)
+    byte_t bytecode_discr[] = {
+        Opcode::SCANF, 0x1, 0, 0,
+        Opcode::SCANF, 0x2, 0, 0,
+        Opcode::SCANF, 0x3, 0, 0,
 
-    //     Opcode::EXIT, 0, 0, 0
-    // };
+        Opcode::MULF, 0x4, 0x2, 0x2,
+        Opcode::MULF, 0x5, 0x1, 0x3,
+        Opcode::MOVIF, 0x6, 0, 0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+        Opcode::CONVIF, 0x7, 0x6, 0x0,
+        Opcode::MULF, 0x8, 0x5, 0x7,
+        Opcode::SUBF, 0x9, 0x4, 0x8,
 
-    // double four = 4.0;
-    // std::memcpy(bytecode_discr + 6 * sizeof(insn_size_t), &four, sizeof(four));
+        Opcode::PRINTF, 0, 0x9, 0,
 
-    // vm.Execute(bytecode_discr);
+        Opcode::EXIT, 0, 0, 0
+    };
+
+    vm.Execute(bytecode_discr);
 
     // std::cout << "[SIN COS EXAMPLE]" << std::endl;
 
@@ -57,8 +56,10 @@ int Main(int argc, char *argv[])
 
     //     Opcode::EXIT, 0, 0, 0
     // };
-    // //clang-format on
+
     // vm.Execute(bytecode_sin_cos);
+
+    // clang-format on
 
     return 0;
 }
