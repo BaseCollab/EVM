@@ -1,5 +1,5 @@
-#ifndef EVM_FRAME_H
-#define EVM_FRAME_H
+#ifndef EVM_REG_REG_H
+#define EVM_REG_REG_H
 
 #include "common/macros.h"
 #include "common/constants.h"
@@ -53,4 +53,4 @@ private:
 
 } // namespace evm
 
-#endif // EVM_FRAME_H
+#endif // EVM_REG_REG_H
