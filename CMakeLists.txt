@@ -15,13 +15,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/bin)
 
-add_subdirectory(interpreter)
 add_subdirectory(vm)
+add_subdirectory(memory)
+add_subdirectory(interpreter)
 
 add_library(evm_static STATIC)
 target_link_libraries(evm_static PUBLIC
-    interpreter_impl
     vm_impl
+    allocator_impl
+    interpreter_impl
 )
 
 # --------------------------clang-format--------------------------------------
