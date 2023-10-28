@@ -78,6 +78,11 @@ void Interpreter::Run(const byte_t *bytecode)
     #undef DEFINE_INSTR
 }
 
+const Frame *Interpreter::getCurrFrame() const
+{
+    return frame_cur_;
+}
+
 #pragma GCC diagnostic pop
 
 // clang-format on

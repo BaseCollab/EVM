@@ -19,6 +19,7 @@ public:
     ~VirtualMachine() = default;
 
     void Execute(const byte_t *bytecode);
+    Interpreter *GetInterpreter();
 
 private:
     Interpreter interpreter_;

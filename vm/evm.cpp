@@ -1,5 +1,4 @@
 #include "vm.h"
-#include "examples/solve_square.h"
 
 #include <cstring>
 #include <iostream>

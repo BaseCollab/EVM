@@ -23,6 +23,13 @@ using instr_size_t = word_t;
         __val;                                                                \
     })
 
+#define PUT_A_INSTR(opcode, rd, rs1, rs2)    opcode, rd, rs1, rs2
+#define PUT_R_INSTR(opcode, rd, rs1)         opcode, rd, rs1, 0x0
+#define PUT_IMM_INSTR(opcode, rd)            opcode, rd, 0x0, 0x0
+#define PUT_IMM_INSTR_BYTE(opcode, rd, byte) opcode, rd, 0x0, 0x0, byte, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
+#define PUT_INS_INSTR(opcode, rs1)           opcode, 0x0, rs1, 0x0
+#define PUT_INSTR(opcode)                    opcode, 0x0, 0x0, 0x0
+
 // clang-format on
 
 } // namespace evm

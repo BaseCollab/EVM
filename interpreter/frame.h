@@ -24,6 +24,8 @@ public:
     ~Frame() = default;
 
     Register *GetReg(size_t reg_idx);
+    const Register *GetReg(size_t reg_idx) const;
+
     size_t GetPC() const;
     void SetPC(size_t pc);
 

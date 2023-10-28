@@ -22,6 +22,7 @@ public:
     ~Interpreter() = default;
 
     void Run(const byte_t *bytecode);
+    const Frame *getCurrFrame() const;
 
 private:
     std::stack<Frame> frames_;

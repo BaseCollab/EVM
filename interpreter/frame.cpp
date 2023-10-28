@@ -26,6 +26,12 @@ Register *Frame::GetReg(size_t reg_idx)
     return &regs_[reg_idx];
 }
 
+const Register *Frame::GetReg(size_t reg_idx) const
+{
+    assert(reg_idx < regs_.size());
+    return &regs_[reg_idx];
+}
+
 size_t Frame::GetPC() const
 {
     return pc_;
