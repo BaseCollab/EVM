@@ -36,28 +36,27 @@ int Main(int argc, char *argv[])
 
     vm.Execute(bytecode_discr);
 
-    // std::cout << "[SIN COS EXAMPLE]" << std::endl;
+    std::cout << "[SIN COS EXAMPLE]" << std::endl;
 
-    // byte_t bytecode_sin_cos[] =
-    // {
-    //     Opcode::SCANF, FReg::XF6, 0, 0, // scan(a)
-    //     Opcode::SCANF, FReg::XF7, 0, 0, // scan(b)
-    //     Opcode::SCANF, FReg::XF8, 0, 0, // scan(x)
+    byte_t bytecode_sin_cos[] =
+    {
+        Opcode::SCANF, 0x1, 0, 0,
+        Opcode::SCANF, 0x2, 0, 0,
+        Opcode::SCANF, 0x3, 0, 0,
 
-    //     Opcode::SIN, FReg::XF9, XF8, 0,
-    //     Opcode::COS, FReg::XFA, XF8, 0,
+        Opcode::SIN, 0x4, 0x3, 0,
+        Opcode::COS, 0x5, 0x3, 0,
 
-    //     Opcode::MULF, FReg::XFB, FReg::XF6, FReg::XF9, // XFB = a * sin(x)
-    //     Opcode::MULF, FReg::XFC, FReg::XF7, FReg::XFA, // XFC = b * cos(x)
+        Opcode::MULF, 0x6, 0x1, 0x4,
+        Opcode::MULF, 0x7, 0x2, 0x5,
 
-    //     Opcode::ADDF, FReg::XFD, FReg::XFB, FReg::XFC, // XFC = XFB + XFC
+        Opcode::ADDF, 0x8, 0x6, 0x7,
+        Opcode::PRINTF, 0, 0x8, 0,
 
-    //     Opcode::PRINTF, 0, FReg::XFD, 0, // print(XFC)
+        Opcode::EXIT, 0, 0, 0
+    };
 
-    //     Opcode::EXIT, 0, 0, 0
-    // };
-
-    // vm.Execute(bytecode_sin_cos);
+    vm.Execute(bytecode_sin_cos);
 
     // clang-format on
 
