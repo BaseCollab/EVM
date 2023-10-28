@@ -13,7 +13,7 @@ BumpAllocator::BumpAllocator(size_t heap_capacity) : heap_capacity_(heap_capacit
     }
 
     heap_ = new uint8_t[heap_capacity_];
-    assert(heap_);
+    assert(heap_ && "Can not allocate heap");
 
     next_alloc_ = heap_;
 }
