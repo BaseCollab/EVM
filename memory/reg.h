@@ -1,5 +1,5 @@
-#ifndef EVM_REG_REG_H
-#define EVM_REG_REG_H
+#ifndef EVM_MEMORY_REG_H
+#define EVM_MEMORY_REG_H
 
 #include "common/macros.h"
 #include "common/constants.h"
@@ -10,7 +10,21 @@ namespace evm {
 
 class Register {
 public:
-    Register() = default;
+    explicit Register(double value)
+    {
+        value_d = value;
+    }
+
+    explicit Register(int64_t value)
+    {
+        value_i = value;
+    }
+
+    explicit Register(byte_t *ptr)
+    {
+        value_ptr = ptr;
+    }
+
     ~Register() = default;
 
     double GetDouble() const
@@ -53,4 +67,4 @@ private:
 
 } // namespace evm
 
-#endif // EVM_REG_REG_H
+#endif // EVM_MEMORY_REG_H

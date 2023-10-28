@@ -3,7 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
-#include "reg.h"
+#include "memory/reg.h"
 
 #include <cassert>
 #include <vector>
