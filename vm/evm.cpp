@@ -10,7 +10,7 @@ int Main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    VirtualMachine vm;
+    // VirtualMachine vm;
 
     std::cout << "[DISCRIMINANT EXAMPLE]" << std::endl;
 
@@ -36,7 +36,7 @@ int Main(int argc, char *argv[])
 
     vm.Execute(bytecode_discr);
 
-    std::cout << "[SIN COS EXAMPLE]" << std::endl;
+    // std::cout << "[SIN COS EXAMPLE]" << std::endl;
 
     byte_t bytecode_sin_cos[] =
     {

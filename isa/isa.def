@@ -33,7 +33,6 @@ DEFINE_INSTR
         RD_I_ASSIGN(RS1_I() * RS2_I());
     }
 )
-
 DEFINE_INSTR
 (
     DIV, 0x4, 0x0,
@@ -256,4 +255,3 @@ DEFINE_INSTR
     {
         RD_F_ASSIGN(std::pow(RS1_F(), RS2_F()));
     }
-)

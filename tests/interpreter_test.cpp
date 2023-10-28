@@ -164,7 +164,6 @@ TEST_F(InterpreterTest, DIV_INT64)
     std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
     std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
-
     vm_->Execute(bytecode);
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
