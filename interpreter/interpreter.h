@@ -3,9 +3,11 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
+#include "frame.h"
 #include "isa/opcodes.h"
 
 #include <cstddef>
+#include <stack>
 
 namespace evm {
 
@@ -19,10 +21,14 @@ public:
     Interpreter() = default;
     ~Interpreter() = default;
 
-    void Run(VirtualMachine *vm, const byte_t *bytecode);
+    void Run(const byte_t *bytecode);
+    const Frame *getCurrFrame() const;
 
 private:
-    size_t pc_ {0};
+    std::stack<Frame> frames_;
+
+    Frame *frame_cur_ {nullptr};
+    size_t pc_ {0}; // pc of the current frame
 };
 
 } // namespace evm

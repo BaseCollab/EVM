@@ -3,7 +3,10 @@
 #include <cstring>
 #include <vector>
 #include <cstddef>
+#include <cmath>
 
+#include "isa/macros.h"
+#include "isa/opcodes.h"
 #include "interpreter/interpreter.h"
 #include "vm/vm.h"
 
@@ -22,1115 +25,827 @@ protected:
     std::unique_ptr<VirtualMachine> vm_;
 };
 
-TEST_F(InterpreterTest, ADD_UINT)
+TEST_F(InterpreterTest, ADD_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::ADD, X0, X1, X2,
-                          Opcode::EXIT };
-    // clang-format on
-
-    uint64_t imm1 = 7;
-    uint64_t imm2 = 3;
-
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 + imm2);
-}
-
-TEST_F(InterpreterTest, ADD_SIGNED_INT)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::ADD, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::ADD, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     int64_t imm1 = 1;
     int64_t imm2 = -10;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 + imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 + imm2);
 }
 
-TEST_F(InterpreterTest, ADD_UINT_STRESS)
+TEST_F(InterpreterTest, SUB_INT64)
 {
     // clang-format off
-    //                                                            |-----------------imm_---------------|
-    std::vector<byte_t> bytecode = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                     Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    // clang-format on
-
-    uint64_t imm1 = 1;
-    uint64_t imm2 = 19;
-
-    std::memcpy(bytecode.data() + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode.data() + 16, &imm2, sizeof(imm2));
-
-    for (size_t i = 3; i < N_REG; ++i) {
-        bytecode.push_back(Opcode::ADD);
-        bytecode.push_back(i);
-        bytecode.push_back(Reg::X1);
-        bytecode.push_back(Reg::X2);
-    }
-
-    bytecode.push_back(Opcode::EXIT);
-
-    vm_->Execute(bytecode.data());
-
-    for (size_t i = 3; i < N_REG; ++i) {
-        ASSERT_EQ(vm_->GetReg(i), imm1 + imm2);
-    }
-}
-
-TEST_F(InterpreterTest, SUB_UINT)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SUB, X0, X1, X2,
-                          Opcode::EXIT };
-    // clang-format on
-
-    uint64_t imm1 = 11;
-    uint64_t imm2 = 2;
-
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 - imm2);
-}
-
-TEST_F(InterpreterTest, SUB_SIGNED_INT)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SUB, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::SUB, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     int64_t imm1 = -11;
     int64_t imm2 = -22;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 - imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 - imm2);
 }
 
-TEST_F(InterpreterTest, SUB_UINT_STRESS)
+TEST_F(InterpreterTest, MUL_INT64)
 {
     // clang-format off
-    //                                                            |-----------------imm_---------------|
-    std::vector<byte_t> bytecode = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                     Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-    // clang-format on
-
-    int64_t imm1 = 1;
-    int64_t imm2 = 19;
-
-    std::memcpy(bytecode.data() + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode.data() + 16, &imm2, sizeof(imm2));
-
-    for (size_t i = 3; i < N_REG; ++i) {
-        bytecode.push_back(Opcode::SUB);
-        bytecode.push_back(i);
-        bytecode.push_back(Reg::X1);
-        bytecode.push_back(Reg::X2);
-    }
-
-    bytecode.push_back(Opcode::EXIT);
-
-    vm_->Execute(bytecode.data());
-
-    for (size_t i = 3; i < N_REG; ++i) {
-        ASSERT_EQ(vm_->GetReg(i), imm1 - imm2);
-    }
-}
-
-TEST_F(InterpreterTest, MUL)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MUL, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::MUL, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     int64_t imm1 = -11;
     int64_t imm2 = -22;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
 
     imm1 = -1;
     imm2 = 22;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
 
     imm1 = 11;
     imm2 = -2;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
 }
 
-TEST_F(InterpreterTest, MUL_STRESS)
+TEST_F(InterpreterTest, MUL_INT64_STRESS)
 {
     // clang-format off
-    //                                                            |-----------------imm_---------------|
-    std::vector<byte_t> bytecode = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                                     Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    std::vector<byte_t> bytecode = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0)
+    };
     // clang-format on
 
     int64_t imm1 = 11231;
     int64_t imm2 = -119;
 
-    std::memcpy(bytecode.data() + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode.data() + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode.data() + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode.data() + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
-    for (size_t i = 3; i < N_REG; ++i) {
+    size_t n_regs = 16;
+
+    for (size_t i = 3; i < n_regs; ++i) {
         bytecode.push_back(Opcode::MUL);
         bytecode.push_back(i);
-        bytecode.push_back(Reg::X1);
-        bytecode.push_back(Reg::X2);
+        bytecode.push_back(0x1);
+        bytecode.push_back(0x2);
     }
 
     bytecode.push_back(Opcode::EXIT);
+    bytecode.push_back(0x0);
+    bytecode.push_back(0x0);
+    bytecode.push_back(0x0);
 
     vm_->Execute(bytecode.data());
 
-    for (size_t i = 3; i < N_REG; ++i) {
-        ASSERT_EQ(vm_->GetReg(i), imm1 * imm2);
+    for (size_t i = 3; i < n_regs; ++i) {
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(i)->GetInt64(), imm1 * imm2);
     }
 }
 
-TEST_F(InterpreterTest, DIV)
+TEST_F(InterpreterTest, DIV_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::DIV, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::DIV, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     int64_t imm1 = 121;
     int64_t imm2 = -22;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
 
     imm1 = -1;
     imm2 = 22;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
 
     imm1 = 1135;
-    imm2 = -442;
+    imm2 = 442;
 
-    std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-    std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
 }
 
-TEST_F(InterpreterTest, AND)
+TEST_F(InterpreterTest, AND_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::AND, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::AND, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
+
     {
         int64_t imm1 = 121;
         int64_t imm2 = 12309;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 & imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
     }
     {
         int64_t imm1 = -1234;
         int64_t imm2 = 22;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 & imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
     }
     {
         uint64_t imm1 = 1135;
         uint64_t imm2 = 12231;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 & imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
     }
 }
 
-TEST_F(InterpreterTest, OR)
+TEST_F(InterpreterTest, OR_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::OR, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::OR, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
-    {
-        int64_t imm1 = 121;
-        int64_t imm2 = 12309;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+    {
+        int64_t imm1 = 12334277;
+        int64_t imm2 = 9992563459;
+
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 | imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
     }
     {
-        int64_t imm1 = -1234;
-        int64_t imm2 = 22;
+        int64_t imm1 = -12230532734;
+        int64_t imm2 = 2767332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 | imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
     }
     {
-        uint64_t imm1 = 1135;
-        uint64_t imm2 = 12231;
+        uint64_t imm1 = 11111135;
+        uint64_t imm2 = 12217888831;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 | imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
     }
 }
 
-TEST_F(InterpreterTest, XOR)
+TEST_F(InterpreterTest, XOR_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::XOR, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::XOR, 0x0, 0x1, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
-    {
-        int64_t imm1 = 121;
-        int64_t imm2 = 12309;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+   {
+        int64_t imm1 = 12334277;
+        int64_t imm2 = 9992563459;
+
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 ^ imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
     }
     {
-        int64_t imm1 = -1234;
-        int64_t imm2 = 22;
+        int64_t imm1 = -12230532734;
+        int64_t imm2 = 2767332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 ^ imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
     }
     {
-        uint64_t imm1 = 1135;
-        uint64_t imm2 = 12231;
+        uint64_t imm1 = 11111135;
+        uint64_t imm2 = 12217888831;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 ^ imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
     }
 }
 
-TEST_F(InterpreterTest, MULU)
+TEST_F(InterpreterTest, MOV_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MULU, X0, X1, X2,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_R_INSTR(Opcode::MOV, 0x3, 0x1),
+        PUT_R_INSTR(Opcode::MOV, 0x4, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
-    {
-        uint64_t imm1 = 11;
-        uint64_t imm2 = 22;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
-    }
-    {
-        uint64_t imm1 = 144;
-        uint64_t imm2 = 222352;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
-    }
-    {
-        uint64_t imm1 = 23411;
-        uint64_t imm2 = 24232;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 * imm2);
-    }
-}
-
-TEST_F(InterpreterTest, DIVU)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::DIVU, X0, X1, X2,
-                          Opcode::EXIT };
-    // clang-format on
-    {
-        uint64_t imm1 = 13231;
-        uint64_t imm2 = 2232;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
-    }
-    {
-        uint64_t imm1 = 13234;
-        uint64_t imm2 = 22;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
-    }
-    {
-        uint64_t imm1 = 23411;
-        uint64_t imm2 = 242332;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 / imm2);
-    }
-}
-
-TEST_F(InterpreterTest, MOVR)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVR, Reg::X3, Reg::X1, 0,
-                          Opcode::MOVR, Reg::X4, Reg::X2, 0,
-                          Opcode::EXIT };
-    // clang-format on
     {
         int64_t imm1 = 123;
         int64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X3), imm1);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
     }
     {
         int64_t imm1 = -1323;
         int64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X3), imm1);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
     }
     {
         int64_t imm1 = 1253;
         int64_t imm2 = -2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X3), imm1);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
     }
     {
         uint64_t imm1 = 1253;
         uint64_t imm2 = 26532;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X3), imm1);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
     }
 }
 
-TEST_F(InterpreterTest, SLT)
+TEST_F(InterpreterTest, SLTI)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SLT,  Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::SLT,  Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::SLTI, 0x3, 0x1, 0x2),
+        PUT_A_INSTR(Opcode::SLTI, 0x4, 0x2, 0x1),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
+
     {
         int64_t imm1 = -123;
         int64_t imm2 = -2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
     }
     {
         int64_t imm1 = 312123;
         int64_t imm2 = -2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
     }
     {
         int64_t imm1 = 123123;
         int64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
     }
 }
 
-TEST_F(InterpreterTest, SLTU)
+TEST_F(InterpreterTest, SMEI)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SLTU, Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::SLTU, Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::SMEI, 0x3, 0x1, 0x2),
+        PUT_A_INSTR(Opcode::SMEI, 0x4, 0x2, 0x1),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
-    {
-        uint64_t imm1 = 123;
-        uint64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
-    }
-    {
-        uint64_t imm1 = 312123;
-        uint64_t imm2 = 232332;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
-    }
-    {
-        uint64_t imm1 = 123123;
-        uint64_t imm2 = 23132;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 < imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 < imm1);
-    }
-}
-
-TEST_F(InterpreterTest, SME)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SME,  Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::SME,  Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
-    // clang-format on
     {
         int64_t imm1 = -123;
         int64_t imm2 = -2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
     }
     {
         int64_t imm1 = 312123;
         int64_t imm2 = -2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
     }
     {
-        int64_t imm1 = 123123;
-        int64_t imm2 = 2332;
+        int64_t imm1 = 2323232323;
+        int64_t imm2 = 2323232323;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
     }
 }
 
-TEST_F(InterpreterTest, SMEU)
+TEST_F(InterpreterTest, EQ_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::SMEU, Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::SMEU, Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::EQI, 0x3, 0x1, 0x2),
+        PUT_A_INSTR(Opcode::EQI, 0x4, 0x2, 0x1),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
-    {
-        uint64_t imm1 = 123;
-        uint64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
-    }
-    {
-        uint64_t imm1 = 312123;
-        uint64_t imm2 = 232332;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
-    }
-    {
-        uint64_t imm1 = 123123;
-        uint64_t imm2 = 23132;
-
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 >= imm1);
-    }
-}
-
-TEST_F(InterpreterTest, EQ)
-{
-    // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::EQ,  Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::EQ,  Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
-    // clang-format on
     {
         int64_t imm1 = 123;
         int64_t imm2 = 123;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 == imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 == imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
     }
     {
         int64_t imm1 = -312123;
         int64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 == imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 == imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
     }
     {
         int64_t imm1 = -123123;
         int64_t imm2 = -123123;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 == imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 == imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
     }
     {
         uint64_t imm1 = 123123;
         uint64_t imm2 = 123123;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 == imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 == imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
     }
 }
 
-TEST_F(InterpreterTest, NEQ)
+TEST_F(InterpreterTest, NEQ_INT64)
 {
     // clang-format off
-    //                                                 |-----------------imm_---------------|
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                          Opcode::NEQ,  Reg::X0, Reg::X1, Reg::X2,
-                          Opcode::NEQ,  Reg::X4, Reg::X2, Reg::X1,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
+        PUT_A_INSTR(Opcode::NEQI, 0x3, 0x1, 0x2),
+        PUT_A_INSTR(Opcode::NEQI, 0x4, 0x2, 0x1),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
+
     {
         int64_t imm1 = -123;
         int64_t imm2 = -123;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 != imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 != imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
     }
     {
         int64_t imm1 = 312123;
         int64_t imm2 = 312123;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 != imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 != imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
     }
     {
         int64_t imm1 = 123123;
         int64_t imm2 = 2332;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 != imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 != imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
     }
     {
         uint64_t imm1 = 432;
         uint64_t imm2 = 432;
 
-        std::memcpy(bytecode + 4, &imm1, sizeof(imm1));
-        std::memcpy(bytecode + 16, &imm2, sizeof(imm2));
+        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
+        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
         vm_->Execute(bytecode);
 
-        ASSERT_EQ(vm_->GetReg(Reg::X0), imm1 != imm2);
-        ASSERT_EQ(vm_->GetReg(Reg::X4), imm2 != imm1);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
+        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
     }
 }
 
-TEST_F(InterpreterTest, CONVRUF1)
+TEST_F(InterpreterTest, CONVIF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X1 = 16U
-                          Opcode::CONVRUF, FReg::XF8, Reg::X1, 0,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XF8), 16.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetDouble(), 23.0);
+}
+TEST_F(InterpreterTest, CONVFI)
+{
+    // clang-format off
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_R_INSTR(Opcode::CONVFI, 0x3, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
+    // clang-format on
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), 23);
 }
 
-TEST_F(InterpreterTest, CONVRSF1)
+TEST_F(InterpreterTest, MOV_DOUBLE)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -16
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_R_INSTR(Opcode::MOV, 0x4, 0x2),
+        PUT_R_INSTR(Opcode::MOV, 0x11, 0x4),
+        PUT_R_INSTR(Opcode::CONVFI, 0x12, 0x11),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XF8), -16.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x12)->GetInt64(), 23);
 }
 
-TEST_F(InterpreterTest, CONVFRS1)
+TEST_F(InterpreterTest, ADDF)
 {
     // clang-format off
-   byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SUBF, FReg::XFA, FReg::XF8, FReg::XF9,
-                          Opcode::CONVFRS, Reg::X3, FReg::XFA, 0,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::ADDF, 0x5, 0x4, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X3), -17);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 55.0);
 }
 
-TEST_F(InterpreterTest, CONVFRU1)
+TEST_F(InterpreterTest, SUBF)
 {
     // clang-format off
-   byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::ADDF, FReg::XFA, FReg::XF8, FReg::XF9,
-                          Opcode::CONVFRU, Reg::X3, FReg::XFA, 0,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::SUBF, 0x5, 0x4, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X3), 15);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 9.0);
 }
 
-TEST_F(InterpreterTest, MOVF1)
+TEST_F(InterpreterTest, MULF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::MOVF, FReg::XFA, FReg::XF8, 0,
-                          Opcode::MOVF, FReg::XFC, FReg::XFA, 0,
-                          Opcode::MOVF, FReg::XF1, FReg::XFC, 0,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::MULF, 0x5, 0x4, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XF1), -1.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 23.0 * 32.0);
 }
 
-TEST_F(InterpreterTest, ADDF1)
+TEST_F(InterpreterTest, DIVF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::ADDF, FReg::XFA, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::DIVF, 0x5, 0x4, 0x2),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XFA), 15.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 32.0 / 23.0);
 }
 
-TEST_F(InterpreterTest, SUBF1)
+TEST_F(InterpreterTest, SLTF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SUBF, FReg::XFA, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::SLTF, 0x5, 0x4, 0x2),
+        PUT_A_INSTR(Opcode::SLTF, 0x6, 0x2, 0x4),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XFA), 17.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 32.0 < 23.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 23.0 < 32.0);
 }
 
-TEST_F(InterpreterTest, MULF1)
+TEST_F(InterpreterTest, SMEF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -16
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::MULF, FReg::XFA, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::SMEF, 0x5, 0x4, 0x2),
+        PUT_A_INSTR(Opcode::SMEF, 0x6, 0x2, 0x4),
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XFA), -256.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 32.0 >= 23.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 23.0 >= 32.0);
 }
 
-TEST_F(InterpreterTest, DIVF1)
+TEST_F(InterpreterTest, EQF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -16
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::DIVF, FReg::XFA, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::EQF, 0x5, 0x4, 0x2),
+
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 44),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 44),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::EQF, 0x6, 0x4, 0x2),
+
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetFReg(FReg::XFA), -1.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
 }
 
-TEST_F(InterpreterTest, SLTF1)
+TEST_F(InterpreterTest, NEQF)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SLTF, Reg::X8, FReg::XF8, FReg::XF9,
-                          Opcode::SLTF, Reg::X9, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::NEQF, 0x5, 0x4, 0x2),
+
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 44),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 44),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+        PUT_A_INSTR(Opcode::NEQF, 0x6, 0x4, 0x2),
+
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 1);
-    ASSERT_EQ(vm_->GetReg(Reg::X9), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
 }
 
-TEST_F(InterpreterTest, SLTF2)
+TEST_F(InterpreterTest, SIN_COS)
 {
     // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X2 = -1
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRSF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SLTF, Reg::X8, FReg::XF8, FReg::XF9,
-                          Opcode::EXIT };
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
+        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+
+        PUT_R_INSTR(Opcode::SIN, 0x5, 0x2),
+        PUT_R_INSTR(Opcode::COS, 0x6, 0x4),
+
+        PUT_INSTR(Opcode::EXIT)
+    };
     // clang-format on
 
     vm_->Execute(bytecode);
 
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 0);
-}
-
-TEST_F(InterpreterTest, SMEF1)
-{
-    // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // X2 = 16U
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRUF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SMEF, Reg::X8, FReg::XF8, FReg::XF9,
-                          Opcode::SMEF, Reg::X9, FReg::XF9, FReg::XF8,
-                          Opcode::EXIT };
-    // clang-format on
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 0);
-    ASSERT_EQ(vm_->GetReg(Reg::X9), 1);
-}
-
-TEST_F(InterpreterTest, SMEF2)
-{
-    // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X2 = -1
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRSF, FReg::XF9, Reg::X2, 0,
-                          Opcode::SMEF, Reg::X8, FReg::XF8, FReg::XF9,
-                          Opcode::EXIT };
-    // clang-format on
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 1);
-}
-
-TEST_F(InterpreterTest, EQF1)
-{
-    // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X2 = -1
-                          Opcode::MOVI, Reg::X3, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf1, // X3 != -1
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRSF, FReg::XF9, Reg::X2, 0,
-                          Opcode::CONVRSF, FReg::XFA, Reg::X3, 0,
-                          Opcode::EQF, Reg::X7, FReg::XF8, FReg::XF9,
-                          Opcode::EQF, Reg::X8, FReg::XF8, FReg::XFA,
-                          Opcode::EXIT };
-    // clang-format on
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X7), 1);
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 0);
-}
-
-TEST_F(InterpreterTest, NEQF1)
-{
-    // clang-format off
-    byte_t bytecode[] = { Opcode::MOVI, Reg::X1, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X1 = -1
-                          Opcode::MOVI, Reg::X2, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // X2 = -1
-                          Opcode::MOVI, Reg::X3, 0, 0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf1, // X3 != -1
-                          Opcode::CONVRSF, FReg::XF8, Reg::X1, 0,
-                          Opcode::CONVRSF, FReg::XF9, Reg::X2, 0,
-                          Opcode::CONVRSF, FReg::XFA, Reg::X3, 0,
-                          Opcode::NEQF, Reg::X7, FReg::XF8, FReg::XF9,
-                          Opcode::NEQF, Reg::X8, FReg::XF8, FReg::XFA,
-                          Opcode::EXIT };
-    // clang-format on
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetReg(Reg::X7), 0);
-    ASSERT_EQ(vm_->GetReg(Reg::X8), 1);
-}
-
-TEST_F(InterpreterTest, MOVFR1)
-{
-    // clang-format off
-    byte_t bytecode[] = { Opcode::MOVFR, FReg::XF1, 0, 0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, // XF1 = 0
-                          Opcode::EXIT };
-    // clang-format on
-
-    double put_value = 435435.34121346;
-    std::memcpy(bytecode + sizeof(insn_size_t), &put_value, sizeof(put_value));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetFReg(FReg::XF1), put_value);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
 }
 
 } // namespace evm

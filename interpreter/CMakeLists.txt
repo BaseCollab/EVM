@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(SOURCES interpreter.cpp)
+set(SOURCES interpreter.cpp frame.cpp)
 
 add_library(interpreter_impl OBJECT ${SOURCES})
 target_include_directories(interpreter_impl PUBLIC ${EVM_ROOT})
