@@ -10,7 +10,7 @@ int Main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    // VirtualMachine vm;
+    VirtualMachine vm;
 
     std::cout << "[DISCRIMINANT EXAMPLE]" << std::endl;
 
@@ -57,6 +57,8 @@ int Main(int argc, char *argv[])
     };
 
     vm.Execute(bytecode_sin_cos);
+
+    // clang-format on
 
     // clang-format on
 

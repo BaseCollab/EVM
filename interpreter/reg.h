@@ -12,17 +12,17 @@ class Register {
 public:
     explicit Register(double value)
     {
-        value_d = value;    
+        value_d = value;
     };
 
     explicit Register(int64_t value)
     {
-        value_i = value;    
+        value_i = value;
     };
 
     explicit Register(byte_t *ptr)
     {
-        value_ptr = ptr;    
+        value_ptr = ptr;
     };
 
     ~Register() = default;

@@ -114,7 +114,6 @@ DEFINE_INSTR
         RD_I_ASSIGN(IMM_I());
     }
 )
-
 // COMPARISON COMMANDS
 
 DEFINE_INSTR
@@ -255,3 +254,4 @@ DEFINE_INSTR
     {
         RD_F_ASSIGN(std::pow(RS1_F(), RS2_F()));
     }
+)
