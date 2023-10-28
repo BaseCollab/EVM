@@ -36,7 +36,7 @@ int Main(int argc, char *argv[])
 
     vm.Execute(bytecode_discr);
 
-    // std::cout << "[SIN COS EXAMPLE]" << std::endl;
+    std::cout << "[SIN COS EXAMPLE]" << std::endl;
 
     byte_t bytecode_sin_cos[] =
     {
@@ -57,8 +57,6 @@ int Main(int argc, char *argv[])
     };
 
     vm.Execute(bytecode_sin_cos);
-
-    // clang-format on
 
     // clang-format on
 
