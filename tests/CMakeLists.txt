@@ -14,3 +14,5 @@ add_custom_target(run_unit_tests
     COMMAND ${EVM_BINARY_ROOT}/unit_tests --gtest_color=yes
 )
 add_dependencies(run_unit_tests unit_tests)
+
+add_subdirectory(memory)
