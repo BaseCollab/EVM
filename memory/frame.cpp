@@ -8,7 +8,8 @@
 
 namespace evm {
 
-Frame::Frame(size_t restore_pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4) : restore_pc_ {restore_pc}
+Frame::Frame(size_t restore_pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4)
+    : restore_pc_ {restore_pc}
 {
     regs_.push_back(arg1);
     regs_.push_back(arg2);

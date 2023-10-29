@@ -292,7 +292,7 @@ TEST_F(InterpreterTest, XOR_INT64)
     };
     // clang-format on
 
-   {
+    {
         int64_t imm1 = 12334277;
         int64_t imm2 = 9992563459;
 
