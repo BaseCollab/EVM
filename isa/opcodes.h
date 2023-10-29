@@ -17,3 +17,7 @@ enum Opcode {
 #undef DEFINE_INSTR
 
 // clang-format on
+
+} // namespace evm
+
+#endif // EVM_ISA_OPCODES_ISA_OPCODES_H
