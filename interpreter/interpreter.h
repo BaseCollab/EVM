@@ -3,7 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
-#include "frame.h"
+#include "memory/frame.h"
 #include "isa/opcodes.h"
 
 #include <cstddef>
