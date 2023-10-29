@@ -4,6 +4,7 @@
 #include "common/macros.h"
 #include "common/constants.h"
 #include "memory/frame.h"
+#include "memory/reg.h"
 #include "isa/opcodes.h"
 
 #include <cstddef>
@@ -29,6 +30,8 @@ private:
 
     Frame *frame_cur_ {nullptr};
     size_t pc_ {0}; // pc of the current frame
+
+    Register accum_;
 };
 
 } // namespace evm

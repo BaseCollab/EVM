@@ -337,3 +337,37 @@ DEFINE_INSTR
         }
     }
 )
+
+DEFINE_INSTR
+(
+    CALL, 0x24,
+    {
+        FRAME_NEW_MIGRATE(PC() + 0x8, PC() + RS1_I());
+    }
+)
+
+DEFINE_INSTR
+(
+    RET, 0x25,
+    {
+        FRAME_OLD_MIGRATE();
+    }
+)
+
+DEFINE_INSTR
+(
+    ACCR, 0x26,
+    {
+        RD_I_ASSIGN(GET_I_ACCUM());
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    RACC, 0x27,
+    {
+        PUT_I_ACCUM(RS1_I());
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)

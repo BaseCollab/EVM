@@ -1,5 +1,5 @@
-#ifndef EVM_FRAME_H
-#define EVM_FRAME_H
+#ifndef EVM_MEMORY_FRAME_H
+#define EVM_MEMORY_FRAME_H
 
 #include "common/macros.h"
 #include "common/constants.h"
@@ -37,4 +37,4 @@ private:
 
 } // namespace evm
 
-#endif // EVM_FRAME_H
+#endif // EVM_MEMORY_FRAME_H

@@ -10,6 +10,11 @@ namespace evm {
 
 class Register {
 public:
+    Register()
+    {
+        value_i = 0;
+    }
+
     explicit Register(double value)
     {
         value_d = value;
