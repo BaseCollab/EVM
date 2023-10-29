@@ -34,7 +34,7 @@ namespace evm {
 
 void Interpreter::Run(const byte_t *bytecode)
 {
-    #define DEFINE_INSTR(instr, opcode, imm_len, interpret) \
+    #define DEFINE_INSTR(instr, opcode, interpret) \
         &&instr,
 
     static void *dispatch_table[] = {
@@ -47,11 +47,15 @@ void Interpreter::Run(const byte_t *bytecode)
     frame_cur_ = &frames_.top();
     pc_ = 0;
 
-    #define RD_IDX()  ISA_GET_RD (bytecode + pc_)
-    #define RS1_IDX() ISA_GET_RS1(bytecode + pc_)
-    #define RS2_IDX() ISA_GET_RS2(bytecode + pc_)
-    #define IMM_I()   ISA_GET_IMM(bytecode + pc_, int64_t)
-    #define IMM_F()   ISA_GET_IMM(bytecode + pc_, double)
+    #define RD_IDX()   ISA_GET_RD (bytecode + pc_)
+    #define RS1_IDX()  ISA_GET_RS1(bytecode + pc_)
+    #define RS2_IDX()  ISA_GET_RS2(bytecode + pc_)
+    #define IMM_I()    ISA_GET_IMM(bytecode + pc_, int64_t)
+    #define IMM_F()    ISA_GET_IMM(bytecode + pc_, double)
+    #define IMM_I32()  ISA_GET_IMM(bytecode + pc_, int32_t)
+
+    #define PC_ADD(value)    pc_ += value
+    #define PC_ASSIGN(value) pc_ =  value
 
     #define RD_I_ASSIGN(value) RD_I_FRAME_ASSIGN(frame_cur_, value)
     #define RD_F_ASSIGN(value) RD_F_FRAME_ASSIGN(frame_cur_, value)
@@ -66,11 +70,10 @@ void Interpreter::Run(const byte_t *bytecode)
 
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
 
-    #define DEFINE_INSTR(instr, opcode, imm_len, interpret) \
+    #define DEFINE_INSTR(instr, opcode, interpret) \
     instr:                                                  \
         PRINT_DEBUG(instr);                                 \
         interpret;                                          \
-        pc_ = ISA_NEXT_INSTR(pc_) + imm_len;                \
         DISPATCH();
 
     #include "isa/isa.def"

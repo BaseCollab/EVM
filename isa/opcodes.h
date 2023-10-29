@@ -8,7 +8,7 @@ namespace evm {
 
 // clang-format off
 
-#define DEFINE_INSTR(instr, opcode, imm_len, interpret) instr = opcode,
+#define DEFINE_INSTR(instr, opcode, interpret) instr = opcode,
 
 enum Opcode {
     #include "isa/isa.def"

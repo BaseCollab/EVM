@@ -15,6 +15,7 @@ using instr_size_t = word_t;
 #define ISA_GET_RS2(instr_ptr) *(instr_ptr + 3)
 
 #define ISA_NEXT_INSTR(pc) (pc + sizeof(instr_size_t))
+#define ISA_INSTR_SIZE sizeof(instr_size_t)
 
 #define ISA_GET_IMM(instr_ptr, type)                                          \
     ({                                                                        \
@@ -23,6 +24,8 @@ using instr_size_t = word_t;
         __val;                                                                \
     })
 
+// Stupid temporary DSL for testing
+// TODO: write assembler and remove all this stuff
 #define PUT_A_INSTR(opcode, rd, rs1, rs2)    opcode, rd, rs1, rs2
 #define PUT_R_INSTR(opcode, rd, rs1)         opcode, rd, rs1, 0x0
 #define PUT_IMM_INSTR(opcode, rd)            opcode, rd, 0x0, 0x0

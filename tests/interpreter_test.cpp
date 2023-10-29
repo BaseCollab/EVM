@@ -847,4 +847,33 @@ TEST_F(InterpreterTest, SIN_COS)
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
 }
 
+TEST_F(InterpreterTest, JMP_IMM)
+{
+    // clang-format off
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x0, 1), // one = 1
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 1), // res = 1
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 2), // two = 2
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 0), // i = 0
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x4, 5), // number of iters = 5
+
+        // if (i >= 5) goto exit
+        PUT_A_INSTR(Opcode::SMEI, 0x5, 0x3, 0x4),
+        PUT_INS_INSTR(Opcode::JMP_IF_IMM, 0x5), 0x18, 0x0, 0x0, 0x0, // pc += 24
+
+        PUT_A_INSTR(Opcode::MUL, 0x1, 0x1, 0x2), // res *= 2
+        PUT_A_INSTR(Opcode::ADD, 0x3, 0x3, 0x0), // ++i
+
+        PUT_INSTR(Opcode::JMP_IMM), 0xEC, 0xFF, 0xFF, 0xFF, // pc -= 20
+
+        // exit
+        PUT_INSTR(Opcode::EXIT)
+    };
+    // clang-format on
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 32);
+}
+
 } // namespace evm
