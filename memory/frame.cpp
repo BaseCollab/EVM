@@ -19,7 +19,7 @@ Frame::Frame(size_t restore_pc, size_t n_local_vars, Register arg1, Register arg
     for (size_t i = 0; i < n_local_vars; ++i) {
         regs_.push_back(Register(0.0));
     }
-};
+}
 
 Register *Frame::GetReg(size_t reg_idx)
 {

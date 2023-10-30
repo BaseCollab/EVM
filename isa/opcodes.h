@@ -10,7 +10,8 @@ namespace evm {
 
 #define DEFINE_INSTR(instr, opcode, interpret) instr = opcode,
 
-enum Opcode {
+enum Opcode : int {
+    INVALID = -1,
     #include "isa/isa.def"
 };
 
