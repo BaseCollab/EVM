@@ -16,6 +16,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${EVM_BINARY_ROOT}/bin)
 
 add_subdirectory(vm)
+add_subdirectory(common)
 add_subdirectory(memory)
 add_subdirectory(interpreter)
 
