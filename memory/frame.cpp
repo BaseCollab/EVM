@@ -8,7 +8,8 @@
 
 namespace evm {
 
-Frame::Frame(size_t pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4) : pc_ {pc}
+Frame::Frame(size_t restore_pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4)
+    : restore_pc_ {restore_pc}
 {
     regs_.push_back(arg1);
     regs_.push_back(arg2);
@@ -32,14 +33,14 @@ const Register *Frame::GetReg(size_t reg_idx) const
     return &regs_[reg_idx];
 }
 
-size_t Frame::GetPC() const
+size_t Frame::GetRestorePC() const
 {
-    return pc_;
+    return restore_pc_;
 }
 
-void Frame::SetPC(size_t pc)
+void Frame::SetRestorePC(size_t restore_pc)
 {
-    pc_ = pc;
+    restore_pc_ = restore_pc;
 }
 
 } // namespace evm

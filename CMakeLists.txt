@@ -22,6 +22,7 @@ add_subdirectory(interpreter)
 add_library(evm_static STATIC)
 target_link_libraries(evm_static PUBLIC
     vm_impl
+    frame_impl
     allocator_impl
     interpreter_impl
 )

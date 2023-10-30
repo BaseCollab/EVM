@@ -164,7 +164,6 @@ TEST_F(InterpreterTest, DIV_INT64)
     std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
     std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
 
-
     vm_->Execute(bytecode);
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
@@ -293,7 +292,7 @@ TEST_F(InterpreterTest, XOR_INT64)
     };
     // clang-format on
 
-   {
+    {
         int64_t imm1 = 12334277;
         int64_t imm2 = 9992563459;
 
@@ -846,6 +845,83 @@ TEST_F(InterpreterTest, SIN_COS)
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
+}
+
+TEST_F(InterpreterTest, JMP_IMM)
+{
+    // clang-format off
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x0, 1), // one = 1
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 1), // res = 1
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 2), // two = 2
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 0), // i = 0
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x4, 5), // number of iters = 5
+
+        // if (i >= 5) goto exit
+        PUT_A_INSTR(Opcode::SMEI, 0x5, 0x3, 0x4),
+        PUT_INS_INSTR(Opcode::JMP_IF_IMM, 0x5), 0x18, 0x0, 0x0, 0x0, // pc += 24
+
+        PUT_A_INSTR(Opcode::MUL, 0x1, 0x1, 0x2), // res *= 2
+        PUT_A_INSTR(Opcode::ADD, 0x3, 0x3, 0x0), // ++i
+
+        PUT_INSTR(Opcode::JMP_IMM), 0xEC, 0xFF, 0xFF, 0xFF, // pc -= 20
+
+        // exit
+        PUT_INSTR(Opcode::EXIT)
+    };
+    // clang-format on
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 32);
+}
+
+TEST_F(InterpreterTest, RACC_ACCR)
+{
+    // clang-format off
+    byte_t bytecode[] = {
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
+        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+
+        PUT_INS_INSTR(Opcode::RACC, 0x2),
+        PUT_IMM_INSTR(Opcode::ACCR, 0x4),
+
+        PUT_INSTR(Opcode::EXIT)
+    };
+    // clang-format on
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetDouble(), 23.0);
+}
+
+TEST_F(InterpreterTest, CALL_RET)
+{
+    // clang-format off
+    byte_t bytecode[] = {
+        // x_7 = 11
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x7, 11),
+        PUT_INSTR(Opcode::JMP_IMM), 0x20, 0x00, 0x00, 0x00, // pc += 32
+
+        // simple_method(): acc = 54 + x_0
+        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x5, 54),
+        PUT_A_INSTR(Opcode::ADD, 0x6, 0x5, 0x0),
+        PUT_INS_INSTR(Opcode::RACC, 0x6),
+        PUT_INSTR(Opcode::RET),
+
+        PUT_IMM_INSTR(Opcode::MOVIF, 0x5), 0xDC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // pc -= 36
+        PUT_CALL_INSTR(Opcode::CALL, 0x5, 0x7, 0x0, 0x0, 0x0),
+
+        PUT_IMM_INSTR(Opcode::ACCR, 0x9),
+
+        // exit
+        PUT_INSTR(Opcode::EXIT)
+    };
+    // clang-format on
+
+    vm_->Execute(bytecode);
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 11 + 54);
 }
 
 } // namespace evm
