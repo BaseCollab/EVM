@@ -123,6 +123,16 @@ public:
                 out_arr->push_back(args_[i]);
             }
         }
+        else if (have_args_ == true) {
+            for (size_t i = 0; i < Frame::N_PASSED_ARGS_DEFAULT; ++i) {
+                out_arr->push_back(args_[i]);
+            }
+        }
+    }
+
+    size_t GetBytesSize() const
+    {
+        return MINIMAL_INSTR_SIZE + imm_.num_bytes_;
     }
 
     size_t GetBytesSize() const
