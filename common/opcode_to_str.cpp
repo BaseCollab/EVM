@@ -11,8 +11,8 @@ namespace evm::common {
 
 std::string OpcodeToString(Opcode opcode)
 {
-#define DEFINE_INSTR(instr, opcode, interpret) \
-    case opcode:                               \
+    #define DEFINE_INSTR(instr, opcode, interpret) \
+    case opcode:                                   \
         return StrToLower(#instr);
 
     switch (opcode) {
@@ -23,7 +23,7 @@ std::string OpcodeToString(Opcode opcode)
     }
     return "";
 
-#undef DEFINE_INSTR
+    #undef DEFINE_INSTR
 }
 
 // clang-format on

@@ -99,10 +99,10 @@ void Interpreter::Run(const byte_t *bytecode)
 
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
 
-    #define DEFINE_INSTR(instr, opcode, interpret)          \
-    instr:                                                  \
-        PRINT_DEBUG(instr);                                 \
-        interpret;                                          \
+    #define DEFINE_INSTR(instr, opcode, interpret)    \
+    instr:                                            \
+        PRINT_DEBUG(instr);                           \
+        interpret;                                    \
         DISPATCH();
 
     #include "isa/isa.def"

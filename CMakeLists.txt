@@ -19,6 +19,7 @@ add_subdirectory(vm)
 add_subdirectory(common)
 add_subdirectory(memory)
 add_subdirectory(interpreter)
+add_subdirectory(assembler)
 
 add_library(evm_static STATIC)
 target_link_libraries(evm_static PUBLIC

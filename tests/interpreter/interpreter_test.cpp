@@ -10,6 +10,8 @@
 #include "interpreter/interpreter.h"
 #include "vm/vm.h"
 
+#include "assembler/asm2byte/asm2byte.h"
+
 namespace evm {
 
 class InterpreterTest : public testing::Test {
@@ -27,24 +29,20 @@ protected:
 
 TEST_F(InterpreterTest, ADD_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::ADD, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source =
+        "movif x1, 1\n"
+        "movif x2, -10\n"
+        "add x0, x1, x2\n"
+        "exit\n";
 
-    int64_t imm1 = 1;
-    int64_t imm2 = -10;
+    auto asm2byte = asm2byte::AsmToByte();
+    asm2byte.ParseAsmString(source);
+    asm2byte.DumpInstructionsToBytes();
 
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 + imm2);
+    vm_->Execute(bytecode.data());
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), 1 + -10);
 }
 
 TEST_F(InterpreterTest, SUB_INT64)

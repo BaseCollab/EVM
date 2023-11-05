@@ -4,10 +4,10 @@
 
 namespace evm::common {
 
-std::string str_tolower(std::string s)
+std::string StrToLower(std::string str)
 {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-    return s;
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+    return str;
 }
 
 } // namespace evm::common
