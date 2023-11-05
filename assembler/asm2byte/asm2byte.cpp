@@ -6,8 +6,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
-#include <iostream>
+#include <stack>
 
 namespace evm::asm2byte {
 
@@ -95,12 +96,12 @@ void AsmToByte::PrepareLinesFromBuffer()
 
     // TODO(Stan1slavssKy): to do better error handling
     for (; i < file_buffer_.size(); ++i) {
-        if (std::isspace(file_buffer_[i]) != 0 || file_buffer_[i] == ',') {
+        if (std::isspace(file_buffer_[i]) || file_buffer_[i] == ',') {
             if (file_buffer_[i] == '\n' || file_buffer_[i] == '\0') {
                 file_buffer_[i] = '\0';
                 lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx + 1)});
                 line_start_idx = ++i;
-                for (; std::isspace(file_buffer_[i]) != 0; ++i) {
+                for (; std::isspace(file_buffer_[i]); ++i) {
                     ++line_start_idx;
                 }
             } else {
@@ -109,7 +110,7 @@ void AsmToByte::PrepareLinesFromBuffer()
         }
     }
 
-    if (!is_string_endline_terminated) {
+    if (is_string_endline_terminated) {
         // Push last line
         lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx) + '\0'});
     }
@@ -117,6 +118,8 @@ void AsmToByte::PrepareLinesFromBuffer()
 
 bool AsmToByte::CreateInstructionsFromLines()
 {
+    std::stack<std::pair<std::string, Instruction *>> label_resolving_table;
+
     size_t offset_cur = 0; // offset in bytecode from the beginning of code section
 
     for (auto &it : lines_) {
@@ -135,6 +138,7 @@ bool AsmToByte::CreateInstructionsFromLines()
             instructions_.push_back(instr);
         }
 
+        // clang-format off
         switch (opcode) {
             case Opcode::INVALID: {
                 std::cerr << "Invalid instruction type" << std::endl;
@@ -211,13 +215,18 @@ bool AsmToByte::CreateInstructionsFromLines()
 
                 int64_t immediate = 0;
 
-                if (common::IsNumber<double>(line_args[2])) {
+                if (common::IsNumber<int64_t>(line_args[2])) {
+                    immediate = std::stol(line_args[2]);
+                } else if (common::IsNumber<double>(line_args[2])) {
                     double double_imm = std::stod(line_args[2]);
                     std::memcpy(&immediate, &double_imm, sizeof(immediate));
-                } else if (common::IsNumber<int64_t>(line_args[2])) {
-                    immediate = std::stol(line_args[2]);
-                } else if (labels_.find(line_args[2]) != labels_.end()) {
-                    immediate = labels_[line_args[2]];
+                } else {
+                    if (labels_.find(line_args[2]) != labels_.end()) {
+                        immediate = labels_[line_args[2]];
+                    } else {
+                        label_resolving_table.push({line_args[2], instr});
+                        immediate = 0;
+                    }
                 }
 
                 instr->Set64Imm(immediate);
@@ -231,14 +240,19 @@ bool AsmToByte::CreateInstructionsFromLines()
 
                 int32_t immediate = 0;
 
-                if (common::IsNumber<double>(line_args[2])) {
+                if (common::IsNumber<int32_t>(line_args[2])) {
+                    immediate = std::stol(line_args[2]);
+                } else if (common::IsNumber<double>(line_args[2])) {
                     std::cerr << "Error immediate in jump arg " << std::stol(line_args[2]) << "; Arg should be integer"
                               << std::endl;
                     return false;
-                } else if (common::IsNumber<int32_t>(line_args[2])) {
-                    immediate = std::stol(line_args[2]);
-                } else if (labels_.find(line_args[2]) != labels_.end()) {
-                    immediate = labels_[line_args[2]] - offset_cur;
+                } else {
+                    if (labels_.find(line_args[2]) != labels_.end()) {
+                        immediate = labels_[line_args[2]] - offset_cur;
+                    } else {
+                        label_resolving_table.push({line_args[2], instr});
+                        immediate = -offset_cur;
+                    }
                 }
 
                 instr->Set32Imm(immediate);
@@ -267,14 +281,19 @@ bool AsmToByte::CreateInstructionsFromLines()
             case Opcode::JMP_IMM: {
                 int32_t immediate = 0;
 
-                if (common::IsNumber<double>(line_args[1])) {
+                if (common::IsNumber<int32_t>(line_args[1])) {
+                    immediate = std::stol(line_args[1]);
+                } else if (common::IsNumber<double>(line_args[1])) {
                     std::cerr << "Error immediate in jump arg " << std::stol(line_args[1]) << "; Arg should be integer"
                               << std::endl;
                     return false;
-                } else if (common::IsNumber<int32_t>(line_args[1])) {
-                    immediate = std::stol(line_args[1]);
-                } else if (labels_.find(line_args[1]) != labels_.end()) {
-                    immediate = labels_[line_args[1]] - offset_cur;
+                } else {
+                    if (labels_.find(line_args[1]) != labels_.end()) {
+                        immediate = labels_[line_args[1]] - offset_cur;
+                    } else {
+                        label_resolving_table.push({line_args[1], instr});
+                        immediate = -offset_cur;
+                    }
                 }
 
                 instr->Set32Imm(immediate);
@@ -298,9 +317,38 @@ bool AsmToByte::CreateInstructionsFromLines()
                 std::cerr << "Default should not be reachable" << std::endl;
                 return false;
         }
+        // clang-format on
 
+        instr->SetOffset(offset_cur);
         offset_cur += instr->GetBytesSize();
     }
+
+    size_t n_unresolved_labels = 0;
+
+    while (!label_resolving_table.empty()) {
+        auto to_resolve = label_resolving_table.top();
+
+        if (labels_.find(to_resolve.first) != labels_.end()) {
+            size_t imm_size = to_resolve.second->GetImmSize();
+            switch (imm_size) {
+                case sizeof(int32_t):
+                    to_resolve.second->Add32Imm(labels_[to_resolve.first]);
+                    break;
+                case sizeof(int64_t):
+                    to_resolve.second->Add64Imm(labels_[to_resolve.first]);
+                    break;
+            }
+        }
+        else {
+            std::cerr << "Label " << std::quoted(to_resolve.first) << "is unresolved" << std::endl;
+            n_unresolved_labels++;
+        }
+
+        label_resolving_table.pop();
+    }
+
+    if (n_unresolved_labels > 0)
+        return false;
 
     return true;
 }

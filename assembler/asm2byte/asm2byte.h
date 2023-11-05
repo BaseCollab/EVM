@@ -22,6 +22,12 @@ public:
     AsmToByte() = default;
     ~AsmToByte() = default;
 
+    explicit AsmToByte(const std::string &src)
+    {
+        ParseAsmString(src);
+        DumpInstructionsToBytes();
+    }
+
     bool ParseAsmString(const std::string &asm_string);
     bool ParseAsmFile(const char *filename);
 

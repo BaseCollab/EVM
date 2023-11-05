@@ -28,13 +28,13 @@ public:
         explicit Immediate(int64_t imm) : imm64_(imm)
         {
             is_set_ = true;
-            num_bytes_ = 8;
+            num_bytes_ = sizeof(int64_t);
         }
 
         explicit Immediate(int32_t imm) : imm32_(imm)
         {
             is_set_ = true;
-            num_bytes_ = 4;
+            num_bytes_ = sizeof(int32_t);
         }
 
     public:
@@ -77,12 +77,32 @@ public:
         imm_ = Immediate(imm);
     }
 
+    void Add32Imm(int32_t imm_add)
+    {
+        imm_ = Immediate(imm_.imm32_ + imm_add);
+    }
+
+    void Add64Imm(int64_t imm_add)
+    {
+        imm_ = Immediate(imm_.imm64_ + imm_add);
+    }
+
+    size_t GetImmSize() const
+    {
+        return imm_.num_bytes_;
+    }
+
     void SetArg(size_t arg_num, byte_t arg_reg)
     {
         have_args_ = true;
 
         assert(arg_num < Frame::N_PASSED_ARGS_DEFAULT);
         args_[arg_num] = arg_reg;
+    }
+
+    void SetOffset(size_t offset)
+    {
+        bytcode_offset_ = offset;
     }
 
     void InstrToBytes(std::vector<byte_t> *out_arr)
@@ -98,8 +118,7 @@ public:
             void *imm_ptr =
                 (imm_.num_bytes_ == 4) ? static_cast<void *>(&(imm_.imm32_)) : static_cast<void *>(&(imm_.imm64_));
             std::memcpy(out_arr->data() + prev_size, imm_ptr, imm_.num_bytes_);
-        }
-        else if (have_args_ == true) {
+        } else if (have_args_ == true) {
             for (size_t i = 0; i < Frame::N_PASSED_ARGS_DEFAULT; ++i) {
                 out_arr->push_back(args_[i]);
             }
@@ -112,6 +131,8 @@ public:
     }
 
 private:
+    size_t bytcode_offset_;
+
     Opcode opcode_ {Opcode::INVALID};
 
     byte_t rd_ {0};
