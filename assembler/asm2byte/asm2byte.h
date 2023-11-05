@@ -55,6 +55,8 @@ private:
     std::vector<Instruction *> instructions_;
 
     std::vector<byte_t> bytecode_;
+
+    std::unordered_map<std::string, size_t> labels_;
 };
 
 } // namespace evm::asm2byte

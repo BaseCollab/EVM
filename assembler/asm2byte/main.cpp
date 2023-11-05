@@ -6,14 +6,15 @@ int Main(int argc, char *argv[])
 {
     if (argc != 2) {
         std::cerr << "Only filename arg required" << std::endl;
-        return 0;
+        return EXIT_FAILURE;
     }
 
     auto asm2byte = AsmToByte();
     asm2byte.ParseAsmFile(argv[1]);
     asm2byte.DumpInstructionsToBytes();
     asm2byte.DumpBytesInBytecode("out.ea");
-    return 0;
+
+    return EXIT_SUCCESS;
 }
 
 } // namespace evm::asm2byte
