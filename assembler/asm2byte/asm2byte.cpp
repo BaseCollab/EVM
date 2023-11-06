@@ -95,14 +95,12 @@ void AsmToByte::PrepareLinesFromBuffer()
                 continue;
             } else {
                 line_start_idx = i;
-                std::cout << "in_line -> true, " << file_buffer_[i] << file_buffer_[i + 1] << std::endl;
                 in_line = true;
             }
         } else {
             if (std::isspace(file_buffer_[i])) {
                 if (file_buffer_[i] == '\n' || file_buffer_[i] == '\0') {
                     file_buffer_[i] = '\0';
-                    std::cout << "in_line -> false, " << std::endl;
                     in_line = false;
                     lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx + 1)});
                 } else {
