@@ -15,7 +15,7 @@ namespace evm {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-#define DEBUG_LOG
+// #define DEBUG_LOG
 
 #ifdef DEBUG_LOG
 #define PRINT_DEBUG(name) std::cerr << #name << ", pc = " << pc_ << std::endl;

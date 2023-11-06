@@ -23,7 +23,7 @@ public:
     {
         size_t token_start_idx = 0;
         for (size_t i = 0; i < line_.size(); ++i) {
-            if (line_[i] == '\0') {
+            if (line_[i] == '\0') { // all isspace() symbols are replaced here to '\0'
                 args_.push_back(line_.substr(token_start_idx, i - token_start_idx));
                 token_start_idx = ++i;
                 for (; line_[i] == '\0'; ++i) {

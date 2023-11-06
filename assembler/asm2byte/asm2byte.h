@@ -22,6 +22,12 @@ public:
     AsmToByte() = default;
     ~AsmToByte() = default;
 
+    explicit AsmToByte(const std::string &src)
+    {
+        ParseAsmString(src);
+        DumpInstructionsToBytes();
+    }
+
     bool ParseAsmString(const std::string &asm_string);
     bool ParseAsmFile(const char *filename);
 
@@ -55,6 +61,8 @@ private:
     std::vector<Instruction *> instructions_;
 
     std::vector<byte_t> bytecode_;
+
+    std::unordered_map<std::string, size_t> labels_;
 };
 
 } // namespace evm::asm2byte

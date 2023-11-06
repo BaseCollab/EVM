@@ -29,817 +29,473 @@ protected:
 
 TEST_F(InterpreterTest, ADD_INT64)
 {
-    auto source =
-        "movif x1, 1\n"
-        "movif x2, -10\n"
-        "add x0, x1, x2\n"
-        "exit\n";
+    auto source = R"(
+        movif x1, 1
+        movif x2, -10
+        add x0, x1, x2
+        exit
+    )";
 
-    auto asm2byte = asm2byte::AsmToByte();
-    asm2byte.ParseAsmString(source);
-    asm2byte.DumpInstructionsToBytes();
-
+    auto asm2byte = asm2byte::AsmToByte(source);
     std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
     vm_->Execute(bytecode.data());
+
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), 1 + -10);
 }
 
 TEST_F(InterpreterTest, SUB_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::SUB, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -11
+        movif x2, -23423
+        sub x0, x1, x2
+        exit
+    )";
 
-    int64_t imm1 = -11;
-    int64_t imm2 = -22;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 - imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 - (-23423));
 }
 
 TEST_F(InterpreterTest, MUL_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::MUL, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -11
+        movif x2, -23423
+        mul x0, x1, x2
+        exit
+    )";
 
-    int64_t imm1 = -11;
-    int64_t imm2 = -22;
-
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
-
-    imm1 = -1;
-    imm2 = 22;
-
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
-
-    imm1 = 11;
-    imm2 = -2;
-
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 * imm2);
-}
-
-TEST_F(InterpreterTest, MUL_INT64_STRESS)
-{
-    // clang-format off
-    std::vector<byte_t> bytecode = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0)
-    };
-    // clang-format on
-
-    int64_t imm1 = 11231;
-    int64_t imm2 = -119;
-
-    std::memcpy(bytecode.data() + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode.data() + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    size_t n_regs = 16;
-
-    for (size_t i = 3; i < n_regs; ++i) {
-        bytecode.push_back(Opcode::MUL);
-        bytecode.push_back(i);
-        bytecode.push_back(0x1);
-        bytecode.push_back(0x2);
-    }
-
-    bytecode.push_back(Opcode::EXIT);
-    bytecode.push_back(0x0);
-    bytecode.push_back(0x0);
-    bytecode.push_back(0x0);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
     vm_->Execute(bytecode.data());
 
-    for (size_t i = 3; i < n_regs; ++i) {
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(i)->GetInt64(), imm1 * imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 * (-23423));
 }
 
 TEST_F(InterpreterTest, DIV_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::DIV, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -11
+        movif x2, -23423
+        div x0, x2, x1
+        exit
+    )";
 
-    int64_t imm1 = 121;
-    int64_t imm2 = -22;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
-
-    imm1 = -1;
-    imm2 = 22;
-
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
-
-    imm1 = 1135;
-    imm2 = 442;
-
-    std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-    std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 / imm2);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -23423 / (-11));
 }
 
 TEST_F(InterpreterTest, AND_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::AND, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -1234322221
+        movif x2, -234656723
+        and x0, x1, x2
+        exit
+    )";
 
-    {
-        int64_t imm1 = 121;
-        int64_t imm2 = 12309;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
-    }
-    {
-        int64_t imm1 = -1234;
-        int64_t imm2 = 22;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
-    }
-    {
-        uint64_t imm1 = 1135;
-        uint64_t imm2 = 12231;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 & imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) & (-234656723));
 }
 
 TEST_F(InterpreterTest, OR_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::OR, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -1234322221
+        movif x2, -234656723
+        or x0, x1, x2
+        exit
+    )";
 
-    {
-        int64_t imm1 = 12334277;
-        int64_t imm2 = 9992563459;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
-    }
-    {
-        int64_t imm1 = -12230532734;
-        int64_t imm2 = 2767332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
-    }
-    {
-        uint64_t imm1 = 11111135;
-        uint64_t imm2 = 12217888831;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 | imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) | (-234656723));
 }
 
 TEST_F(InterpreterTest, XOR_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::XOR, 0x0, 0x1, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -1234322221
+        movif x2, -234656723
+        xor x0, x1, x2
+        exit
+    )";
 
-    {
-        int64_t imm1 = 12334277;
-        int64_t imm2 = 9992563459;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
-    }
-    {
-        int64_t imm1 = -12230532734;
-        int64_t imm2 = 2767332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
-    }
-    {
-        uint64_t imm1 = 11111135;
-        uint64_t imm2 = 12217888831;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), imm1 ^ imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) ^ (-234656723));
 }
 
-TEST_F(InterpreterTest, MOV_INT64)
+TEST_F(InterpreterTest, MOV)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_R_INSTR(Opcode::MOV, 0x3, 0x1),
-        PUT_R_INSTR(Opcode::MOV, 0x4, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, 3.14
+        movif x2, -11
+        mov x3, x1
+        mov x4, x2
+        exit
+    )";
 
-    {
-        int64_t imm1 = 123;
-        int64_t imm2 = 2332;
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+    vm_->Execute(bytecode.data());
 
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
-    }
-    {
-        int64_t imm1 = -1323;
-        int64_t imm2 = 2332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
-    }
-    {
-        int64_t imm1 = 1253;
-        int64_t imm2 = -2332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
-    }
-    {
-        uint64_t imm1 = 1253;
-        uint64_t imm2 = 26532;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetDouble(), 3.14);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), -11);
 }
 
 TEST_F(InterpreterTest, SLTI)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::SLTI, 0x3, 0x1, 0x2),
-        PUT_A_INSTR(Opcode::SLTI, 0x4, 0x2, 0x1),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123
+        movif x2, -11
+        movif x3, 23123123
+        movif x4, -11
 
-    {
-        int64_t imm1 = -123;
-        int64_t imm2 = -2332;
+        slti x5, x1, x2
+        slti x6, x2, x2
+        slti x7, x1, x3
+        slti x8, x3, x4
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+        exit
+    )";
 
-        vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
-    }
-    {
-        int64_t imm1 = 312123;
-        int64_t imm2 = -2332;
+    vm_->Execute(bytecode.data());
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
-    }
-    {
-        int64_t imm1 = 123123;
-        int64_t imm2 = 2332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 < imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 < imm1);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, SMEI)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::SMEI, 0x3, 0x1, 0x2),
-        PUT_A_INSTR(Opcode::SMEI, 0x4, 0x2, 0x1),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123
+        movif x2, -11
+        movif x3, 23123123
+        movif x4, -11
 
-    {
-        int64_t imm1 = -123;
-        int64_t imm2 = -2332;
+        smei x5, x1, x2
+        smei x6, x2, x2
+        smei x7, x1, x3
+        smei x8, x3, x4
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+        exit
+    )";
 
-        vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
-    }
-    {
-        int64_t imm1 = 312123;
-        int64_t imm2 = -2332;
+    vm_->Execute(bytecode.data());
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
-    }
-    {
-        int64_t imm1 = 2323232323;
-        int64_t imm2 = 2323232323;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 >= imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm2 >= imm1);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, EQ_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::EQI, 0x3, 0x1, 0x2),
-        PUT_A_INSTR(Opcode::EQI, 0x4, 0x2, 0x1),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123
+        movif x2, -11
+        movif x3, 23123123
+        movif x4, -11
 
-    {
-        int64_t imm1 = 123;
-        int64_t imm2 = 123;
+        eqi x5, x1, x2
+        eqi x6, x2, x2
+        eqi x7, x1, x3
+        eqi x8, x3, x4
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+        exit
+    )";
 
-        vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
-    }
-    {
-        int64_t imm1 = -312123;
-        int64_t imm2 = 2332;
+    vm_->Execute(bytecode.data());
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
-    }
-    {
-        int64_t imm1 = -123123;
-        int64_t imm2 = -123123;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
-    }
-    {
-        uint64_t imm1 = 123123;
-        uint64_t imm2 = 123123;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 == imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 == imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, NEQ_INT64)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 0),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 0),
-        PUT_A_INSTR(Opcode::NEQI, 0x3, 0x1, 0x2),
-        PUT_A_INSTR(Opcode::NEQI, 0x4, 0x2, 0x1),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123
+        movif x2, -11
+        movif x3, 23123123
+        movif x4, -11
 
-    {
-        int64_t imm1 = -123;
-        int64_t imm2 = -123;
+        neqi x5, x1, x2
+        neqi x6, x2, x2
+        neqi x7, x1, x3
+        neqi x8, x3, x4
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
+        exit
+    )";
 
-        vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
-    }
-    {
-        int64_t imm1 = 312123;
-        int64_t imm2 = 312123;
+    vm_->Execute(bytecode.data());
 
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
-    }
-    {
-        int64_t imm1 = 123123;
-        int64_t imm2 = 2332;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
-    }
-    {
-        uint64_t imm1 = 432;
-        uint64_t imm2 = 432;
-
-        std::memcpy(bytecode + sizeof(instr_size_t), &imm1, sizeof(imm1));
-        std::memcpy(bytecode + sizeof(instr_size_t) * 2 + sizeof(int64_t), &imm2, sizeof(imm2));
-
-        vm_->Execute(bytecode);
-
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), imm1 != imm2);
-        ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), imm1 != imm2);
-    }
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, CONVIF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123
+        convif x2, x1
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetDouble(), 23.0);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetDouble(), -123.0);
 }
+
 TEST_F(InterpreterTest, CONVFI)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_R_INSTR(Opcode::CONVFI, 0x3, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123.0
+        convfi x2, x1
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetInt64(), 23);
-}
+    vm_->Execute(bytecode.data());
 
-TEST_F(InterpreterTest, MOV_DOUBLE)
-{
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_R_INSTR(Opcode::MOV, 0x4, 0x2),
-        PUT_R_INSTR(Opcode::MOV, 0x11, 0x4),
-        PUT_R_INSTR(Opcode::CONVFI, 0x12, 0x11),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
-
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x12)->GetInt64(), 23);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), -123);
 }
 
 TEST_F(InterpreterTest, ADDF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::ADDF, 0x5, 0x4, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, 1.0
+        movif x2, -10.0
+        addf x0, x1, x2
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 55.0);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 - 10.0);
 }
 
 TEST_F(InterpreterTest, SUBF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::SUBF, 0x5, 0x4, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, 1.0
+        movif x2, -10.0
+        subf x0, x1, x2
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 9.0);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 + 10.0);
 }
 
 TEST_F(InterpreterTest, MULF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::MULF, 0x5, 0x4, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, 3.14
+        movif x2, -4.12
+        mulf x0, x1, x2
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 23.0 * 32.0);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 * 4.12);
 }
 
 TEST_F(InterpreterTest, DIVF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::DIVF, 0x5, 0x4, 0x2),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, 3.14
+        movif x2, -4.12
+        divf x0, x1, x2
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 32.0 / 23.0);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 / 4.12);
 }
 
 TEST_F(InterpreterTest, SLTF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::SLTF, 0x5, 0x4, 0x2),
-        PUT_A_INSTR(Opcode::SLTF, 0x6, 0x2, 0x4),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123.2
+        movif x2, -11.1
+        movif x3, 23123123.1
+        movif x4, -11.1
 
-    vm_->Execute(bytecode);
+        sltf x5, x1, x2
+        sltf x6, x2, x2
+        sltf x7, x1, x3
+        sltf x8, x3, x4
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 32.0 < 23.0);
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 23.0 < 32.0);
+        exit
+    )";
+
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, SMEF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::SMEF, 0x5, 0x4, 0x2),
-        PUT_A_INSTR(Opcode::SMEF, 0x6, 0x2, 0x4),
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto source = R"(
+        movif x1, -123.2
+        movif x2, -11.1
+        movif x3, 23123123.1
+        movif x4, -11.1
 
-    vm_->Execute(bytecode);
+        smef x5, x1, x2
+        smef x6, x2, x2
+        smef x7, x1, x3
+        smef x8, x3, x4
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 32.0 >= 23.0);
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 23.0 >= 32.0);
+        exit
+    )";
+
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, EQF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::EQF, 0x5, 0x4, 0x2),
+    auto source = R"(
+        movif x1, -123.2
+        movif x2, -11.1
+        movif x3, 23123123.1
+        movif x4, -11.1
 
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 44),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 44),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::EQF, 0x6, 0x4, 0x2),
+        eqf x5, x1, x2
+        eqf x6, x2, x2
+        eqf x7, x1, x3
+        eqf x8, x3, x4
 
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, NEQF)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::NEQF, 0x5, 0x4, 0x2),
+    auto source = R"(
+        movif x1, -123.2
+        movif x2, -11.1
+        movif x3, 23123123.1
+        movif x4, -11.1
 
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 44),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 44),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
-        PUT_A_INSTR(Opcode::NEQF, 0x6, 0x4, 0x2),
+        neqf x5, x1, x2
+        neqf x6, x2, x2
+        neqf x7, x1, x3
+        neqf x8, x3, x4
 
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, SIN_COS)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 32),
-        PUT_R_INSTR(Opcode::CONVIF, 0x4, 0x3),
+    auto source = R"(
+        movif x1, 23.0
+        movif x2, 32.0
+        sin x5, x1
+        cos x6, x2
 
-        PUT_R_INSTR(Opcode::SIN, 0x5, 0x2),
-        PUT_R_INSTR(Opcode::COS, 0x6, 0x4),
+        exit
+    )";
 
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    vm_->Execute(bytecode);
+    vm_->Execute(bytecode.data());
 
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
@@ -847,79 +503,74 @@ TEST_F(InterpreterTest, SIN_COS)
 
 TEST_F(InterpreterTest, JMP_IMM)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x0, 1), // one = 1
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 1), // res = 1
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x2, 2), // two = 2
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x3, 0), // i = 0
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x4, 5), // number of iters = 5
+    auto source = R"(
+        movif x1, 2
+        movif x2, 1
+        movif x3, 10
 
-        // if (i >= 5) goto exit
-        PUT_A_INSTR(Opcode::SMEI, 0x5, 0x3, 0x4),
-        PUT_INS_INSTR(Opcode::JMP_IF_IMM, 0x5), 0x18, 0x0, 0x0, 0x0, // pc += 24
+    loop:
+        smei x4, x2, x3
+        jmp_if_imm x4, exit
 
-        PUT_A_INSTR(Opcode::MUL, 0x1, 0x1, 0x2), // res *= 2
-        PUT_A_INSTR(Opcode::ADD, 0x3, 0x3, 0x0), // ++i
+        mul x2, x1, x2
 
-        PUT_INSTR(Opcode::JMP_IMM), 0xEC, 0xFF, 0xFF, 0xFF, // pc -= 20
+        jmp_imm loop
 
-        // exit
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    exit:
+        exit
+    )";
 
-    vm_->Execute(bytecode);
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 32);
+    vm_->Execute(bytecode.data());
+
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), 16);
 }
 
 TEST_F(InterpreterTest, RACC_ACCR)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x1, 23),
-        PUT_R_INSTR(Opcode::CONVIF, 0x2, 0x1),
+    auto source = R"(
+        movif x1, 2.0
+        racc x1
+        accr x5, x1
 
-        PUT_INS_INSTR(Opcode::RACC, 0x2),
-        PUT_IMM_INSTR(Opcode::ACCR, 0x4),
+        exit
+    )";
 
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-    vm_->Execute(bytecode);
+    vm_->Execute(bytecode.data());
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetDouble(), 23.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 2.0);
 }
 
 TEST_F(InterpreterTest, CALL_RET)
 {
-    // clang-format off
-    byte_t bytecode[] = {
-        // x_7 = 11
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x7, 11),
-        PUT_INSTR(Opcode::JMP_IMM), 0x20, 0x00, 0x00, 0x00, // pc += 32
+    auto source = R"(
+        movif x1, 11
+        movif x2, inc
+        call x2, x1
+        accr x1
+        jmp_imm exit
 
-        // simple_method(): acc = 54 + x_0
-        PUT_IMM_INSTR_BYTE(Opcode::MOVIF, 0x5, 54),
-        PUT_A_INSTR(Opcode::ADD, 0x6, 0x5, 0x0),
-        PUT_INS_INSTR(Opcode::RACC, 0x6),
-        PUT_INSTR(Opcode::RET),
+    inc:
+        movif x5, 1
+        add x6, x5, x0
+        racc x6
+        ret
 
-        PUT_IMM_INSTR(Opcode::MOVIF, 0x5), 0xDC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // pc -= 36
-        PUT_CALL_INSTR(Opcode::CALL, 0x5, 0x7, 0x0, 0x0, 0x0),
+    exit:
+        exit
+    )";
 
-        PUT_IMM_INSTR(Opcode::ACCR, 0x9),
+    auto asm2byte = asm2byte::AsmToByte(source);
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
 
-        // exit
-        PUT_INSTR(Opcode::EXIT)
-    };
-    // clang-format on
+    vm_->Execute(bytecode.data());
 
-    vm_->Execute(bytecode);
-
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 11 + 54);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
 }
 
 } // namespace evm

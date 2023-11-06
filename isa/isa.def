@@ -342,7 +342,7 @@ DEFINE_INSTR
 (
     CALL, 0x24,
     {
-        FRAME_NEW_MIGRATE(PC() + 0x8, PC() + RS1_I());
+        FRAME_NEW_MIGRATE(PC() + 0x8, RS1_I());
     }
 )
 
