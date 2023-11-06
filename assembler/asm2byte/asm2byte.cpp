@@ -84,35 +84,41 @@ bool AsmToByte::ReadAsmFile(const char *filename)
 
 void AsmToByte::PrepareLinesFromBuffer()
 {
-    bool is_string_endline_terminated = (file_buffer_.back() == '\n');
-
     std::size_t line_start_idx = 0;
-
     size_t i = 0;
-    // TODO(): move this cycle to function
-    for (; std::isspace(file_buffer_[i]) != 0; ++i) {
-        ++line_start_idx;
-    }
 
-    // TODO(Stan1slavssKy): to do better error handling
-    for (; i < file_buffer_.size(); ++i) {
-        if (std::isspace(file_buffer_[i]) || file_buffer_[i] == ',') {
-            if (file_buffer_[i] == '\n' || file_buffer_[i] == '\0') {
-                file_buffer_[i] = '\0';
-                lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx + 1)});
-                line_start_idx = ++i;
-                for (; std::isspace(file_buffer_[i]); ++i) {
-                    ++line_start_idx;
-                }
+    bool in_line = false;
+
+    do {
+        if (in_line == false) {
+            if (std::isspace(file_buffer_[i])) {
+                continue;
             } else {
+                line_start_idx = i;
+                std::cout << "in_line -> true, " << file_buffer_[i] << file_buffer_[i + 1] << std::endl;
+                in_line = true;
+            }
+        } else {
+            if (std::isspace(file_buffer_[i])) {
+                if (file_buffer_[i] == '\n' || file_buffer_[i] == '\0') {
+                    file_buffer_[i] = '\0';
+                    std::cout << "in_line -> false, " << std::endl;
+                    in_line = false;
+                    lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx + 1)});
+                } else {
+                    file_buffer_[i] = '\0';
+                }
+            } else if (file_buffer_[i] == ',') {
                 file_buffer_[i] = '\0';
+            } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
+                                                        file_buffer_[i] != '.' && file_buffer_[i] != '-') {
+                std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
-    }
+    } while (++i < file_buffer_.size());
 
-    if (is_string_endline_terminated) {
-        // Push last line
-        lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, i - line_start_idx) + '\0'});
+    if (in_line == true) {
+        lines_.push_back(LineInfo {file_buffer_.substr(line_start_idx, file_buffer_.size() - 1) + '\0'});
     }
 }
 
