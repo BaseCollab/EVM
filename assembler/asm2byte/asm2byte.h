@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 namespace evm::asm2byte {
@@ -58,7 +59,7 @@ private:
 
     std::vector<LineInfo> lines_;
 
-    std::vector<Instruction *> instructions_;
+    std::vector<std::unique_ptr<Instruction>> instructions_;
 
     std::vector<byte_t> bytecode_;
 

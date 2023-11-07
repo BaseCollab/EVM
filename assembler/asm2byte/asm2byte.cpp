@@ -41,7 +41,7 @@ bool AsmToByte::ParseAsmString(const std::string &asm_string)
 
 bool AsmToByte::DumpInstructionsToBytes()
 {
-    for (auto it : instructions_) {
+    for (auto &it : instructions_) {
         it->InstrToBytes(&bytecode_);
     }
     return true;
@@ -109,7 +109,7 @@ void AsmToByte::PrepareLinesFromBuffer()
             } else if (file_buffer_[i] == ',') {
                 file_buffer_[i] = '\0';
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
-                                                        file_buffer_[i] != '.' && file_buffer_[i] != '-') {
+                       file_buffer_[i] != '.' && file_buffer_[i] != '-') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -134,12 +134,13 @@ bool AsmToByte::CreateInstructionsFromLines()
             continue; // no opcode in the line with label:
         }
 
-        Instruction *instr = nullptr;
+        Instruction *instr;
         Opcode opcode = common::StringToOpcode(line_args[0]);
 
         if (opcode != Opcode::INVALID) {
-            instr = new Instruction(opcode);
-            instructions_.push_back(instr);
+            auto unique_instr = std::make_unique<Instruction>(opcode);
+            instr = unique_instr.get();
+            instructions_.push_back(std::move(unique_instr));
         }
 
         // clang-format off
@@ -342,8 +343,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                     to_resolve.second->Add64Imm(labels_[to_resolve.first]);
                     break;
             }
-        }
-        else {
+        } else {
             std::cerr << "Label " << std::quoted(to_resolve.first) << "is unresolved" << std::endl;
             n_unresolved_labels++;
         }
