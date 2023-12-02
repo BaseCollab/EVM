@@ -19,13 +19,15 @@ public:
     NO_COPY_SEMANTIC(Interpreter);
     NO_MOVE_SEMANTIC(Interpreter);
 
-    Interpreter() = default;
+    Interpreter(VirtualMachine *vm) : vm_(vm) {}
     ~Interpreter() = default;
 
     void Run(const byte_t *bytecode);
     const Frame *getCurrFrame() const;
 
 private:
+    VirtualMachine *vm_ {nullptr};
+
     std::stack<Frame> frames_;
 
     Frame *frame_cur_ {nullptr};

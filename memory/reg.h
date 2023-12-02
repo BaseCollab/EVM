@@ -62,11 +62,17 @@ public:
         value_ptr = ptr;
     }
 
+    uint64_t GetRaw() const
+    {
+        return raw_value;
+    }
+
 private:
     union {
         double value_d;
         int64_t value_i;
         byte_t *value_ptr;
+        uint64_t raw_value;
     };
 };
 

@@ -8,6 +8,8 @@
 
 namespace evm::memory {
 
+class Array;
+
 class AllocatorBase {
 public:
     enum class AllocatorType {
@@ -29,6 +31,8 @@ public:
     virtual void *Alloc(size_t size) = 0;
 
     virtual size_t GetHeapCapacity() const = 0;
+
+    virtual Array *AllocateArray(size_t size) = 0;
 };
 
 } // namespace evm::memory

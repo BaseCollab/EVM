@@ -2,6 +2,8 @@
 #include "interpreter.h"
 #include "isa/macros.h"
 
+#include "memory/types/array-inl.h"
+
 #include <iostream>
 #include <cstring>
 #include <type_traits>
@@ -10,12 +12,16 @@
 
 namespace evm {
 
-// clang-format off
-
+// Disable warning because the function uses computed goto
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-label-as-value"
+#elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
+#endif
 
-// #define DEBUG_LOG
+// clang-format off
 
 #ifdef DEBUG_LOG
 #define PRINT_DEBUG(name) std::cerr << #name << ", pc = " << pc_ << std::endl;
@@ -31,6 +37,9 @@ namespace evm {
 
 #define RS2_I_FRAME(frame) frame->GetReg(RS2_IDX())->GetInt64()
 #define RS2_F_FRAME(frame) frame->GetReg(RS2_IDX())->GetDouble()
+
+#define RS3_I_FRAME(frame) frame->GetReg(RS3_IDX())->GetInt64()
+#define RS3_F_FRAME(frame) frame->GetReg(RS3_IDX())->GetDouble()
 
 void Interpreter::Run(const byte_t *bytecode)
 {
@@ -55,10 +64,11 @@ void Interpreter::Run(const byte_t *bytecode)
     #define RD_IDX()   ISA_GET_RD (bytecode + pc_)
     #define RS1_IDX()  ISA_GET_RS1(bytecode + pc_)
     #define RS2_IDX()  ISA_GET_RS2(bytecode + pc_)
+    #define RS3_IDX()  ISA_GET_RS2(bytecode + pc_)
     #define IMM_I()    ISA_GET_IMM(bytecode + pc_, int64_t)
     #define IMM_F()    ISA_GET_IMM(bytecode + pc_, double)
     #define IMM_I32()  ISA_GET_IMM(bytecode + pc_, int32_t)
-
+    
     #define PC()             pc_
     #define PC_ADD(value)    pc_ += value
     #define PC_ASSIGN(value) pc_ =  value
@@ -72,6 +82,9 @@ void Interpreter::Run(const byte_t *bytecode)
     #define RS2_I() RS2_I_FRAME(frame_cur_)
     #define RS2_F() RS2_F_FRAME(frame_cur_)
 
+    #define RS3_I() RS3_I_FRAME(frame_cur_)
+    #define RS3_F() RS3_F_FRAME(frame_cur_)
+
     #define PUT_ACCUM(reg)     accum_ = reg
     #define PUT_I_ACCUM(value) accum_.SetInt64(value)
     #define PUT_F_ACCUM(value) accum_.SetDouble(value)
@@ -79,6 +92,24 @@ void Interpreter::Run(const byte_t *bytecode)
     #define GET_ACCUM()   accum_
     #define GET_I_ACCUM() accum_.GetInt64()
     #define GET_F_ACCUM() accum_.GetDouble()
+
+    #define GET_ARRAY_TYPE() ISA_GET_TYPE(bytecode + pc_)
+
+    #define CREATE_ARR(type, size) \
+        reinterpret_cast<reg_t>(Array::Create(*vm_, static_cast<Array::Type>(type), size))
+
+    #define LOAD_FROM_ARR(array_ptr, idx)                    \
+    ({                                                       \
+        Array *array = reinterpret_cast<Array *>(array_ptr); \
+        reg_t value = 0;                                     \
+        array->Get(&value, idx);                             \
+        value;                                               \
+    })
+
+    #define STORE_TO_ARR(array_ptr, array_idx, src_reg_idx)         \
+        Array *array = reinterpret_cast<Array *>(array_ptr);        \
+        uint64_t value = frame_cur_->GetReg(src_reg_idx)->GetRaw(); \
+        array->Set(value, array_idx);
 
     #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                          \
         frame_cur_->SetRestorePC(restore_pc);                              \
@@ -118,5 +149,11 @@ const Frame *Interpreter::getCurrFrame() const
 #pragma GCC diagnostic pop
 
 // clang-format on
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 } // namespace evm

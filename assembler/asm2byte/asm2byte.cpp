@@ -3,6 +3,7 @@
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
 #include "memory/frame.h"
+#include "memory/types/array.h"
 
 #include <fstream>
 #include <iostream>
@@ -109,7 +110,7 @@ void AsmToByte::PrepareLinesFromBuffer()
             } else if (file_buffer_[i] == ',') {
                 file_buffer_[i] = '\0';
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
-                                                        file_buffer_[i] != '.' && file_buffer_[i] != '-') {
+                       file_buffer_[i] != '.' && file_buffer_[i] != '-') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -317,6 +318,38 @@ bool AsmToByte::CreateInstructionsFromLines()
                 break;
             }
 
+            case Opcode::NEWARR: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                
+                auto arr_type = memory::Array::GetTypeFromString(line_args[2]);
+                instr->SetRs1(static_cast<byte_t>(arr_type));
+
+                int32_t arr_size = 0;
+                if (common::IsNumber<int32_t>(line_args[3])) {
+                    arr_size = std::stol(line_args[3]);
+                } else if (common::IsNumber<double>(line_args[3])) {
+                    std::cerr << "Error immediate in newarr arg " << std::stol(line_args[1]) << "; Arg should be integer"
+                              << std::endl;
+                    return false;
+                }
+
+                instr->Set32Imm(arr_size);
+                break;
+            }
+
+            case Opcode::LARR: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                instr->SetRs1(GetRegisterIdxFromString(line_args[2]));
+                instr->SetRs2(GetRegisterIdxFromString(line_args[3]));
+            }
+
+            case Opcode::STARR: {
+                instr->SetRs1(GetRegisterIdxFromString(line_args[1]));
+                instr->SetRs2(GetRegisterIdxFromString(line_args[2]));
+                // set rs3 aka rd
+                instr->SetRd(GetRegisterIdxFromString(line_args[3]));
+            }
+
             default:
                 std::cerr << "Default should not be reachable" << std::endl;
                 return false;
@@ -342,8 +375,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                     to_resolve.second->Add64Imm(labels_[to_resolve.first]);
                     break;
             }
-        }
-        else {
+        } else {
             std::cerr << "Label " << std::quoted(to_resolve.first) << "is unresolved" << std::endl;
             n_unresolved_labels++;
         }
