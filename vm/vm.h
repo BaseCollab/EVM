@@ -1,12 +1,14 @@
-#ifndef EVM_VM_H
-#define EVM_VM_H
+#ifndef EVM_VM_VM_H
+#define EVM_VM_VM_H
 
 #include "common/constants.h"
 #include "common/config.h"
 #include "common/macros.h"
 #include "interpreter/interpreter.h"
 
-#include <cassert>
+#include "memory/allocator/allocator.h"
+
+#include <memory>
 
 namespace evm {
 
@@ -15,16 +17,29 @@ public:
     NO_COPY_SEMANTIC(VirtualMachine);
     NO_MOVE_SEMANTIC(VirtualMachine);
 
-    VirtualMachine() = default;
+    explicit VirtualMachine();
     ~VirtualMachine() = default;
 
-    void Execute(const byte_t *bytecode);
-    Interpreter *GetInterpreter();
+    void Execute(const byte_t *bytecode)
+    {
+        interpreter_->Run(bytecode);
+    }
+
+    Interpreter *GetInterpreter()
+    {
+        return interpreter_.get();
+    }
+
+    memory::AllocatorBase *GetAllocator() const
+    {
+        return allocator_.get();
+    }
 
 private:
-    Interpreter interpreter_;
+    std::unique_ptr<Interpreter> interpreter_;
+    std::unique_ptr<memory::AllocatorBase> allocator_;
 };
 
 } // namespace evm
 
-#endif // EVM_VM_H
+#endif // EVM_VM_VM_H

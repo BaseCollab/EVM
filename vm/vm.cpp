@@ -1,15 +1,12 @@
 #include "vm.h"
+#include "memory/allocator/bump_allocator.h"
 
 namespace evm {
 
-void VirtualMachine::Execute(const byte_t *bytecode)
+VirtualMachine::VirtualMachine()
 {
-    interpreter_.Run(bytecode);
-}
-
-Interpreter *VirtualMachine::GetInterpreter()
-{
-    return &interpreter_;
+    interpreter_ = std::make_unique<Interpreter>(this);
+    allocator_ = std::make_unique<memory::BumpAllocator>(/* default size*/);
 }
 
 } // namespace evm

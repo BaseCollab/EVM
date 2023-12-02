@@ -13,6 +13,9 @@ target_include_directories(asm2byte_static PUBLIC
     ${EVM_BINARY_ROOT}
 )
 add_dependencies(asm2byte_static common_impl)
-target_link_libraries(asm2byte_static PUBLIC common_impl)
+target_link_libraries(asm2byte_static PUBLIC 
+                      common_impl
+                      memory_types_impl
+)
 
 target_link_libraries(asm2byte PUBLIC asm2byte_static)

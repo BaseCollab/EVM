@@ -33,4 +33,6 @@
     DEFAULT_COPY_CTOR(TypeName)         \
     DEFAULT_COPY_OPERATOR(TypeName)
 
+#define MEMBER_OFFSET(T, F) offsetof(T, F)
+
 #endif // EVM_COMMON_MACROS_H

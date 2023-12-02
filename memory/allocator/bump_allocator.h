@@ -2,6 +2,7 @@
 #define EVM_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
 
 #include "allocator.h"
+#include "memory/types/array-inl.h"
 
 namespace evm::memory {
 
@@ -45,6 +46,8 @@ public:
     }
 
     void *Alloc(size_t size) override;
+
+    Array *AllocateArray(size_t size) override;
 
 private:
     AllocatorType allocator_type_ {AllocatorType::BUMP};

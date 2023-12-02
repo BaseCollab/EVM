@@ -371,3 +371,39 @@ DEFINE_INSTR
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
+
+// Object operations
+
+DEFINE_INSTR
+(
+    // newarr rd, type, size
+    // pseudo: new type(size)
+    NEWARR, 0x28,
+    {
+        RD_I_ASSIGN(CREATE_ARR(GET_ARRAY_TYPE(), IMM_I32()));
+        PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    // larr rd, rs1(ptr), rs2(idx)
+    // pseudo: rd = ptr[idx]
+    LARR, 0x29,
+    {
+        RD_I_ASSIGN(LOAD_FROM_ARR(RS1_I(), RS2_I()));
+        PC_ADD(0x4);// 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    // starr rs1(ptr), rs2(idx), rs3(src_reg_idx)
+    // val = registers[src_reg_idx]
+    // pseudo: ptr[idx] = val
+    STARR, 0x2a,
+    {
+        STORE_TO_ARR(RS1_I(), RS2_I(), RS3_I());
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)
