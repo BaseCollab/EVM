@@ -2,9 +2,10 @@
 #define EVM_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
 
 #include "allocator.h"
-#include "memory/types/array-inl.h"
 
 namespace evm::memory {
+
+class Array;
 
 /**
  *  +----------------+-------------------+
@@ -30,11 +31,6 @@ public:
     explicit BumpAllocator(size_t heap_capacity = DEFAULT_HEAP_SIZE);
     ~BumpAllocator() override;
 
-    AllocatorType GetAllocatorType() const override
-    {
-        return allocator_type_;
-    }
-
     size_t GetHeapCapacity() const override
     {
         return heap_capacity_;
@@ -47,11 +43,7 @@ public:
 
     void *Alloc(size_t size) override;
 
-    Array *AllocateArray(size_t size) override;
-
 private:
-    AllocatorType allocator_type_ {AllocatorType::BUMP};
-
     uint8_t *heap_ {nullptr};
     uint8_t *next_alloc_ {nullptr};
 

@@ -15,8 +15,6 @@ public:
     // clang-format off
     enum class Type {
         INVALID = -1,
-        BOOLEAN = 0,
-        CHAR    = 1,
         DOUBLE  = 2,
         BYTE    = 3,
         SHORT   = 4,
@@ -33,9 +31,14 @@ public:
 
     static void *Create(const VirtualMachine &vm, Type array_type, size_t count);
 
-    void *GetData() const
+    const void *GetData() const
     {
         return data_;
+    }
+
+    void SetData(void *data_ptr)
+    {
+        data_ = data_ptr;
     }
 
     size_t GetSize() const
@@ -63,16 +66,16 @@ public:
         elem_size_ = elem_size;
     }
 
-    void Set(uint64_t value, size_t idx);
+    void Set(int64_t value, size_t idx);
 
-    void Get(void *value, size_t idx) const;
+    void Get(int64_t *value, size_t idx) const;
 
     static constexpr uint32_t GetDataOffset()
     {
         return MEMBER_OFFSET(Array, data_);
     }
 
-    static size_t GetSizeOfArrayType(Array::Type array_type);
+    static size_t GetSizeOfArrayType(Type array_type);
     static Type GetTypeFromString(std::string_view string);
 
 private:

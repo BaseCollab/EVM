@@ -26,13 +26,16 @@ public:
     explicit AllocatorBase() = default;
     virtual ~AllocatorBase() = default;
 
-    virtual AllocatorType GetAllocatorType() const = 0;
+    AllocatorType GetAllocatorType() const {
+        return allocator_type_;
+    }
 
     virtual void *Alloc(size_t size) = 0;
 
     virtual size_t GetHeapCapacity() const = 0;
 
-    virtual Array *AllocateArray(size_t size) = 0;
+private:
+    AllocatorType allocator_type_ {AllocatorType::BUMP};
 };
 
 } // namespace evm::memory

@@ -67,6 +67,11 @@ public:
         rs2_ = rs2;
     }
 
+    void SetRs3(byte_t rs3)
+    {
+        rd_ = rs3;
+    }
+
     void Set32Imm(int32_t imm)
     {
         imm_ = Immediate(imm);

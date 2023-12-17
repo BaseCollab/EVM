@@ -1,4 +1,5 @@
 #include "bump_allocator.h"
+#include "memory/types/array.h"
 
 #include <iostream>
 #include <cassert>
@@ -38,13 +39,6 @@ void *BumpAllocator::Alloc(size_t size)
     busy_size_ += size;
 
     return alloc_ptr;
-}
-
-/* override */
-Array *BumpAllocator::AllocateArray(size_t size)
-{
-    size_t array_class_size = size + Array::GetDataOffset();
-    return reinterpret_cast<Array *>(Alloc(size));
 }
 
 } // namespace evm::memory

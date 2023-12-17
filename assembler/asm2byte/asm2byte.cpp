@@ -320,7 +320,7 @@ bool AsmToByte::CreateInstructionsFromLines()
 
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
-                
+
                 auto arr_type = memory::Array::GetTypeFromString(line_args[2]);
                 instr->SetRs1(static_cast<byte_t>(arr_type));
 
@@ -341,13 +341,14 @@ bool AsmToByte::CreateInstructionsFromLines()
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetRs1(GetRegisterIdxFromString(line_args[2]));
                 instr->SetRs2(GetRegisterIdxFromString(line_args[3]));
+                break;
             }
 
             case Opcode::STARR: {
                 instr->SetRs1(GetRegisterIdxFromString(line_args[1]));
                 instr->SetRs2(GetRegisterIdxFromString(line_args[2]));
-                // set rs3 aka rd
-                instr->SetRd(GetRegisterIdxFromString(line_args[3]));
+                instr->SetRs3(GetRegisterIdxFromString(line_args[3]));
+                break;
             }
 
             default:

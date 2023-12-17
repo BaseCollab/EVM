@@ -1,8 +1,8 @@
 #include "common/constants.h"
-#include "interpreter.h"
+#include "common/config.h"
+#include "interpreter/interpreter.h"
+#include "memory/types/array.h"
 #include "isa/macros.h"
-
-#include "memory/types/array-inl.h"
 
 #include <iostream>
 #include <cstring>
@@ -64,11 +64,11 @@ void Interpreter::Run(const byte_t *bytecode)
     #define RD_IDX()   ISA_GET_RD (bytecode + pc_)
     #define RS1_IDX()  ISA_GET_RS1(bytecode + pc_)
     #define RS2_IDX()  ISA_GET_RS2(bytecode + pc_)
-    #define RS3_IDX()  ISA_GET_RS2(bytecode + pc_)
+    #define RS3_IDX()  ISA_GET_RS3(bytecode + pc_)
     #define IMM_I()    ISA_GET_IMM(bytecode + pc_, int64_t)
     #define IMM_F()    ISA_GET_IMM(bytecode + pc_, double)
     #define IMM_I32()  ISA_GET_IMM(bytecode + pc_, int32_t)
-    
+
     #define PC()             pc_
     #define PC_ADD(value)    pc_ += value
     #define PC_ASSIGN(value) pc_ =  value
@@ -96,34 +96,33 @@ void Interpreter::Run(const byte_t *bytecode)
     #define GET_ARRAY_TYPE() ISA_GET_TYPE(bytecode + pc_)
 
     #define CREATE_ARR(type, size) \
-        reinterpret_cast<reg_t>(Array::Create(*vm_, static_cast<Array::Type>(type), size))
+        reinterpret_cast<int64_t>(memory::Array::Create(*vm_, static_cast<memory::Array::Type>(type), size))
 
-    #define LOAD_FROM_ARR(array_ptr, idx)                    \
-    ({                                                       \
-        Array *array = reinterpret_cast<Array *>(array_ptr); \
-        reg_t value = 0;                                     \
-        array->Get(&value, idx);                             \
-        value;                                               \
+    #define LOAD_FROM_ARR(array_ptr, idx)                                    \
+    ({                                                                       \
+        memory::Array *array = reinterpret_cast<memory::Array *>(array_ptr); \
+        int64_t value = 0;                                                   \
+        array->Get(&value, idx);                                             \
+        value;                                                               \
     })
 
-    #define STORE_TO_ARR(array_ptr, array_idx, src_reg_idx)         \
-        Array *array = reinterpret_cast<Array *>(array_ptr);        \
-        uint64_t value = frame_cur_->GetReg(src_reg_idx)->GetRaw(); \
-        array->Set(value, array_idx);
+    #define STORE_TO_ARR(array_ptr, array_idx, src_reg)                      \
+        memory::Array *array = reinterpret_cast<memory::Array *>(array_ptr); \
+        array->Set(src_reg, array_idx);
 
-    #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                          \
-        frame_cur_->SetRestorePC(restore_pc);                              \
-        frames_.push(Frame(new_pc, Frame::N_FRAME_LOCAL_REGS_DEFAULT,      \
-                     *frame_cur_->GetReg(CALL_REG1()),                     \
-                     *frame_cur_->GetReg(CALL_REG2()),                     \
-                     *frame_cur_->GetReg(CALL_REG3()),                     \
-                     *frame_cur_->GetReg(CALL_REG4())));                   \
-        PC_ASSIGN(new_pc);                                                 \
+    #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                            \
+        frame_cur_->SetRestorePC(restore_pc);                                \
+        frames_.push(Frame(new_pc, Frame::N_FRAME_LOCAL_REGS_DEFAULT,        \
+                     *frame_cur_->GetReg(CALL_REG1()),                       \
+                     *frame_cur_->GetReg(CALL_REG2()),                       \
+                     *frame_cur_->GetReg(CALL_REG3()),                       \
+                     *frame_cur_->GetReg(CALL_REG4())));                     \
+        PC_ASSIGN(new_pc);                                                   \
         frame_cur_ = &frames_.top();
 
-    #define FRAME_OLD_MIGRATE()                                            \
-        frames_.pop();                                                     \
-        frame_cur_ = &frames_.top();                                       \
+    #define FRAME_OLD_MIGRATE()                                              \
+        frames_.pop();                                                       \
+        frame_cur_ = &frames_.top();                                         \
         PC_ASSIGN(frame_cur_->GetRestorePC());
 
     #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
