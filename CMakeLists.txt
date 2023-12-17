@@ -27,6 +27,7 @@ target_link_libraries(evm_static PUBLIC
     frame_impl
     allocator_impl
     interpreter_impl
+    memory_types_impl
 )
 
 # --------------------------clang-format--------------------------------------

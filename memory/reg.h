@@ -3,6 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
+#include "common/config.h"
 
 #include <cstddef>
 
@@ -62,7 +63,7 @@ public:
         value_ptr = ptr;
     }
 
-    uint64_t GetRaw() const
+    reg_t GetRaw() const
     {
         return raw_value;
     }
@@ -72,7 +73,7 @@ private:
         double value_d;
         int64_t value_i;
         byte_t *value_ptr;
-        uint64_t raw_value;
+        reg_t raw_value;
     };
 };
 

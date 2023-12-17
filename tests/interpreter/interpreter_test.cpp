@@ -573,4 +573,27 @@ TEST_F(InterpreterTest, CALL_RET)
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
 }
 
+TEST_F(InterpreterTest, ARRAY_INSTRS)
+{
+    auto source = R"(
+        newarr x0, int, 10
+        movif x10, 3
+        starr x0, x10, x10
+
+        movif x9, 1000
+
+        larr x9, x0, x10
+        add x7, x9, x10
+    )";
+
+    auto asm2byte = asm2byte::AsmToByte();
+    asm2byte.ParseAsmString(source);
+    asm2byte.DumpInstructionsToBytes();
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 3);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 6);
+}
+
 } // namespace evm
