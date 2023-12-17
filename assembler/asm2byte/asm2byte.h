@@ -10,11 +10,18 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 namespace evm::asm2byte {
 
 class AsmToByte {
+public:
+    enum ByteCodePos : size_t {
+        CODE_SECTION = 0x0,
+        STRING_PULL = 0x8,
+    };
+
 public:
     NO_COPY_SEMANTIC(AsmToByte);
     NO_MOVE_SEMANTIC(AsmToByte);
@@ -58,11 +65,12 @@ private:
 
     std::vector<LineInfo> lines_;
 
-    std::vector<Instruction *> instructions_;
+    std::vector<std::unique_ptr<Instruction>> instructions_;
 
     std::vector<byte_t> bytecode_;
 
     std::unordered_map<std::string, size_t> labels_;
+    std::unordered_map<std::string, size_t> string_pull_;
 };
 
 } // namespace evm::asm2byte

@@ -5,6 +5,7 @@
 #include <cassert>
 #include <vector>
 #include <cstddef>
+#include <iostream>
 
 namespace evm {
 

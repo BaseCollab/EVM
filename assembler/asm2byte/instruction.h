@@ -92,6 +92,16 @@ public:
         imm_ = Immediate(imm_.imm64_ + imm_add);
     }
 
+    void SetStringOp(const std::string str)
+    {
+        string_op_ = str;
+    }
+
+    const std::string GetStringOp() const
+    {
+        return string_op_;
+    }
+
     size_t GetImmSize() const
     {
         return imm_.num_bytes_;
@@ -145,6 +155,8 @@ private:
     byte_t rs2_ {0};
 
     Immediate imm_;
+
+    std::string string_op_;
 
     bool have_args_ {false};
     byte_t args_[Frame::N_PASSED_ARGS_DEFAULT] = {0};

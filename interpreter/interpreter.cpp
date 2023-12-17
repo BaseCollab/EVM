@@ -23,6 +23,8 @@ namespace evm {
 
 // clang-format off
 
+#define DEBUG_LOG
+
 #ifdef DEBUG_LOG
 #define PRINT_DEBUG(name) std::cerr << #name << ", pc = " << pc_ << std::endl;
 #else
@@ -54,7 +56,10 @@ void Interpreter::Run(const byte_t *bytecode)
 
     frames_.push(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
     frame_cur_ = &frames_.top();
-    pc_ = 0;
+
+    size_t code_section_offset = 0;
+    std::memcpy(&code_section_offset, bytecode, sizeof(code_section_offset));
+    pc_ = code_section_offset;
 
     #define CALL_REG1() ISA_CALL_GET_REG1(bytecode + pc_)
     #define CALL_REG2() ISA_CALL_GET_REG2(bytecode + pc_)
@@ -68,6 +73,8 @@ void Interpreter::Run(const byte_t *bytecode)
     #define IMM_I()    ISA_GET_IMM(bytecode + pc_, int64_t)
     #define IMM_F()    ISA_GET_IMM(bytecode + pc_, double)
     #define IMM_I32()  ISA_GET_IMM(bytecode + pc_, int32_t)
+
+    #define BYTECODE_OFFSET(offset) bytecode + offset
 
     #define PC()             pc_
     #define PC_ADD(value)    pc_ += value
