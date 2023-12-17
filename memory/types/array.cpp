@@ -12,7 +12,7 @@ void *Array::Create(const VirtualMachine &vm, Array::Type array_type, size_t cou
 
     size_t elem_size = GetSizeOfArrayType(array_type);
 
-    void *array_ptr  = allocator->Alloc(sizeof(Array));
+    void *array_ptr = allocator->Alloc(sizeof(Array));
     void *array_data = allocator->Alloc(count * elem_size);
 
     Array array;
@@ -30,29 +30,22 @@ void Array::Set(int64_t value, size_t idx)
 {
     switch (type_) {
         case Array::Type::DOUBLE:
-        case Array::Type::LONG:
-        {
+        case Array::Type::LONG: {
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value, elem_size_);
             break;
         }
-        case Array::Type::BYTE:
-        {
+        case Array::Type::BYTE: {
             int8_t value_cast = static_cast<int8_t>(value);
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value_cast, elem_size_);
             break;
         }
-        case Array::Type::SHORT:
-        {
+        case Array::Type::SHORT: {
             int16_t value_cast = static_cast<int16_t>(value);
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value_cast, elem_size_);
             break;
         }
-        case Array::Type::INT:
-        {
+        case Array::Type::INT: {
             int32_t value_cast = static_cast<int32_t>(value);
-            std::cout << "HERE, store " << value_cast << " addr " << (uint64_t) (reinterpret_cast<uint8_t *>(data_) + idx * elem_size_) << std::endl;
-            std::cout << "size " << elem_size_ << "\n";
-            std::cout << "origval " << value_cast << std::endl;
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value_cast, elem_size_);
             break;
         }
@@ -74,32 +67,25 @@ void Array::Get(int64_t *value, size_t idx) const
 
     switch (type_) {
         case Array::Type::DOUBLE:
-        case Array::Type::LONG:
-        {
-            std::memcpy(&value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
+        case Array::Type::LONG: {
+            std::memcpy(value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
             break;
         }
-        case Array::Type::BYTE:
-        {
+        case Array::Type::BYTE: {
             int8_t value_cast = 0;
             std::memcpy(&value_cast, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
             *value = static_cast<int64_t>(value_cast);
             break;
         }
-        case Array::Type::SHORT:
-        {
+        case Array::Type::SHORT: {
             int16_t value_cast = 0;
             std::memcpy(&value_cast, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
             *value = static_cast<int64_t>(value_cast);
             break;
         }
-        case Array::Type::INT:
-        {
-            std::cout << "HERE, load addr " << (uint64_t) (reinterpret_cast<uint8_t *>(data_) + idx * elem_size_) << std::endl;
-            std::cout << "size " << elem_size_ << "\n";
+        case Array::Type::INT: {
             int32_t value_cast = 0;
             std::memcpy(&value_cast, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
-            std::cout << "val " << value_cast << std::endl;
             *value = static_cast<int64_t>(value_cast);
             break;
         }
@@ -110,8 +96,6 @@ void Array::Get(int64_t *value, size_t idx) const
             std::cerr << "GetSizeOfArrayType: this line should be unreachable" << std::endl;
             break;
     }
-
-    std::memcpy(value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
 }
 
 /* static */

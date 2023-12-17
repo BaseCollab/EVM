@@ -26,7 +26,8 @@ public:
     explicit AllocatorBase() = default;
     virtual ~AllocatorBase() = default;
 
-    AllocatorType GetAllocatorType() const {
+    AllocatorType GetAllocatorType() const
+    {
         return allocator_type_;
     }
 

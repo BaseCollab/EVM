@@ -407,3 +407,21 @@ DEFINE_INSTR
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
+
+DEFINE_INSTR
+(
+    STRING, 0x2b,
+    {
+        RD_I_ASSIGN(IMM_I32());
+        PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    PRSTR, 0x2c,
+    {
+        printf("%s\n", BYTECODE_OFFSET(RS1_I()));
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)

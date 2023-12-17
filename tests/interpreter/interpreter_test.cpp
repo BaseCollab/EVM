@@ -573,7 +573,7 @@ TEST_F(InterpreterTest, CALL_RET)
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
 }
 
-TEST_F(InterpreterTest, ARRAY_INSTRS)
+TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 {
     auto source = R"(
         newarr x0, int, 10
@@ -584,6 +584,8 @@ TEST_F(InterpreterTest, ARRAY_INSTRS)
 
         larr x9, x0, x10
         add x7, x9, x10
+
+        exit
     )";
 
     auto asm2byte = asm2byte::AsmToByte();
@@ -594,6 +596,69 @@ TEST_F(InterpreterTest, ARRAY_INSTRS)
     vm_->Execute(bytecode.data());
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 3);
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 6);
+}
+
+TEST_F(InterpreterTest, ARRAY_INSTRS_2)
+{
+    auto source = R"(
+        newarr x0, double, 11
+        movif x10, 0
+        movif x11, 10
+
+    loop:
+        movif x2, 1
+        add x10, x2, x10
+
+        convif x12, x10
+        starr x0, x10, x12
+
+        smei x4, x10, x11
+        jmp_if_imm x4, exit
+        jmp_imm loop
+
+    exit:
+        movif x10, 3
+        larr x3, x0, x10
+
+        movif x10, 7
+        larr x7, x0, x10
+
+        movif x10, 9
+        larr x9, x0, x10
+
+        exit
+    )";
+
+    auto asm2byte = asm2byte::AsmToByte();
+    asm2byte.ParseAsmString(source);
+    asm2byte.DumpInstructionsToBytes();
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetDouble(), 9.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetDouble(), 7.0);
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetDouble(), 3.0);
+}
+
+TEST_F(InterpreterTest, STRING)
+{
+    auto source = R"(
+        string x0, 'kek lol'
+        string x1, 'kek lol'
+        string x2, 'kek lol'
+
+        exit
+    )";
+
+    auto asm2byte = asm2byte::AsmToByte();
+    asm2byte.ParseAsmString(source);
+    asm2byte.DumpInstructionsToBytes();
+
+    std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    vm_->Execute(bytecode.data());
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
+              vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
 }
 
 } // namespace evm
