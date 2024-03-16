@@ -7,6 +7,7 @@
 #include "interpreter/interpreter.h"
 
 #include "memory/allocator/allocator.h"
+#include "memory/heap_manager.h"
 
 #include <memory>
 
@@ -30,14 +31,14 @@ public:
         return interpreter_.get();
     }
 
-    memory::AllocatorBase *GetAllocator() const
+    memory::HeapManager *GetHeapManager() const
     {
-        return allocator_.get();
+        return heap_manager_.get();
     }
 
 private:
     std::unique_ptr<Interpreter> interpreter_;
-    std::unique_ptr<memory::AllocatorBase> allocator_;
+    std::unique_ptr<memory::HeapManager> heap_manager_;
 };
 
 } // namespace evm

@@ -6,7 +6,7 @@ namespace evm {
 VirtualMachine::VirtualMachine()
 {
     interpreter_ = std::make_unique<Interpreter>(this);
-    allocator_ = std::make_unique<memory::BumpAllocator>(/* default size*/);
+    heap_manager_ = std::make_unique<memory::HeapManager>(/* default size*/);
 }
 
 } // namespace evm

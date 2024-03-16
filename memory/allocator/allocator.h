@@ -8,16 +8,13 @@
 
 namespace evm::memory {
 
-class Array;
-
 class AllocatorBase {
 public:
     enum class AllocatorType {
         INVALID = -1,
         BUMP = 0,
+        FREE_LIST = 1,
     };
-
-    static constexpr size_t DEFAULT_HEAP_SIZE = 1 << 20; // 1 Mb
 
 public:
     NO_COPY_SEMANTIC(AllocatorBase);
@@ -37,6 +34,9 @@ public:
 
 private:
     AllocatorType allocator_type_ {AllocatorType::BUMP};
+
+    void *heap_ {nullptr};
+    size_t heap_size_ {0};
 };
 
 } // namespace evm::memory
