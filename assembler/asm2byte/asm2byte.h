@@ -4,14 +4,12 @@
 #include "common/macros.h"
 #include "common/config.h"
 
-#include "instruction.h"
+#include "code_section.h"
 #include "header.h"
 #include "line.h"
 
 #include <vector>
 #include <string>
-#include <memory>
-#include <unordered_map>
 
 namespace evm::asm2byte {
 
@@ -21,8 +19,10 @@ public:
     NO_MOVE_SEMANTIC(AsmToByte);
 
     AsmToByte() :
-        header_("")
+        header_(""),
+        code_section_(".code")
     {}
+
     ~AsmToByte() = default;
 
     AsmToByte(const std::string &src) :
@@ -53,7 +53,8 @@ private:
     bool ReadAsmFile(const char *filename);
 
     void PrepareLinesFromBuffer();
-    bool CreateInstructionsFromLines(Header *header);
+    bool ResolveDependencies(Header *header, CodeSection *code_section);
+    bool GenRawInstructions(Header *header, CodeSection *code_section);
 
     static int GetRegisterIdxFromString(const std::string &reg_name);
 
@@ -61,14 +62,10 @@ private:
     std::string file_buffer_;
 
     std::vector<LineInfo> lines_;
-
-    std::vector<std::unique_ptr<Instruction>> instructions_;
-
     std::vector<byte_t> bytecode_;
 
     Header header_;
-
-    std::unordered_map<std::string, size_t> labels_;
+    CodeSection code_section_;
 };
 
 } // namespace evm::asm2byte
