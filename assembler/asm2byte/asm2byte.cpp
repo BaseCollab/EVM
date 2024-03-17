@@ -2,8 +2,10 @@
 
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
+
 #include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
+#include "header.h"
 
 #include <fstream>
 #include <iostream>
@@ -19,7 +21,7 @@ bool AsmToByte::ParseAsm()
 {
     PrepareLinesFromBuffer();
 
-    if (!CreateInstructionsFromLines()) {
+    if (!CreateInstructionsFromLines(&header_)) {
         std::cerr << "Error in CreateInstructionsFromLines" << std::endl;
         return false;
     }
@@ -42,23 +44,26 @@ bool AsmToByte::ParseAsmString(const std::string &asm_string)
     return ParseAsm();
 }
 
-bool AsmToByte::DumpInstructionsToBytes()
+bool AsmToByte::EmitBytecode()
 {
-    bytecode_.insert(bytecode_.end(), ByteCodePos::STRING_PULL, 0);
+    header_.EmitBytecode(bytecode_);
 
-    size_t code_section_offset = ByteCodePos::STRING_PULL;
+    // bytecode_.insert(bytecode_.end(), HeaderReference::STRING_PULL, 0);
 
-    for (auto &it : string_pull_) {
-        size_t string_size = std::strlen(it.first.c_str());
-        bytecode_.insert(bytecode_.end(), string_size + 1, 0);
-        std::memcpy(bytecode_.data() + it.second, it.first.c_str(), string_size);
-        code_section_offset += string_size + 1;
-    }
+    // size_t code_section_offset = HeaderReference::STRING_PULL; // to be overwritten below
 
-    std::memcpy(bytecode_.data(), &code_section_offset, sizeof(code_section_offset));
+    // for (auto &it : string_pull_) {
+    //     size_t string_size = std::strlen(it.first.c_str());
+    //     bytecode_.insert(bytecode_.end(), string_size + 1, 0);
+    //     std::memcpy(bytecode_.data() + it.second, it.first.c_str(), string_size);
+    //     code_section_offset += string_size + 1;
+    // }
+
+    std::memcpy(bytecode_.data() + CODE_SECTION_PTR,
+        &code_section_offset, sizeof(code_section_offset));
 
     for (auto &it : instructions_) {
-        it->InstrToBytes(&bytecode_);
+        it->EmitBytecode(&bytecode_);
     }
 
     return true;
@@ -135,7 +140,9 @@ void AsmToByte::PrepareLinesFromBuffer()
                 else
                     in_string = false;
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
-                       file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'') {
+                       file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'' &&
+                       file_buffer_[i] != ';' && file_buffer_[i] != ';' && file_buffer_[i] != '{' &&
+                       file_buffer_[i] != '}') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -146,23 +153,60 @@ void AsmToByte::PrepareLinesFromBuffer()
     }
 }
 
-bool AsmToByte::CreateInstructionsFromLines()
+bool AsmToByte::FillHeaderAndResolve(Header *header)
 {
+    ClassSection *class_section = header->GetClassSection();
+    StringPool *string_pool = header->GetStringPool();
+}
+
+bool AsmToByte::CreateInstructionsFromLines(Header *header)
+{
+    ClassSection *class_section = header->GetClassSection();
+    StringPool *string_pool = header->GetStringPool();
+
     std::stack<std::pair<std::string, Instruction *>> label_resolving_table;
 
-    std::stack<Instruction *> string_resolving_table;
-    size_t string_pull_size = 0;
-
     size_t code_section_offset_cur = 0; // offset in bytecode from the beginning of the code section
+
+    bool in_class_defition = false;
 
     for (auto &it : lines_) {
         std::vector<std::string> line_args = it.GetArgs();
 
+        // Label
         if (line_args[0].back() == ':') {
             labels_.insert({line_args[0].substr(0, line_args[0].size() - 1), code_section_offset_cur});
             continue; // no opcode in the line with label:
         }
 
+        // Class definition start/end
+        if (!line_args[0].compare(".class")) {
+            if (in_class_defition == false) {
+                class_section->AddInstance(line_args[1]);
+                in_class_defition = true;
+            } else {
+                in_class_defition = false;
+            }
+
+            continue;
+        }
+
+        // Class definition fields
+        if (in_class_defition == true) {
+            ClassField::Type type = ClassField::FieldTypeFromString(line_args[0]);
+
+            if (type == ClassField::Type::USER_CLASS) {
+                class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
+            } else {
+                class_section->GetInstances()->back().AddInstance({line_args[1], type});
+            }
+
+            continue;
+        }
+
+        std::cout << line_args[0] << std::endl;
+
+        // If we here, only assembler instruction is assumed to be in a line
         Instruction *instr = nullptr;
         Opcode opcode = common::StringToOpcode(line_args[0]);
 
@@ -406,7 +450,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                     to_resolve.second->Add32Imm(labels_[to_resolve.first]);
                     break;
                 case sizeof(int64_t):
-                    to_resolve.second->Add64Imm(labels_[to_resolve.first] + ByteCodePos::STRING_PULL +
+                    to_resolve.second->Add64Imm(labels_[to_resolve.first] + HeaderReference::STRING_PULL +
                                                 string_pull_size);
                     break;
             }
