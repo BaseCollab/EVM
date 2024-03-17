@@ -4,7 +4,7 @@
 #include "common/macros.h"
 #include "common/constants.h"
 #include "emittable.h"
-#include "class.h"
+#include "class_section.h"
 #include "string_pool.h"
 
 #include <cassert>
@@ -12,8 +12,6 @@
 #include <string>
 
 namespace evm::asm2byte {
-
-using ClassSection = Section<Class>;
 
 class Header : Emittable {
 public:
@@ -25,8 +23,8 @@ public:
 
     Header(const std::string name) :
         Emittable(name),
-        class_section_(".class"),
-        string_pool_(".string_pool")
+        string_pool_(".string_pool"),
+        class_section_(".class")
     {}
 
     ~Header() = default;

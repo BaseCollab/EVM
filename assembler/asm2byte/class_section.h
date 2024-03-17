@@ -1,5 +1,5 @@
-#ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_H
-#define EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_H
+#ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_SECTION_H
+#define EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_SECTION_H
 
 #include "common/macros.h"
 #include "common/constants.h"
@@ -115,8 +115,9 @@ private:
 };
 
 using Class = Section<ClassField>;
+using ClassSection = Section<Class>;
 
 
 } // namespace evm::asm2byte
 
-#endif // EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_H
+#endif // EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_SECTION_H

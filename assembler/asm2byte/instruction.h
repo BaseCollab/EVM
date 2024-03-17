@@ -9,9 +9,8 @@
 #include <cassert>
 #include <cstddef>
 #include <vector>
+#include <string>
 #include <cstring>
-#include <iostream>
-#include <fstream>
 
 namespace evm::asm2byte {
 
@@ -97,7 +96,7 @@ public:
         string_op_ = str;
     }
 
-    const std::string GetStringOp() const
+    const std::string &GetStringOp() const
     {
         return string_op_;
     }
@@ -118,6 +117,11 @@ public:
     void SetOffset(size_t offset)
     {
         bytcode_offset_ = offset;
+    }
+
+    size_t GetOffset()
+    {
+        return bytcode_offset_;
     }
 
     void EmitBytecode(std::vector<byte_t> *out_arr)
