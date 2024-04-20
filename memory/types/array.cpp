@@ -8,9 +8,8 @@
 namespace evm::memory {
 
 /* static */
-Array *Array::Create(uint8_t *data, size_t length, Type type, VirtualMachine *vm)
+Array *Array::Create(Type type, size_t length, VirtualMachine *vm)
 {
-    assert(data != nullptr);
     assert(vm != nullptr);
 
     size_t elem_size = GetSizeOfArrayType(type);
@@ -28,7 +27,14 @@ Array *Array::Create(uint8_t *data, size_t length, Type type, VirtualMachine *vm
     }
 
     array->SetLength(length);
+}
 
+/* static */
+Array *Array::Create(uint8_t *data, size_t length, Type type, VirtualMachine *vm)
+{
+    assert(data != nullptr);
+
+    auto *array = Array::Create(type, length, vm);
     std::memcpy(array->GetData(), data, length * elem_size);
 }
 

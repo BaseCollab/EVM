@@ -44,6 +44,9 @@ void Array::GetPrimitive(T *value, size_t idx) const
     std::memcpy(value, data_ + idx * sizeof(T), sizeof(T));
 }
 
+template<typename T>
+void Get(T *value, size_t idx) const;
+
 } // namespace evm::memory
 
 #endif // MEMORY_TYPES_ARRAY_INL_H

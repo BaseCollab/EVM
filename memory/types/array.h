@@ -21,9 +21,12 @@ public:
         DOUBLE  = 2,
         BYTE    = 3,
         INT     = 4,
+        OBJECT  = 5
     };
     // clang-format on
 public:
+    static Array *Create(Type type, size_t length, VirtualMachine *vm);
+
     static Array *Create(uint8_t *data, size_t length, Type type, VirtualMachine *vm);
 
     template<typename T>
@@ -31,6 +34,20 @@ public:
 
     template<typename T>
     void GetPrimitive(T *value, size_t idx) const;
+
+    // TODO: implement
+    template<typename T>
+    void SetObject(T value, size_t idx);
+
+    // TODO: implement
+    template<typename T>
+    void GetObject(T *value, size_t idx) const;
+
+    template<typename T>
+    void Set(T value, size_t idx);
+
+    template<typename T>
+    void Get(T *value, size_t idx) const;
 
     uint8_t *GetData() const
     {
