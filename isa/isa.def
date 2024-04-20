@@ -380,6 +380,7 @@ DEFINE_INSTR
     // pseudo: new type(size)
     NEWARR, 0x28,
     {
+        // TODO: why I_ASSIGN, maybe pointer assign?????
         RD_I_ASSIGN(CREATE_ARR(GET_ARRAY_TYPE(), IMM_I32()));
         PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
     }

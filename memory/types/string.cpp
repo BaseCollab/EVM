@@ -13,12 +13,9 @@ String *String::Create(const uint8_t *data, size_t length, VirtualMachine *vm)
     assert(data != nullptr);
     assert(vm != nullptr);
 
-    auto *allocator = vm->GetAllocator();
-    assert(allocator != nullptr);
+    size_t string_size = String::GetDataOffset() + length * sizeof(uint8_t);
+    auto *string = static_cast<String *>(vm->GetHeapManager()->AllocateObject(string_size));
 
-    void *alloced_ptr = allocator->Alloc(String::GetDataOffset() + length * sizeof(uint8_t));
-    
-    String *string = reinterpret_cast<String *>(alloced_ptr);
     if (string == nullptr) {
         std::cerr << "Can't create string" << std::endl;
         return nullptr;
@@ -27,8 +24,8 @@ String *String::Create(const uint8_t *data, size_t length, VirtualMachine *vm)
     string->SetLength(length);
     string->SetHash(CalculateStringHash(data, length));
 
-    std::memcpy(alloced_ptr + String::GetDataOffset(), data, length);
-    
+    std::memcpy(reinterpret_cast<uint8_t *>(string) + String::GetDataOffset(), data, length);
+
     return string;
 }
 

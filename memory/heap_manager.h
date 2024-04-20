@@ -19,13 +19,13 @@ public:
     explicit HeapManager(size_t heap_size);
     ~HeapManager();
 
-    static ObjectHeader *AllocateObject(size_t size);
+    ObjectHeader *AllocateObject(size_t size);
     // TODO: implement AllocateFrame function
-    static Frame *AllocateFrame();
+    Frame *AllocateFrame();
 
 private:
     size_t heap_size_ {0};
-    void *heap_ {nullptr};
+    uint8_t *heap_ {nullptr};
     // TODO: use free-list allocator to allocate object when this allocator will be implemented
     std::unique_ptr<AllocatorBase> objectAllocator_;
 };

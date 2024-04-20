@@ -28,13 +28,8 @@ public:
     NO_COPY_SEMANTIC(BumpAllocator);
     NO_MOVE_SEMANTIC(BumpAllocator);
 
-    explicit BumpAllocator(size_t heap_capacity = DEFAULT_HEAP_SIZE);
-    ~BumpAllocator() override;
-
-    size_t GetHeapCapacity() const override
-    {
-        return heap_capacity_;
-    }
+    explicit BumpAllocator(uint8_t *heap, size_t heap_capacity);
+    ~BumpAllocator() override = default;
 
     size_t GetBusySize() const
     {
@@ -44,11 +39,8 @@ public:
     void *Alloc(size_t size) override;
 
 private:
-    uint8_t *heap_ {nullptr};
     uint8_t *next_alloc_ {nullptr};
-
     size_t busy_size_ {0};
-    size_t heap_capacity_ {0};
 };
 
 } // namespace evm::memory

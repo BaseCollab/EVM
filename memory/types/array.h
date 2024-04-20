@@ -2,88 +2,70 @@
 #define EVM_MEMORY_OBJECTS_ARRAY_H
 
 #include "common/macros.h"
-
-#include "vm/vm.h"
+#include "memory/object_header.h"
 
 #include <cstddef>
-#include <cstring>
+#include <cstdint>
+
+namespace evm {
+class VirtualMachine;
+};
 
 namespace evm::memory {
 
-class Array {
+class Array : public ObjectHeader {
 public:
     // clang-format off
     enum class Type {
         INVALID = -1,
         DOUBLE  = 2,
         BYTE    = 3,
-        SHORT   = 4,
-        INT     = 5,
-        LONG    = 6
+        INT     = 4,
     };
     // clang-format on
 public:
-    NO_COPY_SEMANTIC(Array);
-    NO_MOVE_SEMANTIC(Array);
+    static Array *Create(uint8_t *data, size_t length, Type type, VirtualMachine *vm);
 
-    Array() = default;
-    ~Array() = default;
+    template<typename T>
+    void SetPrimitive(T value, size_t idx);
 
-    static void *Create(const VirtualMachine &vm, Type array_type, size_t count);
+    template<typename T>
+    void GetPrimitive(T *value, size_t idx) const;
 
-    const void *GetData() const
+    uint8_t *GetData() const
     {
         return data_;
     }
 
-    void SetData(void *data_ptr)
+    size_t GetLength() const
     {
-        data_ = data_ptr;
+        return length_;
     }
 
-    size_t GetSize() const
+    void SetLength(size_t length)
     {
-        return size_;
+        length_ = length;
     }
-
-    Type GetType() const
-    {
-        return type_;
-    }
-
-    void SetSize(size_t size)
-    {
-        size_ = size;
-    }
-
-    void SetType(Type type)
-    {
-        type_ = type;
-    }
-
-    void SetElemSize(size_t elem_size)
-    {
-        elem_size_ = elem_size;
-    }
-
-    void Set(int64_t value, size_t idx);
-
-    void Get(int64_t *value, size_t idx) const;
 
     static constexpr uint32_t GetDataOffset()
     {
         return MEMBER_OFFSET(Array, data_);
     }
 
-    static size_t GetSizeOfArrayType(Type array_type);
+    static size_t GetSizeOfArrayType(Array::Type array_type);
+    
     static Type GetTypeFromString(std::string_view string);
 
 private:
-    Type type_ {Type::INVALID};
-    size_t elem_size_ {0};
-    size_t size_ {0};
+    NO_COPY_SEMANTIC(Array);
+    NO_MOVE_SEMANTIC(Array);
 
-    void *data_ {nullptr};
+    Array() = default;
+    ~Array() = default;
+
+private:
+    size_t length_ {0};
+    uint8_t data_[0];
 };
 
 } // namespace evm::memory

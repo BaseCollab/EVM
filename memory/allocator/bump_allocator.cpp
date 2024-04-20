@@ -6,24 +6,10 @@
 
 namespace evm::memory {
 
-BumpAllocator::BumpAllocator(size_t heap_capacity) : heap_capacity_(heap_capacity)
-{
-    if (heap_capacity <= 0) {
-        std::cerr << "Invalid heap size, can not allocate heap" << std::endl;
-        return;
-    }
-
-    heap_ = new uint8_t[heap_capacity_];
-    assert(heap_ && "Can not allocate heap");
-
-    next_alloc_ = heap_;
-}
-
-/* override */
-BumpAllocator::~BumpAllocator()
-{
-    delete[] heap_;
-}
+BumpAllocator::BumpAllocator(uint8_t *heap, size_t heap_capacity) : 
+    AllocatorBase(heap, heap_capacity),
+    next_alloc_(heap_)
+{}
 
 /* override */
 void *BumpAllocator::Alloc(size_t size)

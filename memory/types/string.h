@@ -1,6 +1,7 @@
 #ifndef EVM_MEMORY_TYPES_STRING
 #define EVM_MEMORY_TYPES_STRING
 
+#include "common/macros.h"
 #include "memory/object_header.h"
 #include <cstddef>
 
@@ -10,7 +11,7 @@ class VirtualMachine;
 
 namespace evm::memory {
 
-class String : ObjectHeader {
+class String : public ObjectHeader {
 public:
     static String *Create(const uint8_t *data, size_t length, VirtualMachine *vm);
 
