@@ -42,37 +42,35 @@ public:
     }
 
     template <typename T>
-    static EmitSize EmitBytecode(std::vector<byte_t> *out_arr, const T *obj)
-    {
-        EmitSize bytecode_size = out_arr->size();
-        out_arr->insert(out_arr->end(), sizeof(T), 0);
-        memcpy(out_arr->data() + bytecode_size, obj, sizeof(T));
-
-        return sizeof(T);
-    }
-
-    template <typename T>
     static T *EmitEmptyBytecode(std::vector<byte_t> *out_arr)
     {
-        auto bytecode_data = out_arr->data();
+        auto empty_data = out_arr->data() + out_arr->size();
         out_arr->insert(out_arr->end(), sizeof(T), 0);
-        return reinterpret_cast<T *>(bytecode_data);
-    }
-
-    static EmitSize EmitBytecode(std::vector<byte_t> *out_arr, const void *obj, EmitSize insert_size, EmitSize cpy_size)
-    {
-        EmitSize bytecode_size = out_arr->size();
-        out_arr->insert(out_arr->end(), insert_size, 0);
-        memcpy(out_arr->data() + bytecode_size, obj, cpy_size);
-
-        return insert_size;
+        return reinterpret_cast<T *>(empty_data);
     }
 
     static void *EmitEmptyBytecode(std::vector<byte_t> *out_arr, EmitSize insert_size)
     {
-        auto bytecode_data = out_arr->data();
+        auto empty_data = out_arr->data() + out_arr->size();
         out_arr->insert(out_arr->end(), insert_size, 0);
-        return bytecode_data;
+        return empty_data;
+    }
+
+    template <typename T>
+    static EmitSize EmitBytecode(std::vector<byte_t> *out_arr, const T *obj)
+    {
+        T *emitted_empty_data = EmitEmptyBytecode<T>(out_arr);
+        memcpy(emitted_empty_data, obj, sizeof(T));
+
+        return sizeof(T);
+    }
+
+    static EmitSize EmitBytecode(std::vector<byte_t> *out_arr, const void *obj, EmitSize insert_size, EmitSize cpy_size)
+    {
+        void *emitted_empty_data = EmitEmptyBytecode(out_arr, insert_size);
+        memcpy(emitted_empty_data, obj, cpy_size);
+
+        return insert_size;
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)

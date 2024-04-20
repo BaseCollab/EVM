@@ -36,6 +36,11 @@ public:
         return offset_;
     }
 
+    size_t GetSize() const
+    {
+        return size_;
+    }
+
     // ':' at the end of label
     void AddLabel(const std::string &label)
     {
@@ -93,11 +98,6 @@ public:
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
 
-    }
-
-    size_t GetSize() const
-    {
-        return size_;
     }
 
 private:
