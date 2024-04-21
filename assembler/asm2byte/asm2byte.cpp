@@ -2,8 +2,8 @@
 
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
-#include "memory/frame.h"
-#include "memory/types/array.h"
+#include "runtime/memory/frame.h"
+#include "runtime/memory/types/array.h"
 
 #include <fstream>
 #include <iostream>

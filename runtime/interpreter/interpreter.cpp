@@ -1,7 +1,7 @@
 #include "common/constants.h"
 #include "common/config.h"
-#include "interpreter/interpreter.h"
-#include "memory/types/array.h"
+#include "runtime/interpreter/interpreter.h"
+#include "runtime/memory/types/array.h"
 #include "isa/macros.h"
 
 #include <iostream>

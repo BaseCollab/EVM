@@ -3,7 +3,7 @@
 #include <array>
 #include <cstring>
 
-#include "memory/allocator/bump_allocator.h"
+#include "runtime/memory/allocator/bump_allocator.h"
 
 namespace evm::memory {
 

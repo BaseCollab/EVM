@@ -7,7 +7,7 @@
 
 #include "isa/macros.h"
 #include "isa/opcodes.h"
-#include "interpreter/interpreter.h"
+#include "runtime/interpreter/interpreter.h"
 #include "vm/vm.h"
 
 #include "assembler/asm2byte/asm2byte.h"

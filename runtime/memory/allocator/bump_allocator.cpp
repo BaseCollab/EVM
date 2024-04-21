@@ -1,5 +1,5 @@
 #include "bump_allocator.h"
-#include "memory/types/array.h"
+#include "runtime/memory/types/array.h"
 
 #include <iostream>
 #include <cassert>

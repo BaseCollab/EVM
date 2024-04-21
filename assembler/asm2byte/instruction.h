@@ -4,7 +4,7 @@
 #include "common/macros.h"
 #include "common/constants.h"
 #include "isa/opcodes.h"
-#include "memory/frame.h"
+#include "runtime/memory/frame.h"
 
 #include <cassert>
 #include <cstddef>
