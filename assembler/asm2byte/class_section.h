@@ -75,6 +75,21 @@ public:
         return emit_size;
     }
 
+    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
+    {
+        EmitSize parsed_size = already_parsed;
+        EmitNameSize type_name_size = 0;
+
+        parsed_size += Emittable::ParseBytecode<Type>(in_arr + parsed_size, &type_);
+        parsed_size += Emittable::ParseBytecode<EmitNameSize>(in_arr + parsed_size, &type_name_size);
+
+        type_name_.reserve(type_name_size);
+        parsed_size += Emittable::ParseBytecode(in_arr + parsed_size, type_name_.data(), type_name_size);
+        parsed_size += Emittable::ParseBytecode(in_arr, parsed_size);
+
+        return parsed_size;
+    }
+
     static std::string FieldTypeToString(Type type)
     {
         switch (type) {
