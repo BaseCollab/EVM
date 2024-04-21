@@ -69,7 +69,7 @@ public:
 
         emit_size += Emittable::EmitBytecode<Type>(out_arr, &type_);
         emit_size += Emittable::EmitBytecode<EmitNameSize>(out_arr, &type_name_size);
-        emit_size += Emittable::EmitBytecode(out_arr, type_name_.c_str(), type_name_size + 1, type_name_.size());
+        emit_size += Emittable::EmitBytecode(out_arr, type_name_.c_str(), type_name_size, type_name_.size());
         emit_size += Emittable::EmitBytecode(out_arr);
 
         return emit_size;

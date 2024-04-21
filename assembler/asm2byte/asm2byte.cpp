@@ -22,11 +22,11 @@ bool AsmToByte::ParseAsm()
     PrepareLinesFromBuffer();
 
     if (!GenRawInstructions(&header_, &code_section_)) {
-        std::cerr << "Error in CreateInstructionsFromLines" << std::endl;
+        std::cerr << "Error in " << __func__ << std::endl;
         return false;
     }
 
-    return ResolveDependencies(&header_, &code_section_);;
+    return ResolveDependencies(&header_, &code_section_);
 }
 
 bool AsmToByte::ParseAsmFile(const char *filename)
@@ -46,27 +46,7 @@ bool AsmToByte::ParseAsmString(const std::string &asm_string)
 
 bool AsmToByte::EmitBytecode()
 {
-    header_.EmitBytecode(&bytecode_);
-
-    // bytecode_.insert(bytecode_.end(), HeaderReference::STRING_PULL, 0);
-
-    // size_t code_section_offset = HeaderReference::STRING_PULL; // to be overwritten below
-
-    // for (auto &it : string_pull_) {
-    //     size_t string_size = std::strlen(it.first.c_str());
-    //     bytecode_.insert(bytecode_.end(), string_size + 1, 0);
-    //     std::memcpy(bytecode_.data() + it.second, it.first.c_str(), string_size);
-    //     code_section_offset += string_size + 1;
-    // }
-
-    // std::memcpy(bytecode_.data() + CODE_SECTION_PTR,
-    //     &code_section_offset, sizeof(code_section_offset));
-
-    // for (auto &it : instructions_) {
-    //     it->EmitBytecode(&bytecode_);
-    // }
-
-    return true;
+    return header_.EmitBytecode(&bytecode_) && code_section_.EmitBytecode(&bytecode_);
 }
 
 bool AsmToByte::DumpBytesInBytecode(const char *filename)
@@ -130,7 +110,7 @@ void AsmToByte::PrepareLinesFromBuffer()
                 } else if (in_string != true) {
                     file_buffer_[i] = '\0';
                 }
-            } else if (file_buffer_[i] == ',') {
+            } else if (file_buffer_[i] == ',' || file_buffer_[i] == ';' ) {
                 file_buffer_[i] = '\0';
             } else if (file_buffer_[i] == '\'') {
                 file_buffer_[i] = '\0';
@@ -215,19 +195,15 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
 
         // If we here, only assembler instruction is assumed to be in a line
         Opcode opcode = common::StringToOpcode(line_args[0]);
-        Instruction *instr = nullptr;
-
-        if (opcode != Opcode::INVALID) {
-            instr = code_section->AddInstr(line_args[0], opcode);
+        if (opcode == Opcode::INVALID) {
+            std::cerr << "Invalid instruction type" << std::endl;
+                return false;
         }
+
+        Instruction *instr = code_section->AddInstr(line_args[0], opcode);
 
         // clang-format off
         switch (opcode) {
-            case Opcode::INVALID: {
-                std::cerr << "Invalid instruction type" << std::endl;
-                return false;
-            }
-
             // No arguments
 
             case Opcode::EXIT:
@@ -421,10 +397,10 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
                     string_pool->AddInstance(line_args[2]);
                 }
 
-                string_pool->AddInstrToResolve(instr);
-
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetStringOp(line_args[2]);
+
+                string_pool->AddInstrToResolve(instr);
 
                 break;
             }
