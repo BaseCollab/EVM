@@ -225,12 +225,12 @@ public:
         EmitSize parsed_size = Emittable::ParseBytecode(in_arr, already_parsed);
 
         EmitSize n_instances = 0;
-        parsed_size += ParseBytecode<EmitSize>(in_arr + parsed_size, &n_instances);
+        parsed_size += Emittable::ParseBytecode<EmitSize>(in_arr + parsed_size, &n_instances);
         std::vector<EmitRef> instances_starts(n_instances);
         instances_.reserve(n_instances);
 
         for (size_t i = 0; i < n_instances; ++i) {
-            parsed_size += ParseBytecode<EmitRef>(in_arr + parsed_size, &instances_starts[i]);
+            parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &instances_starts[i]);
         }
 
         for (size_t i = 0; i < n_instances; ++i) {
