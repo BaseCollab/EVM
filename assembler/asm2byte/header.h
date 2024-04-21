@@ -13,16 +13,18 @@
 
 namespace evm::asm2byte {
 
-class Header : Emittable {
+class Header : public Offsetable {
 public:
     static constexpr EmitMagic MAGIC_NUMBER = 0xEA661221;
+    // String pool, class section and code section
+    static constexpr EmitSize N_MAJOR_INSTANCES = 3;
 
 public:
     DEFAULT_MOVE_SEMANTIC(Header);
     DEFAULT_COPY_SEMANTIC(Header);
 
-    Header(const std::string name) :
-        Emittable(name),
+    Header(const std::string &name) :
+        Offsetable(name),
         string_pool_(".string_pool"),
         class_section_(".class")
     {}
@@ -37,6 +39,21 @@ public:
     ClassSection *GetClassSection()
     {
         return &class_section_;
+    }
+
+    size_t GetMajorInstances() const
+    {
+        return N_MAJOR_INSTANCES;
+    }
+
+    EmitSize GetDataOfsset() const
+    {
+        return sizeof(EmitMagic) + GetMajorInstances() * sizeof(EmitRef);
+    }
+
+    size_t GetSize() const
+    {
+        return GetDataOfsset() + string_pool_.GetSize() + class_section_.GetSize();
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
@@ -63,12 +80,6 @@ public:
         memcpy(code_section_offset, &current_offset, sizeof(current_offset));
 
         return current_offset;
-    }
-
-    size_t GetSize() const
-    {
-        return sizeof(EmitMagic) + 3 * sizeof(EmitRef) +
-               string_pool_.GetSize() + class_section_.GetSize();
     }
 
 private:

@@ -6,7 +6,6 @@
 #include "instruction.h"
 #include "emittable.h"
 
-#include <memory>
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -14,27 +13,16 @@
 
 namespace evm::asm2byte {
 
-class CodeSection : Emittable {
+class CodeSection : public Offsetable {
 public:
     DEFAULT_MOVE_SEMANTIC(CodeSection);
     DEFAULT_COPY_SEMANTIC(CodeSection);
 
-    CodeSection(const std::string name, EmitRef offset = 0) :
-        Emittable(name),
-        offset_(offset)
+    CodeSection(const std::string &name, EmitRef offset = 0) :
+        Offsetable(name, offset)
     {}
 
     ~CodeSection() = default;
-
-    void SetOffset(EmitRef offset)
-    {
-        offset_ = offset;
-    }
-
-    EmitRef GetOffset() const
-    {
-        return offset_;
-    }
 
     size_t GetSize() const
     {
@@ -47,9 +35,9 @@ public:
         labels_.insert({label.substr(0, label.size() - 1), size_});
     }
 
-    Instruction *AddInstr(const Opcode opcode)
+    Instruction *AddInstr(const std::string &name, const Opcode opcode)
     {
-        instructions_.push_back({opcode});
+        instructions_.push_back({name, opcode});
         return &instructions_.back();
     }
 
@@ -66,7 +54,7 @@ public:
 
     bool ResolveInstrs()
     {
-        if (!offset_) {
+        if (!GetOffset()) {
             return false;
         }
 
@@ -82,7 +70,7 @@ public:
                         to_resolve.second->Add32Imm(labels_[to_resolve.first] - to_resolve.second->GetOffset());
                         break;
                     case sizeof(int64_t): // absolute values
-                        to_resolve.second->Add64Imm(labels_[to_resolve.first] + offset_);
+                        to_resolve.second->Add64Imm(labels_[to_resolve.first] + GetOffset());
                         break;
                 }
             } else {
@@ -97,7 +85,8 @@ public:
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
-
+        (void)out_arr;
+        return 0;
     }
 
 private:
@@ -108,7 +97,7 @@ private:
     std::vector<Instruction> instructions_;
 
     size_t size_ = 0;
-    EmitRef offset_ = 0;
+
 };
 
 } // namespace evm::asm2byte

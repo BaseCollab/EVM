@@ -3,6 +3,7 @@
 
 #include "common/macros.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -20,7 +21,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Emittable);
     DEFAULT_COPY_SEMANTIC(Emittable);
 
-    Emittable(const std::string name) :
+    Emittable(const std::string &name) :
         name_(name)
     {}
 
@@ -93,14 +94,45 @@ private:
     std::string name_;
 };
 
+class Offsetable : public Emittable {
+public:
+    DEFAULT_MOVE_SEMANTIC(Offsetable);
+    DEFAULT_COPY_SEMANTIC(Offsetable);
+
+    Offsetable(const std::string &name, EmitRef offset = 0) :
+        Emittable(name),
+        offset_(offset)
+    {}
+
+    ~Offsetable() = default;
+
+    EmitRef GetOffset() const
+    {
+        return offset_;
+    }
+
+    void SetOffset(EmitRef offset)
+    {
+        offset_ = offset;
+    }
+
+    size_t GetDataOffset() const
+    {
+        return offset_ + Emittable::GetSize();
+    }
+
+private:
+    EmitRef offset_ = 0;
+};
+
 template <typename T>
-class Section : Emittable {
+class Section : public Offsetable {
 public:
     DEFAULT_MOVE_SEMANTIC(Section);
     DEFAULT_COPY_SEMANTIC(Section);
 
     Section(const std::string name, std::vector<T> instances = {}) :
-        Emittable(name),
+        Offsetable(name),
         instances_(instances)
     {}
 
@@ -127,10 +159,16 @@ public:
         size_t instances_size = 0;
 
         for (auto &it : instances_) {
-            instances_size += it->GetSize();
+            instances_size += it.GetSize();
         }
 
-        return instances_size + Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize);
+        return Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize) + instances_size;
+    }
+
+    size_t GetDataOffset() const
+    {
+        const EmitSize n_instances = instances_.size();
+        return offset_ + Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize);
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
