@@ -98,6 +98,16 @@ public:
         return instrs_size;
     }
 
+    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
+    {
+        // Code section shouldn't be parsed, only emitted
+        // So code here is valid
+        (void)in_arr;
+        (void)already_parsed;
+
+        return 0;
+    }
+
 private:
 
     std::stack<std::pair<std::string, Instruction *>> label_resolution_table_;
