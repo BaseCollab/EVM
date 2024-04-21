@@ -26,7 +26,7 @@ public:
     ~AsmToByte() = default;
 
     AsmToByte(const std::string &src) :
-        header_("")
+        AsmToByte()
     {
         ParseAsmString(src);
         EmitBytecode();

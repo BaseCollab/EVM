@@ -26,9 +26,7 @@ bool AsmToByte::ParseAsm()
         return false;
     }
 
-    ResolveDependencies(&header_, &code_section_);
-
-    return true;
+    return ResolveDependencies(&header_, &code_section_);;
 }
 
 bool AsmToByte::ParseAsmFile(const char *filename)
@@ -157,15 +155,21 @@ void AsmToByte::PrepareLinesFromBuffer()
 
 bool AsmToByte::ResolveDependencies(Header *header, CodeSection *code_section)
 {
-    ClassSection *class_section = header->GetClassSection();
     StringPool *string_pool = header->GetStringPool();
-
-    // here we set all offsets to sections and resolve after
+    string_pool->SetOffset(header->GetDataOffset());
 
     if (string_pool->ResolveInstrs() == false) {
         std::cerr << "Couldn't resolve all strings pool references" << std::endl;
         return false;
     }
+
+    ClassSection *class_section = header->GetClassSection();
+    class_section->SetOffset(string_pool->GetOffset() + string_pool->GetSize());
+
+    code_section->SetOffset(class_section->GetOffset() + class_section->GetSize());
+    code_section->ResolveInstrs();
+
+    return true;
 }
 
 bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
@@ -214,7 +218,7 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
         Instruction *instr = nullptr;
 
         if (opcode != Opcode::INVALID) {
-            instr = code_section->AddInstr(opcode);
+            instr = code_section->AddInstr(line_args[0], opcode);
         }
 
         // clang-format off

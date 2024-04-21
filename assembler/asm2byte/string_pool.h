@@ -13,32 +13,16 @@
 
 namespace evm::asm2byte {
 
-class StringPool : Emittable {
+class StringPool : public Offsetable {
 public:
     DEFAULT_MOVE_SEMANTIC(StringPool);
     DEFAULT_COPY_SEMANTIC(StringPool);
 
     StringPool(const std::string name, EmitRef offset = 0) :
-        Emittable(name),
-        offset_(offset)
+        Offsetable(name, offset)
     {}
 
     ~StringPool() = default;
-
-    void SetOffset(EmitRef offset)
-    {
-        offset_ = offset;
-    }
-
-    EmitRef GetOffset() const
-    {
-        return offset_;
-    }
-
-    size_t GetStringsStart() const
-    {
-        return offset_ + Emittable::GetSize();
-    }
 
     size_t GetSize() const
     {
@@ -65,13 +49,13 @@ public:
     bool ResolveInstrs()
     {
         // Not set offset => don't know real offset of string literals => cannot resolve instsrs
-        if (!offset_) {
+        if (!GetOffset()) {
             return false;
         }
 
         while (!resolution_table_.empty()) {
             Instruction *to_resolve = resolution_table_.top();
-            to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()] + GetStringsStart());
+            to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()] + GetDataOffset());
             resolution_table_.pop();
         }
 
@@ -97,8 +81,7 @@ private:
     std::stack<Instruction *> resolution_table_;
 
     size_t size_ = 0;
-    EmitRef offset_ = 0;
-}
+};
 
 } // namespace evm::asm2byte
 
