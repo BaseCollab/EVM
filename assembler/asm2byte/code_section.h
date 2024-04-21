@@ -15,12 +15,17 @@ namespace evm::asm2byte {
 
 class CodeSection : public Offsetable {
 public:
+    static constexpr size_t N_MAX_INSTRS = 1 << 15;
+
+public:
     DEFAULT_MOVE_SEMANTIC(CodeSection);
     DEFAULT_COPY_SEMANTIC(CodeSection);
 
     CodeSection(const std::string &name, EmitRef offset = 0) :
         Offsetable(name, offset)
-    {}
+    {
+        instructions_.reserve(N_MAX_INSTRS);
+    }
 
     ~CodeSection() = default;
 
@@ -85,8 +90,12 @@ public:
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
-        (void)out_arr;
-        return 0;
+        EmitSize instrs_size = 0;
+        for (auto &it : instructions_) {
+            instrs_size += it.EmitBytecode(out_arr);
+        }
+
+        return instrs_size;
     }
 
 private:

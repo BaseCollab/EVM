@@ -46,14 +46,14 @@ public:
         return N_MAJOR_INSTANCES;
     }
 
-    EmitSize GetDataOfsset() const
+    EmitSize GetDataOffset() const
     {
         return sizeof(EmitMagic) + GetMajorInstances() * sizeof(EmitRef);
     }
 
     size_t GetSize() const
     {
-        return GetDataOfsset() + string_pool_.GetSize() + class_section_.GetSize();
+        return GetDataOffset() + string_pool_.GetSize() + class_section_.GetSize();
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)

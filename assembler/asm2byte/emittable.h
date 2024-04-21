@@ -45,16 +45,16 @@ public:
     template <typename T>
     static T *EmitEmptyBytecode(std::vector<byte_t> *out_arr)
     {
-        auto empty_data = out_arr->data() + out_arr->size();
+        auto curr_size = out_arr->size();
         out_arr->insert(out_arr->end(), sizeof(T), 0);
-        return reinterpret_cast<T *>(empty_data);
+        return reinterpret_cast<T *>(out_arr->data() + curr_size);
     }
 
     static void *EmitEmptyBytecode(std::vector<byte_t> *out_arr, EmitSize insert_size)
     {
-        auto empty_data = out_arr->data() + out_arr->size();
+        auto curr_size = out_arr->size();
         out_arr->insert(out_arr->end(), insert_size, 0);
-        return empty_data;
+        return out_arr->data() + curr_size;
     }
 
     template <typename T>
@@ -80,7 +80,7 @@ public:
         EmitSize emit_size = 0;
 
         emit_size += EmitBytecode<EmitNameSize>(out_arr, &name_size);
-        emit_size += EmitBytecode(out_arr, name_.c_str(), name_size + 1, name_.size());
+        emit_size += EmitBytecode(out_arr, name_.c_str(), name_size, name_.size());
 
         return emit_size;
     }
