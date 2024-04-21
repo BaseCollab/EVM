@@ -4,9 +4,9 @@
 #include "common/constants.h"
 #include "common/config.h"
 #include "common/macros.h"
-#include "interpreter/interpreter.h"
+#include "runtime/interpreter/interpreter.h"
 
-#include "memory/allocator/allocator.h"
+#include "runtime/memory/allocator/allocator.h"
 
 #include <memory>
 
