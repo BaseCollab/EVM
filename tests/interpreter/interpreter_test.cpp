@@ -38,7 +38,7 @@ TEST_F(InterpreterTest, ADD_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -58,7 +58,7 @@ TEST_F(InterpreterTest, SUB_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -78,7 +78,7 @@ TEST_F(InterpreterTest, MUL_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -98,7 +98,7 @@ TEST_F(InterpreterTest, DIV_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -118,7 +118,7 @@ TEST_F(InterpreterTest, AND_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -138,7 +138,7 @@ TEST_F(InterpreterTest, OR_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -158,7 +158,7 @@ TEST_F(InterpreterTest, XOR_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -179,7 +179,7 @@ TEST_F(InterpreterTest, MOV)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -209,7 +209,7 @@ TEST_F(InterpreterTest, SLTI)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -239,7 +239,7 @@ TEST_F(InterpreterTest, SMEI)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -269,7 +269,7 @@ TEST_F(InterpreterTest, EQ_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -299,7 +299,7 @@ TEST_F(InterpreterTest, NEQ_INT64)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -323,7 +323,7 @@ TEST_F(InterpreterTest, CONVIF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -342,7 +342,7 @@ TEST_F(InterpreterTest, CONVFI)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -364,7 +364,7 @@ TEST_F(InterpreterTest, ADDF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -384,7 +384,7 @@ TEST_F(InterpreterTest, SUBF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -404,7 +404,7 @@ TEST_F(InterpreterTest, MULF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -424,7 +424,7 @@ TEST_F(InterpreterTest, DIVF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -453,7 +453,7 @@ TEST_F(InterpreterTest, SLTF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -483,7 +483,7 @@ TEST_F(InterpreterTest, SMEF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -513,7 +513,7 @@ TEST_F(InterpreterTest, EQF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -543,7 +543,7 @@ TEST_F(InterpreterTest, NEQF)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -570,7 +570,7 @@ TEST_F(InterpreterTest, SIN_COS)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -603,7 +603,7 @@ TEST_F(InterpreterTest, JMP_IMM)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -624,7 +624,7 @@ TEST_F(InterpreterTest, RACC_ACCR)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -654,7 +654,7 @@ TEST_F(InterpreterTest, CALL_RET)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -682,7 +682,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_1)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -725,7 +725,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -750,7 +750,7 @@ TEST_F(InterpreterTest, STRING)
         exit
     )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     std::vector<byte_t> bytecode;
 
@@ -792,7 +792,7 @@ TEST_F(InterpreterTest, USER_OBJECT_PRIMITIVE)
     //     exit
     // )";
 
-    file_format::File file_arch("");
+    file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
     asm2byte.ParseAsmString(source, &file_arch);
     // asm2byte.EmitBytecode();

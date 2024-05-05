@@ -2,6 +2,7 @@
 #include "common/config.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/memory/types/array.h"
+#include "file_format/file.h"
 #include "isa/macros.h"
 
 #include <iostream>
@@ -57,9 +58,11 @@ void Interpreter::Run(const byte_t *bytecode)
     frames_.push(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
     frame_cur_ = &frames_.top();
 
-    size_t code_section_offset = 0;
-    std::memcpy(&code_section_offset, bytecode, sizeof(code_section_offset));
-    pc_ = code_section_offset;
+    file_format::File file_arch;
+    file_arch.ParseBytecode(bytecode);
+
+    std::cerr << "Code section at " << file_arch.GetCodeSection()->GetOffset() << std::endl;
+    pc_ = file_arch.GetCodeSection()->GetOffset();
 
     #define CALL_REG1() ISA_CALL_GET_REG1(bytecode + pc_)
     #define CALL_REG2() ISA_CALL_GET_REG2(bytecode + pc_)

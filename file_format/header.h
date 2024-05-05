@@ -107,6 +107,10 @@ public:
         code_section_offset_ = current_offset = out_arr->size();
         memcpy(code_section_offset, &current_offset, sizeof(current_offset));
 
+        std::cout << "1 " << string_pool_offset_ << "\n";
+        std::cout << "2 " << class_section_offset_ << "\n";
+        std::cout << "3 " << code_section_offset_ << "\n";
+
         return current_offset;
     }
 
@@ -122,14 +126,21 @@ public:
             return 0;
         }
 
+        std::cout << "magick " << magic << " " << parsed_size << "\n";
+
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &string_pool_offset_);
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &class_section_offset_);
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &code_section_offset_);
 
-        // String pool and code asection shouldn't be passed: no necessaty for it
+        std::cout << "SPEPEPEP " << string_pool_offset_ << " " << class_section_offset_ << " " << code_section_offset_ << "\n";
+
+        string_pool_.SetOffset(string_pool_offset_);
+        class_section_.SetOffset(class_section_offset_);
+
+        // String pool and code section shouldn't be parsed: no necessaty for it
         parsed_size += class_section_.ParseBytecode(in_arr, class_section_offset_);
 
-        return 0;
+        return parsed_size - already_parsed;
     }
 
 private:
