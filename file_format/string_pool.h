@@ -10,7 +10,7 @@
 #include <cstring>
 #include <unordered_map>
 
-namespace evm::asm2byte {
+namespace evm::file_format {
 
 class StringPool : public Offsetable {
 public:
@@ -92,6 +92,6 @@ private:
     size_t size_ = 0;
 };
 
-} // namespace evm::asm2byte
+} // namespace evm::file_format
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__STRING_POOL_H

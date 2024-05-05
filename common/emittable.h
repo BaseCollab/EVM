@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace evm::asm2byte {
+namespace evm {
 
 class Emittable {
 public:
@@ -244,6 +244,6 @@ private:
     std::vector<T> instances_;
 };
 
-} // namespace evm::asm2byte
+} // namespace evm
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__EMITTABLE_H

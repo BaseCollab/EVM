@@ -14,7 +14,7 @@
 #include <string>
 #include <cstring>
 
-namespace evm::asm2byte {
+namespace evm::file_format {
 
 class Instruction : Emittable {
 public:
@@ -179,6 +179,6 @@ private:
     byte_t args_[Frame::N_PASSED_ARGS_DEFAULT] = {0};
 };
 
-} // namespace evm::asm2byte
+} // namespace evm::file_format
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__INSTURCTION_H

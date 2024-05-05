@@ -2,6 +2,7 @@
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
 #include "runtime/memory/types/array.h"
+#include "file_format/file.h"
 #include "file_format/header.h"
 #include "file_format/code_section.h"
 #include "file_format/instruction.h"
@@ -12,43 +13,31 @@
 
 namespace evm::asm2byte {
 
-bool AsmToByte::ParseAsm()
+bool AsmToByte::ParseAsm(file_format::File *file_arch)
 {
     PrepareLinesFromBuffer();
 
-    if (!GenRawInstructions(&header_, &code_section_)) {
+    if (!GenRawInstructions(file_arch)) {
         std::cerr << "Error in " << __func__ << std::endl;
         return false;
     }
 
-    return ResolveDependencies(&header_, &code_section_);
+    return file_arch->ResolveDependencies();
 }
 
-bool AsmToByte::ParseAsmFile(const char *filename)
+bool AsmToByte::ParseAsmFile(const char *filename, file_format::File *file_arch)
 {
     if (!ReadAsmFile(filename)) {
         return false;
     }
 
-    return ParseAsm();
+    return ParseAsm(file_arch);
 }
 
-bool AsmToByte::ParseAsmString(const std::string &asm_string)
+bool AsmToByte::ParseAsmString(const std::string &asm_string, file_format::File *file_arch)
 {
     file_buffer_ = asm_string;
-    return ParseAsm();
-}
-
-bool AsmToByte::EmitBytecode()
-{
-    return header_.EmitBytecode(&bytecode_) && code_section_.EmitBytecode(&bytecode_);
-}
-
-bool AsmToByte::DumpBytesInBytecode(const char *filename)
-{
-    std::ofstream outfile(filename, std::ios::out | std::ios::binary);
-    outfile.write(reinterpret_cast<char *>(bytecode_.data()), bytecode_.size());
-    return true;
+    return ParseAsm(file_arch);
 }
 
 bool AsmToByte::ReadAsmFile(const char *filename)
@@ -128,29 +117,11 @@ void AsmToByte::PrepareLinesFromBuffer()
     }
 }
 
-bool AsmToByte::ResolveDependencies(Header *header, CodeSection *code_section)
+bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 {
-    StringPool *string_pool = header->GetStringPool();
-    string_pool->SetOffset(header->GetDataOffset());
-
-    if (string_pool->ResolveInstrs() == false) {
-        std::cerr << "Couldn't resolve all strings pool references" << std::endl;
-        return false;
-    }
-
-    ClassSection *class_section = header->GetClassSection();
-    class_section->SetOffset(string_pool->GetOffset() + string_pool->GetSize());
-
-    code_section->SetOffset(class_section->GetOffset() + class_section->GetSize());
-    code_section->ResolveInstrs();
-
-    return true;
-}
-
-bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
-{
-    ClassSection *class_section = header->GetClassSection();
-    StringPool *string_pool = header->GetStringPool();
+    file_format::ClassSection *class_section = file_arch->GetHeader()->GetClassSection();
+    file_format::StringPool *string_pool = file_arch->GetHeader()->GetStringPool();
+    file_format::CodeSection *code_section = file_arch->GetCodeSection();
 
     bool in_class_defition = false;
 
@@ -177,9 +148,9 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
 
         // Class definition fields
         if (in_class_defition == true) {
-            ClassField::Type type = ClassField::FieldTypeFromString(line_args[0]);
+            file_format::ClassField::Type type = file_format::ClassField::FieldTypeFromString(line_args[0]);
 
-            if (type == ClassField::Type::USER_CLASS) {
+            if (type == file_format::ClassField::Type::USER_CLASS) {
                 class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
             } else {
                 class_section->GetInstances()->back().AddInstance({line_args[1], type});
@@ -195,7 +166,7 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
                 return false;
         }
 
-        Instruction *instr = code_section->AddInstr(line_args[0], opcode);
+        file_format::Instruction *instr = code_section->AddInstr(line_args[0], opcode);
 
         // clang-format off
         switch (opcode) {
