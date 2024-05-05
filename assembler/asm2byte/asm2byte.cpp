@@ -1,19 +1,14 @@
-#include "asm2byte.h"
-
+#include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
-
-#include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
-#include "header.h"
-#include "code_section.h"
+#include "file_format/header.h"
+#include "file_format/code_section.h"
+#include "file_format/instruction.h"
+#include "asm2byte.h"
 
 #include <fstream>
 #include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <vector>
-#include <unordered_map>
 
 namespace evm::asm2byte {
 

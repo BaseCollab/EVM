@@ -66,13 +66,13 @@ void Interpreter::Run(const byte_t *bytecode)
     #define CALL_REG3() ISA_CALL_GET_REG3(bytecode + pc_)
     #define CALL_REG4() ISA_CALL_GET_REG4(bytecode + pc_)
 
-    #define RD_IDX()   ISA_GET_RD (bytecode + pc_)
-    #define RS1_IDX()  ISA_GET_RS1(bytecode + pc_)
-    #define RS2_IDX()  ISA_GET_RS2(bytecode + pc_)
-    #define RS3_IDX()  ISA_GET_RS3(bytecode + pc_)
-    #define IMM_I()    ISA_GET_IMM(bytecode + pc_, int64_t)
-    #define IMM_F()    ISA_GET_IMM(bytecode + pc_, double)
-    #define IMM_I32()  ISA_GET_IMM(bytecode + pc_, int32_t)
+    #define RD_IDX()    ISA_GET_RD (bytecode + pc_)
+    #define RS1_IDX()   ISA_GET_RS1(bytecode + pc_)
+    #define RS2_IDX()   ISA_GET_RS2(bytecode + pc_)
+    #define RS3_IDX()   ISA_GET_RS3(bytecode + pc_)
+    #define IMM_I()     ISA_GET_IMM(bytecode + pc_, int64_t)
+    #define IMM_F()     ISA_GET_IMM(bytecode + pc_, double)
+    #define IMM_I32()   ISA_GET_IMM(bytecode + pc_, int32_t)
 
     #define BYTECODE_OFFSET(offset) bytecode + offset
 

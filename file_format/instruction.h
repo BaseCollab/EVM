@@ -3,6 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
+#include "common/emittable.h"
 #include "isa/opcodes.h"
 #include "runtime/memory/frame.h"
 #include "emittable.h"
