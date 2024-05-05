@@ -12,7 +12,7 @@
 #include <vector>
 #include <string>
 
-namespace evm::asm2byte {
+namespace evm::file_format {
 
 class Header : public Offsetable {
 public:
@@ -141,6 +141,6 @@ private:
     EmitRef code_section_offset_ = 0;
 };
 
-} // namespace evm::asm2byte
+} // namespace evm::file_format
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__HEADER_H
