@@ -110,7 +110,7 @@ public:
 
         parsed_size += ParseBytecode(in_arr + parsed_size, name_.data(), name_size);
 
-        return parsed_size;
+        return parsed_size - already_parsed;
     }
 
 private:

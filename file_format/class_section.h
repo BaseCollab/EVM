@@ -87,7 +87,7 @@ public:
         parsed_size += Emittable::ParseBytecode(in_arr + parsed_size, type_name_.data(), type_name_size);
         parsed_size += Emittable::ParseBytecode(in_arr, parsed_size);
 
-        return parsed_size;
+        return parsed_size - already_parsed;
     }
 
     static std::string FieldTypeToString(Type type)

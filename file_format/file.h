@@ -17,6 +17,12 @@ public:
     DEFAULT_MOVE_SEMANTIC(File);
     DEFAULT_COPY_SEMANTIC(File);
 
+    File() :
+        Emittable(""),
+        header_(""),
+        code_section_(".code")
+    {}
+
     File(const std::string &name) :
         Emittable(name),
         header_(""),
@@ -53,10 +59,12 @@ public:
         class_section->SetOffset(string_pool->GetOffset() + string_pool->GetSize());
 
         code_section_.SetOffset(class_section->GetOffset() + class_section->GetSize());
-        code_section_.ResolveInstrs();
+        if (code_section_.ResolveInstrs() == false) {
+            std::cerr << "Couldn't resolve some dependencies in code section" << std::endl;
+            return false;
+        }
 
-        resolved_dependencies_ = true;
-        return true;
+        return resolved_dependencies_ = true;
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *bytecode)
@@ -75,14 +83,16 @@ public:
         return true;
     }
 
-    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
+    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed = 0)
     {
-        // Code section shouldn't be parsed, only emitted
-        // So code here is valid
-        (void)in_arr;
-        (void)already_parsed;
+        EmitSize parsed_size = already_parsed;
 
-        return 0;
+        parsed_size += header_.ParseBytecode(in_arr, parsed_size);
+        parsed_size += code_section_.ParseBytecode(in_arr, parsed_size);
+
+        code_section_.SetOffset(header_.GetCodeSectionOffset());
+
+        return parsed_size - already_parsed;
     }
 
 private:
