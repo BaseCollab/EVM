@@ -3,7 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
-#include "emittable.h"
+#include "common/emittable.h"
 #include "class_section.h"
 #include "string_pool.h"
 

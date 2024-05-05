@@ -3,9 +3,8 @@
 
 #include "common/macros.h"
 #include "common/config.h"
-
-#include "code_section.h"
-#include "header.h"
+#include "file_format/code_section.h"
+#include "file_format/header.h"
 #include "line.h"
 
 #include <vector>

@@ -3,8 +3,8 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
+#include "common/emittable.h"
 #include "instruction.h"
-#include "emittable.h"
 
 #include <vector>
 #include <string>
