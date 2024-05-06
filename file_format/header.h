@@ -89,6 +89,8 @@ public:
         assert(out_arr->size() == 0);
         EmitRef current_offset = 0;
 
+        out_arr->reserve(GetDataOffset() + string_pool_.GetSize() + class_section_.GetSize());
+
         const EmitMagic magic = MAGIC_NUMBER;
         Emittable::EmitBytecode<EmitMagic>(out_arr, &magic);
 
@@ -107,10 +109,6 @@ public:
         code_section_offset_ = current_offset = out_arr->size();
         memcpy(code_section_offset, &current_offset, sizeof(current_offset));
 
-        std::cout << "1 " << string_pool_offset_ << "\n";
-        std::cout << "2 " << class_section_offset_ << "\n";
-        std::cout << "3 " << code_section_offset_ << "\n";
-
         return current_offset;
     }
 
@@ -126,13 +124,9 @@ public:
             return 0;
         }
 
-        std::cout << "magick " << magic << " " << parsed_size << "\n";
-
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &string_pool_offset_);
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &class_section_offset_);
         parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &code_section_offset_);
-
-        std::cout << "SPEPEPEP " << string_pool_offset_ << " " << class_section_offset_ << " " << code_section_offset_ << "\n";
 
         string_pool_.SetOffset(string_pool_offset_);
         class_section_.SetOffset(class_section_offset_);
