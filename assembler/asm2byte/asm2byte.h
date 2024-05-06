@@ -13,9 +13,6 @@ namespace evm::asm2byte {
 
 class AsmToByte {
 public:
-    static constexpr size_t N_MAX_EMITTED_BYTES = 1 << 17;
-
-public:
     NO_COPY_SEMANTIC(AsmToByte);
     NO_MOVE_SEMANTIC(AsmToByte);
 
