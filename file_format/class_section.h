@@ -29,7 +29,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(ClassField);
     DEFAULT_COPY_SEMANTIC(ClassField);
 
-    ClassField(const std::string name, Type type, const std::string type_name = "") :
+    ClassField(const std::string name = "", Type type = Type::INVALID, const std::string type_name = "") :
         Emittable(name),
         type_(type),
         type_name_(type_name)
@@ -37,7 +37,7 @@ public:
 
     ~ClassField() = default;
 
-    void SetTypeName(const std::string name)
+    void SetTypeName(const std::string &name)
     {
         type_name_ = name;
     }
@@ -83,7 +83,7 @@ public:
         parsed_size += Emittable::ParseBytecode<Type>(in_arr + parsed_size, &type_);
         parsed_size += Emittable::ParseBytecode<EmitNameSize>(in_arr + parsed_size, &type_name_size);
 
-        type_name_.reserve(type_name_size);
+        type_name_.resize(type_name_size);
         parsed_size += Emittable::ParseBytecode(in_arr + parsed_size, type_name_.data(), type_name_size);
         parsed_size += Emittable::ParseBytecode(in_arr, parsed_size);
 

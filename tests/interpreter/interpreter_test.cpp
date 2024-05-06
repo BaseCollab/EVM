@@ -740,7 +740,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 
 // String-related operations
 
-TEST_F(InterpreterTest, STRING)
+TEST_F(InterpreterTest, STRING_PULL)
 {
     auto source = R"(
         string x0, 'kek lol'
@@ -764,7 +764,7 @@ TEST_F(InterpreterTest, STRING)
 
 // User-objects operations
 
-TEST_F(InterpreterTest, USER_OBJECT_PRIMITIVE)
+TEST_F(InterpreterTest, CLASS_SECTION)
 {
     auto source = R"(
         .class Foo
@@ -772,36 +772,57 @@ TEST_F(InterpreterTest, USER_OBJECT_PRIMITIVE)
             double y;
         .class
 
+        .class UU
+            class Foo f;
+            double i;
+        .class
+
+        movif x1, 23
         exit
     )";
 
-    // auto source = R"(
-    //     .class Foo {
-    //         int x
-    //         double y
-    //     }
+    file_format::File file_arch;
+    asm2byte::AsmToByte asm2byte;
+    std::vector<byte_t> bytecode;
 
-    //     alloc <Foo> x1
-    //     lfield x2, x1, Foo::x
+    asm2byte.ParseAsmString(source, &file_arch);
+    file_arch.EmitBytecode(&bytecode);
+    vm_->Execute(bytecode.data());
 
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
+}
 
-    //     movif x3, 6
-    //     convif x4, x3
-    //     stfield x1, x4, Foo::y
+TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
+{
+    auto source = R"(
+        .class Foo
+            int x;
+            double y;
+        .class
 
-    //     exit
-    // )";
+        .class UU
+            class Foo f;
+            double i;
+        .class
+
+        string x0, 'kek lol'
+        string x1, 'kek lol'
+        string x2, 'kek lol cheburek'
+
+        movif x1, 23
+        exit
+    )";
 
     file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
+    std::vector<byte_t> bytecode;
+
     asm2byte.ParseAsmString(source, &file_arch);
-    // asm2byte.EmitBytecode();
+    file_arch.EmitBytecode(&bytecode);
+    vm_->Execute(bytecode.data());
 
-    // std::vector<byte_t> bytecode = asm2byte.GetBytecode();
-
-    // vm_->Execute(bytecode.data());
-    // ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
-    //           vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
+    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
+
 
 } // namespace evm
