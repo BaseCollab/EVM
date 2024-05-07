@@ -29,11 +29,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(ClassField);
     DEFAULT_COPY_SEMANTIC(ClassField);
 
-    ClassField(const std::string name = "", Type type = Type::INVALID, const std::string type_name = "") :
-        Emittable(name),
-        type_(type),
-        type_name_(type_name)
-    {}
+    ClassField(const std::string name = "", Type type = Type::INVALID, const std::string type_name = "")
+        : Emittable(name), type_(type), type_name_(type_name)
+    {
+    }
 
     ~ClassField() = default;
 
@@ -136,7 +135,6 @@ private:
 
 using Class = Section<ClassField>;
 using ClassSection = Section<Class>;
-
 
 } // namespace evm::file_format
 
