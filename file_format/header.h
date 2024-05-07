@@ -24,12 +24,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Header);
     DEFAULT_COPY_SEMANTIC(Header);
 
-    Header(const std::string &name) :
-        Offsetable(name),
-        string_pool_(".string_pool"),
-        class_section_(".class")
-    {}
-
+    Header(const std::string &name) : Offsetable(name), string_pool_(".string_pool"), class_section_(".class") {}
     ~Header() = default;
 
     StringPool *GetStringPool()
@@ -119,8 +114,8 @@ public:
 
         parsed_size += Emittable::ParseBytecode<EmitMagic>(in_arr + parsed_size, &magic);
         if (magic != MAGIC_NUMBER) {
-            std::cerr << "Magic number of input file is invalid: " << std::hex << magic <<
-                         "instead of " << MAGIC_NUMBER << std::dec << std::endl;
+            std::cerr << "Magic number of input file is invalid: " << std::hex << magic << "instead of " << MAGIC_NUMBER
+                      << std::dec << std::endl;
             return 0;
         }
 

@@ -17,18 +17,9 @@ public:
     DEFAULT_MOVE_SEMANTIC(File);
     DEFAULT_COPY_SEMANTIC(File);
 
-    File() :
-        Emittable(""),
-        header_(""),
-        code_section_(".code")
-    {}
+    File() : Emittable(""), header_(""), code_section_(".code") {}
 
-    File(const std::string &name) :
-        Emittable(name),
-        header_(""),
-        code_section_(".code")
-    {}
-
+    File(const std::string &name) : Emittable(name), header_(""), code_section_(".code") {}
     ~File() = default;
 
     Header *GetHeader()

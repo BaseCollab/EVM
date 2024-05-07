@@ -94,7 +94,7 @@ void AsmToByte::PrepareLinesFromBuffer()
                 } else if (in_string != true) {
                     file_buffer_[i] = '\0';
                 }
-            } else if (file_buffer_[i] == ',' || file_buffer_[i] == ';' ) {
+            } else if (file_buffer_[i] == ',' || file_buffer_[i] == ';') {
                 file_buffer_[i] = '\0';
             } else if (file_buffer_[i] == '\'') {
                 file_buffer_[i] = '\0';
@@ -163,7 +163,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
         Opcode opcode = common::StringToOpcode(line_args[0]);
         if (opcode == Opcode::INVALID) {
             std::cerr << "Invalid instruction type" << std::endl;
-                return false;
+            return false;
         }
 
         file_format::Instruction *instr = code_section->AddInstr(line_args[0], opcode);

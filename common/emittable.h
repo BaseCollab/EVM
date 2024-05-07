@@ -13,18 +13,16 @@ namespace evm {
 class Emittable {
 public:
     using EmitNameSize = uint8_t;
-    using EmitSize     = uint32_t;
-    using EmitType     = uint8_t;
-    using EmitRef      = EmitSize;
-    using EmitMagic    = uint32_t;
+    using EmitSize = uint32_t;
+    using EmitType = uint8_t;
+    using EmitRef = EmitSize;
+    using EmitMagic = uint32_t;
 
 public:
     DEFAULT_MOVE_SEMANTIC(Emittable);
     DEFAULT_COPY_SEMANTIC(Emittable);
 
-    Emittable(const std::string &name) :
-        name_(name)
-    {}
+    Emittable(const std::string &name) : name_(name) {}
 
     ~Emittable() = default;
 
@@ -123,10 +121,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Offsetable);
     DEFAULT_COPY_SEMANTIC(Offsetable);
 
-    Offsetable(const std::string name = "", EmitRef offset = 0) :
-        Emittable(name),
-        offset_(offset)
-    {}
+    Offsetable(const std::string name = "", EmitRef offset = 0) : Emittable(name), offset_(offset) {}
 
     ~Offsetable() = default;
 
@@ -155,10 +150,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Section);
     DEFAULT_COPY_SEMANTIC(Section);
 
-    Section(const std::string name = "", std::vector<T> instances = {}) :
-        Offsetable(name),
-        instances_(instances)
-    {}
+    Section(const std::string name = "", std::vector<T> instances = {}) : Offsetable(name), instances_(instances) {}
 
     ~Section() = default;
 
@@ -223,8 +215,7 @@ public:
 
     EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
     {
-        EmitSize parsed_size = already_parsed +
-            Emittable::ParseBytecode(in_arr, already_parsed);
+        EmitSize parsed_size = already_parsed + Emittable::ParseBytecode(in_arr, already_parsed);
 
         EmitSize n_instances = 0;
         parsed_size += Emittable::ParseBytecode<EmitSize>(in_arr + parsed_size, &n_instances);
