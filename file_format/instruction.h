@@ -3,19 +3,19 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
+#include "common/emittable.h"
 #include "isa/opcodes.h"
 #include "runtime/memory/frame.h"
 
 #include <cassert>
 #include <cstddef>
 #include <vector>
+#include <string>
 #include <cstring>
-#include <iostream>
-#include <fstream>
 
-namespace evm::asm2byte {
+namespace evm::file_format {
 
-class Instruction {
+class Instruction : Emittable {
 public:
     static constexpr size_t MINIMAL_INSTR_SIZE = 4;
 
@@ -49,7 +49,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(Instruction);
     DEFAULT_COPY_SEMANTIC(Instruction);
 
-    Instruction(Opcode opcode) : opcode_(opcode) {}
+    Instruction(const std::string name, Opcode opcode) : Emittable(name), opcode_(opcode) {}
+
     ~Instruction() = default;
 
     void SetRd(byte_t rd)
@@ -97,7 +98,7 @@ public:
         string_op_ = str;
     }
 
-    const std::string GetStringOp() const
+    const std::string &GetStringOp() const
     {
         return string_op_;
     }
@@ -120,7 +121,22 @@ public:
         bytcode_offset_ = offset;
     }
 
-    void InstrToBytes(std::vector<byte_t> *out_arr)
+    size_t GetOffset()
+    {
+        return bytcode_offset_;
+    }
+
+    Opcode GetOpcode() const
+    {
+        return opcode_;
+    }
+
+    size_t GetBytesSize() const
+    {
+        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;
+    }
+
+    EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
         out_arr->push_back(static_cast<byte_t>(opcode_));
         out_arr->push_back(rd_);
@@ -138,11 +154,8 @@ public:
                 out_arr->push_back(args_[i]);
             }
         }
-    }
 
-    size_t GetBytesSize() const
-    {
-        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;
+        return GetBytesSize();
     }
 
 private:
@@ -162,6 +175,6 @@ private:
     byte_t args_[Frame::N_PASSED_ARGS_DEFAULT] = {0};
 };
 
-} // namespace evm::asm2byte
+} // namespace evm::file_format
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__INSTURCTION_H

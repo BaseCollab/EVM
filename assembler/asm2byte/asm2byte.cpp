@@ -1,74 +1,43 @@
-#include "asm2byte.h"
-
+#include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
-#include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
+#include "file_format/file.h"
+#include "file_format/header.h"
+#include "file_format/code_section.h"
+#include "file_format/instruction.h"
+#include "asm2byte.h"
 
 #include <fstream>
 #include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <stack>
-#include <vector>
-#include <unordered_map>
 
 namespace evm::asm2byte {
 
-bool AsmToByte::ParseAsm()
+bool AsmToByte::ParseAsm(file_format::File *file_arch)
 {
     PrepareLinesFromBuffer();
 
-    if (!CreateInstructionsFromLines()) {
-        std::cerr << "Error in CreateInstructionsFromLines" << std::endl;
+    if (!GenRawInstructions(file_arch)) {
+        std::cerr << "Error in " << __func__ << std::endl;
         return false;
     }
 
-    return true;
+    return file_arch->ResolveDependencies();
 }
 
-bool AsmToByte::ParseAsmFile(const char *filename)
+bool AsmToByte::ParseAsmFile(const char *filename, file_format::File *file_arch)
 {
     if (!ReadAsmFile(filename)) {
         return false;
     }
 
-    return ParseAsm();
+    return ParseAsm(file_arch);
 }
 
-bool AsmToByte::ParseAsmString(const std::string &asm_string)
+bool AsmToByte::ParseAsmString(const std::string &asm_string, file_format::File *file_arch)
 {
     file_buffer_ = asm_string;
-    return ParseAsm();
-}
-
-bool AsmToByte::DumpInstructionsToBytes()
-{
-    bytecode_.insert(bytecode_.end(), ByteCodePos::STRING_PULL, 0);
-
-    size_t code_section_offset = ByteCodePos::STRING_PULL;
-
-    for (auto &it : string_pull_) {
-        size_t string_size = std::strlen(it.first.c_str());
-        bytecode_.insert(bytecode_.end(), string_size + 1, 0);
-        std::memcpy(bytecode_.data() + it.second, it.first.c_str(), string_size);
-        code_section_offset += string_size + 1;
-    }
-
-    std::memcpy(bytecode_.data(), &code_section_offset, sizeof(code_section_offset));
-
-    for (auto &it : instructions_) {
-        it->InstrToBytes(&bytecode_);
-    }
-
-    return true;
-}
-
-bool AsmToByte::DumpBytesInBytecode(const char *filename)
-{
-    std::ofstream outfile(filename, std::ios::out | std::ios::binary);
-    outfile.write(reinterpret_cast<char *>(bytecode_.data()), bytecode_.size());
-    return true;
+    return ParseAsm(file_arch);
 }
 
 bool AsmToByte::ReadAsmFile(const char *filename)
@@ -125,7 +94,7 @@ void AsmToByte::PrepareLinesFromBuffer()
                 } else if (in_string != true) {
                     file_buffer_[i] = '\0';
                 }
-            } else if (file_buffer_[i] == ',') {
+            } else if (file_buffer_[i] == ',' || file_buffer_[i] == ';') {
                 file_buffer_[i] = '\0';
             } else if (file_buffer_[i] == '\'') {
                 file_buffer_[i] = '\0';
@@ -135,7 +104,9 @@ void AsmToByte::PrepareLinesFromBuffer()
                 else
                     in_string = false;
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
-                       file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'') {
+                       file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'' &&
+                       file_buffer_[i] != ';' && file_buffer_[i] != ';' && file_buffer_[i] != '{' &&
+                       file_buffer_[i] != '}') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -146,39 +117,59 @@ void AsmToByte::PrepareLinesFromBuffer()
     }
 }
 
-bool AsmToByte::CreateInstructionsFromLines()
+bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 {
-    std::stack<std::pair<std::string, Instruction *>> label_resolving_table;
+    file_format::ClassSection *class_section = file_arch->GetHeader()->GetClassSection();
+    file_format::StringPool *string_pool = file_arch->GetHeader()->GetStringPool();
+    file_format::CodeSection *code_section = file_arch->GetCodeSection();
 
-    std::stack<Instruction *> string_resolving_table;
-    size_t string_pull_size = 0;
-
-    size_t code_section_offset_cur = 0; // offset in bytecode from the beginning of the code section
+    bool in_class_defition = false;
 
     for (auto &it : lines_) {
         std::vector<std::string> line_args = it.GetArgs();
 
+        // Label
         if (line_args[0].back() == ':') {
-            labels_.insert({line_args[0].substr(0, line_args[0].size() - 1), code_section_offset_cur});
-            continue; // no opcode in the line with label:
+            code_section->AddLabel(line_args[0]);
+            continue;
         }
 
-        Instruction *instr = nullptr;
+        // Class definition start/end
+        if (!line_args[0].compare(".class")) {
+            if (in_class_defition == false) {
+                class_section->AddInstance(line_args[1]);
+                in_class_defition = true;
+            } else {
+                in_class_defition = false;
+            }
+
+            continue;
+        }
+
+        // Class definition fields
+        if (in_class_defition == true) {
+            file_format::ClassField::Type type = file_format::ClassField::FieldTypeFromString(line_args[0]);
+
+            if (type == file_format::ClassField::Type::USER_CLASS) {
+                class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
+            } else {
+                class_section->GetInstances()->back().AddInstance({line_args[1], type});
+            }
+
+            continue;
+        }
+
+        // If we here, only assembler instruction is assumed to be in a line
         Opcode opcode = common::StringToOpcode(line_args[0]);
-
-        if (opcode != Opcode::INVALID) {
-            auto unique_instr = std::make_unique<Instruction>(opcode);
-            instr = unique_instr.get();
-            instructions_.push_back(std::move(unique_instr));
+        if (opcode == Opcode::INVALID) {
+            std::cerr << "Invalid instruction type" << std::endl;
+            return false;
         }
+
+        file_format::Instruction *instr = code_section->AddInstr(line_args[0], opcode);
 
         // clang-format off
         switch (opcode) {
-            case Opcode::INVALID: {
-                std::cerr << "Invalid instruction type" << std::endl;
-                return false;
-            }
-
             // No arguments
 
             case Opcode::EXIT:
@@ -256,7 +247,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                     double double_imm = std::stod(line_args[2]);
                     std::memcpy(&immediate, &double_imm, sizeof(immediate));
                 } else {
-                    label_resolving_table.push({line_args[2], instr});
+                    code_section->AddInstrToResolve(line_args[2], instr);
                     immediate = 0;
                 }
 
@@ -278,8 +269,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                               << std::endl;
                     return false;
                 } else {
-                    label_resolving_table.push({line_args[2], instr});
-                    immediate = -code_section_offset_cur;
+                    code_section->AddInstrToResolve(line_args[2], instr);
                 }
 
                 instr->Set32Imm(immediate);
@@ -315,8 +305,7 @@ bool AsmToByte::CreateInstructionsFromLines()
                               << std::endl;
                     return false;
                 } else {
-                    label_resolving_table.push({line_args[1], instr});
-                    immediate = -code_section_offset_cur;
+                    code_section->AddInstrToResolve(line_args[1], instr);
                 }
 
                 instr->Set32Imm(immediate);
@@ -370,16 +359,14 @@ bool AsmToByte::CreateInstructionsFromLines()
             }
 
             case Opcode::STRING: {
-                auto string_pos = string_pull_.find(line_args[2]);
-                if (string_pos == string_pull_.end()) {
-                    string_pull_[line_args[2]] = string_pull_size + STRING_PULL;
-                    string_pull_size += std::strlen(line_args[2].c_str()) + 1;
+                if (!string_pool->HasInstance(line_args[2])) {
+                    string_pool->AddInstance(line_args[2]);
                 }
-
-                string_resolving_table.push(instr);
 
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetStringOp(line_args[2]);
+
+                string_pool->AddInstrToResolve(instr);
 
                 break;
             }
@@ -390,41 +377,7 @@ bool AsmToByte::CreateInstructionsFromLines()
         }
         // clang-format on
 
-        instr->SetOffset(code_section_offset_cur);
-        code_section_offset_cur += instr->GetBytesSize();
-    }
-
-    size_t n_unresolved_labels = 0;
-
-    while (!label_resolving_table.empty()) {
-        auto to_resolve = label_resolving_table.top();
-
-        if (labels_.find(to_resolve.first) != labels_.end()) {
-            size_t imm_size = to_resolve.second->GetImmSize();
-            switch (imm_size) {
-                case sizeof(int32_t):
-                    to_resolve.second->Add32Imm(labels_[to_resolve.first]);
-                    break;
-                case sizeof(int64_t):
-                    to_resolve.second->Add64Imm(labels_[to_resolve.first] + ByteCodePos::STRING_PULL +
-                                                string_pull_size);
-                    break;
-            }
-        } else {
-            std::cerr << "Label " << std::quoted(to_resolve.first) << "is unresolved" << std::endl;
-            n_unresolved_labels++;
-        }
-
-        label_resolving_table.pop();
-    }
-
-    if (n_unresolved_labels > 0)
-        return false;
-
-    while (!string_resolving_table.empty()) {
-        auto to_resolve = string_resolving_table.top();
-        to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()]);
-        string_resolving_table.pop();
+        code_section->ValidateLastInstr();
     }
 
     return true;

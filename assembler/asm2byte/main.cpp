@@ -1,18 +1,30 @@
 #include "asm2byte.h"
+#include <cstdlib>
+#include <iostream>
 
 namespace evm::asm2byte {
 
 int Main(int argc, char *argv[])
 {
     if (argc != 2) {
-        std::cerr << "Only filename arg required" << std::endl;
+        std::cerr << "Only filename arg is required" << std::endl;
         return EXIT_FAILURE;
     }
 
+    file_format::File file_arch("out.ea");
+
     auto asm2byte = AsmToByte();
-    asm2byte.ParseAsmFile(argv[1]);
-    asm2byte.DumpInstructionsToBytes();
-    asm2byte.DumpBytesInBytecode("out.ea");
+    bool parsed = asm2byte.ParseAsmFile(argv[1], &file_arch);
+    if (!parsed) {
+        std::cerr << "Error when parsing asm file '" << argv[1] << "'" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    bool dumped = file_arch.EmitBytecode();
+    if (!dumped) {
+        std::cerr << "Error when dumping bytecode of file '" << argv[1] << "'" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
