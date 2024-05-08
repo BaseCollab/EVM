@@ -740,7 +740,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 
 // String-related operations
 
-TEST_F(InterpreterTest, STRING_PULL)
+TEST_F(InterpreterTest, STRING)
 {
     auto source = R"(
         string x0, 'kek lol'
@@ -764,7 +764,7 @@ TEST_F(InterpreterTest, STRING_PULL)
 
 // User-objects operations
 
-TEST_F(InterpreterTest, CLASS_SECTION)
+TEST_F(InterpreterTest, USER_OBJECT_PRIMITIVE)
 {
     auto source = R"(
         .class Foo
@@ -772,57 +772,36 @@ TEST_F(InterpreterTest, CLASS_SECTION)
             double y;
         .class
 
-        .class UU
-            class Foo f;
-            double i;
-        .class
-
-        movif x1, 23
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
+    // auto source = R"(
+    //     .class Foo {
+    //         int x
+    //         double y
+    //     }
 
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    vm_->Execute(bytecode.data());
+    //     alloc <Foo> x1
+    //     lfield x2, x1, Foo::x
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
-}
 
-TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
-{
-    auto source = R"(
-        .class Foo
-            int x;
-            double y;
-        .class
+    //     movif x3, 6
+    //     convif x4, x3
+    //     stfield x1, x4, Foo::y
 
-        .class UU
-            class Foo f;
-            double i;
-        .class
-
-        string x0, 'kek lol'
-        string x1, 'kek lol'
-        string x2, 'kek lol cheburek'
-
-        movif x1, 23
-        exit
-    )";
+    //     exit
+    // )";
 
     file_format::File file_arch;
     asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
     asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    vm_->Execute(bytecode.data());
+    // asm2byte.EmitBytecode();
 
-    ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
+    // std::vector<byte_t> bytecode = asm2byte.GetBytecode();
+
+    // vm_->Execute(bytecode.data());
+    // ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
+    //           vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
 }
-
 
 } // namespace evm

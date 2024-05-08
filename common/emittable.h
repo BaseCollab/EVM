@@ -6,7 +6,6 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <iostream>
 
 namespace evm {
 
@@ -28,7 +27,7 @@ public:
 
     ~Emittable() = default;
 
-    void SetName(const std::string &name)
+    void SetName(const std::string name)
     {
         name_ = name;
     }
@@ -107,7 +106,7 @@ public:
         EmitNameSize name_size = 0;
 
         parsed_size += ParseBytecode<EmitNameSize>(in_arr + parsed_size, &name_size);
-        name_.resize(name_size);
+        name_.reserve(name_size);
 
         parsed_size += ParseBytecode(in_arr + parsed_size, name_.data(), name_size);
 
@@ -123,7 +122,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Offsetable);
     DEFAULT_COPY_SEMANTIC(Offsetable);
 
-    Offsetable(const std::string name = "", EmitRef offset = 0) :
+    Offsetable(const std::string &name, EmitRef offset = 0) :
         Emittable(name),
         offset_(offset)
     {}
@@ -155,7 +154,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Section);
     DEFAULT_COPY_SEMANTIC(Section);
 
-    Section(const std::string name = "", std::vector<T> instances = {}) :
+    Section(const std::string name, std::vector<T> instances = {}) :
         Offsetable(name),
         instances_(instances)
     {}
@@ -223,13 +222,12 @@ public:
 
     EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
     {
-        EmitSize parsed_size = already_parsed +
-            Emittable::ParseBytecode(in_arr, already_parsed);
+        EmitSize parsed_size = Emittable::ParseBytecode(in_arr, already_parsed);
 
         EmitSize n_instances = 0;
         parsed_size += Emittable::ParseBytecode<EmitSize>(in_arr + parsed_size, &n_instances);
         std::vector<EmitRef> instances_starts(n_instances);
-        instances_.resize(n_instances);
+        instances_.reserve(n_instances);
 
         for (size_t i = 0; i < n_instances; ++i) {
             parsed_size += Emittable::ParseBytecode<EmitRef>(in_arr + parsed_size, &instances_starts[i]);
@@ -239,7 +237,7 @@ public:
             parsed_size += instances_[i].ParseBytecode(in_arr, instances_starts[i]);
         }
 
-        return parsed_size - already_parsed;
+        return parsed_size;
     }
 
 private:

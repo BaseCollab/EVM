@@ -61,6 +61,7 @@ void Interpreter::Run(const byte_t *bytecode)
     file_format::File file_arch;
     file_arch.ParseBytecode(bytecode);
 
+    std::cerr << "Code section at " << file_arch.GetCodeSection()->GetOffset() << std::endl;
     pc_ = file_arch.GetCodeSection()->GetOffset();
 
     #define CALL_REG1() ISA_CALL_GET_REG1(bytecode + pc_)

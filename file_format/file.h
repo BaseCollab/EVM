@@ -89,6 +89,7 @@ public:
 
         parsed_size += header_.ParseBytecode(in_arr, parsed_size);
         parsed_size += code_section_.ParseBytecode(in_arr, parsed_size);
+
         code_section_.SetOffset(header_.GetCodeSectionOffset());
 
         return parsed_size - already_parsed;
