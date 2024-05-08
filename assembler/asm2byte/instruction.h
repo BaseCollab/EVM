@@ -5,7 +5,6 @@
 #include "common/constants.h"
 #include "isa/opcodes.h"
 #include "runtime/memory/frame.h"
-#include "emittable.h"
 
 #include <cassert>
 #include <cstddef>
@@ -15,7 +14,7 @@
 
 namespace evm::asm2byte {
 
-class Instruction : Emittable {
+class Instruction {
 public:
     static constexpr size_t MINIMAL_INSTR_SIZE = 4;
 
@@ -49,11 +48,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(Instruction);
     DEFAULT_COPY_SEMANTIC(Instruction);
 
-    Instruction(const std::string name, Opcode opcode) :
-        Emittable(name),
-        opcode_(opcode)
-    {}
-
+    Instruction(Opcode opcode) : opcode_(opcode) {}
     ~Instruction() = default;
 
     void SetRd(byte_t rd)
@@ -129,12 +124,7 @@ public:
         return bytcode_offset_;
     }
 
-    size_t GetBytesSize() const
-    {
-        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;
-    }
-
-    EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
+    void EmitBytecode(std::vector<byte_t> *out_arr)
     {
         out_arr->push_back(static_cast<byte_t>(opcode_));
         out_arr->push_back(rd_);
@@ -152,8 +142,11 @@ public:
                 out_arr->push_back(args_[i]);
             }
         }
+    }
 
-        return GetBytesSize();
+    size_t GetBytesSize() const
+    {
+        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;
     }
 
 private:

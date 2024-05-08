@@ -57,11 +57,6 @@ public:
         return type_;
     }
 
-    size_t GetSize() const
-    {
-        return sizeof(Type) + sizeof(EmitNameSize) + type_name_.size() + 1 + Emittable::GetSize();
-    }
-
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
         EmitNameSize type_name_size = type_name_.size() + 1;
