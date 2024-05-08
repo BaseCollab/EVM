@@ -65,7 +65,9 @@ public:
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
-        EmitSize emit_size = Emittable::EmitBytecode(out_arr);
+        EmitSize emit_size = 0;
+
+        emit_size += Emittable::EmitBytecode(out_arr);
 
         for (auto &str_inst : string_pull_) {
             size_t str_size = str_inst.size();
@@ -73,16 +75,6 @@ public:
         }
 
         return emit_size;
-    }
-
-    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
-    {
-        // String pool shouldn't be parsed, only emitted
-        // So code here is valid
-        (void)in_arr;
-        (void)already_parsed;
-
-        return 0;
     }
 
 private:
