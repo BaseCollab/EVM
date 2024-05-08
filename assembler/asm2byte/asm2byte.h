@@ -5,7 +5,7 @@
 #include "common/config.h"
 
 #include "instruction.h"
-#include "header.h"
+
 #include "line.h"
 
 #include <vector>
@@ -17,19 +17,22 @@ namespace evm::asm2byte {
 
 class AsmToByte {
 public:
+    enum ByteCodePos : size_t {
+        CODE_SECTION = 0x0,
+        STRING_PULL = 0x8,
+    };
+
+public:
     NO_COPY_SEMANTIC(AsmToByte);
     NO_MOVE_SEMANTIC(AsmToByte);
 
-    AsmToByte() :
-        header_("")
-    {}
+    AsmToByte() = default;
     ~AsmToByte() = default;
 
-    AsmToByte(const std::string &src) :
-        header_("")
+    explicit AsmToByte(const std::string &src)
     {
         ParseAsmString(src);
-        EmitBytecode();
+        DumpInstructionsToBytes();
     }
 
     bool ParseAsmString(const std::string &asm_string);
@@ -45,7 +48,7 @@ public:
         return bytecode_;
     }
 
-    bool EmitBytecode();
+    bool DumpInstructionsToBytes();
     bool DumpBytesInBytecode(const char *filename);
 
 private:
@@ -53,7 +56,7 @@ private:
     bool ReadAsmFile(const char *filename);
 
     void PrepareLinesFromBuffer();
-    bool CreateInstructionsFromLines(Header *header);
+    bool CreateInstructionsFromLines();
 
     static int GetRegisterIdxFromString(const std::string &reg_name);
 
@@ -66,9 +69,8 @@ private:
 
     std::vector<byte_t> bytecode_;
 
-    Header header_;
-
     std::unordered_map<std::string, size_t> labels_;
+    std::unordered_map<std::string, size_t> string_pull_;
 };
 
 } // namespace evm::asm2byte

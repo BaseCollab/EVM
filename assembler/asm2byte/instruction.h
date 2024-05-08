@@ -120,7 +120,7 @@ public:
         bytcode_offset_ = offset;
     }
 
-    void EmitBytecode(std::vector<byte_t> *out_arr)
+    void InstrToBytes(std::vector<byte_t> *out_arr)
     {
         out_arr->push_back(static_cast<byte_t>(opcode_));
         out_arr->push_back(rd_);

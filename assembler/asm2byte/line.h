@@ -7,7 +7,8 @@
 
 #include <vector>
 #include <string>
-
+#include <string_view>
+#include <iostream>
 namespace evm::asm2byte {
 
 class LineInfo {

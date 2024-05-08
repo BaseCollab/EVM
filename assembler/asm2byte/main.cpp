@@ -11,7 +11,7 @@ int Main(int argc, char *argv[])
 
     auto asm2byte = AsmToByte();
     asm2byte.ParseAsmFile(argv[1]);
-    asm2byte.EmitBytecode();
+    asm2byte.DumpInstructionsToBytes();
     asm2byte.DumpBytesInBytecode("out.ea");
 
     return EXIT_SUCCESS;
