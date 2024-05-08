@@ -85,33 +85,10 @@ public:
         return emit_size;
     }
 
-    template <typename T>
-    EmitSize ParseBytecode(const byte_t *in_arr, T *obj)
-    {
-        std::memcpy(obj, in_arr, sizeof(T));
-
-        return sizeof(T);
-    }
-
-    EmitSize ParseBytecode(const byte_t *in_arr, void *obj, const size_t obj_size)
-    {
-        std::memcpy(obj, in_arr, obj_size);
-
-        return obj_size;
-    }
-
-    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
-    {
-        EmitSize parsed_size = already_parsed;
-        EmitNameSize name_size = 0;
-
-        parsed_size += ParseBytecode<EmitNameSize>(in_arr + parsed_size, &name_size);
-        name_.reserve(name_size);
-
-        parsed_size += ParseBytecode(in_arr + parsed_size, name_.data(), name_size);
-
-        return parsed_size;
-    }
+    // size_t ParseBytecode(const std::vector<byte_t> *out_arr)
+    // {
+    //     // TODO;
+    // }
 
 private:
     std::string name_;
@@ -218,26 +195,6 @@ public:
         }
 
         return emit_size;
-    }
-
-    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
-    {
-        EmitSize parsed_size = Emittable::ParseBytecode(in_arr, already_parsed);
-
-        EmitSize n_instances = 0;
-        parsed_size += ParseBytecode<EmitSize>(in_arr + parsed_size, &n_instances);
-        std::vector<EmitRef> instances_starts(n_instances);
-        instances_.reserve(n_instances);
-
-        for (size_t i = 0; i < n_instances; ++i) {
-            parsed_size += ParseBytecode<EmitRef>(in_arr + parsed_size, &instances_starts[i]);
-        }
-
-        for (size_t i = 0; i < n_instances; ++i) {
-            parsed_size += instances_[i].ParseBytecode(in_arr, instances_starts[i]);
-        }
-
-        return parsed_size;
     }
 
 private:
