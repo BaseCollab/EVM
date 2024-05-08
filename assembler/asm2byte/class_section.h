@@ -3,7 +3,7 @@
 
 #include "common/macros.h"
 #include "common/constants.h"
-#include "common/emittable.h"
+#include "emittable.h"
 
 #include <vector>
 #include <cstring>
