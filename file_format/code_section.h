@@ -21,7 +21,8 @@ public:
     DEFAULT_MOVE_SEMANTIC(CodeSection);
     DEFAULT_COPY_SEMANTIC(CodeSection);
 
-    CodeSection(const std::string &name, EmitRef offset = 0) : Offsetable(name, offset)
+    CodeSection(const std::string &name, EmitRef offset = 0) :
+        Offsetable(name, offset)
     {
         instructions_.reserve(N_MAX_INSTRS);
     }
@@ -108,12 +109,14 @@ public:
     }
 
 private:
+
     std::stack<std::pair<std::string, Instruction *>> label_resolution_table_;
     std::unordered_map<std::string, size_t> labels_;
 
     std::vector<Instruction> instructions_;
 
     size_t size_ = 0;
+
 };
 
 } // namespace evm::file_format

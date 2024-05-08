@@ -6,6 +6,7 @@
 #include "common/emittable.h"
 #include "isa/opcodes.h"
 #include "runtime/memory/frame.h"
+#include "emittable.h"
 
 #include <cassert>
 #include <cstddef>
@@ -49,7 +50,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(Instruction);
     DEFAULT_COPY_SEMANTIC(Instruction);
 
-    Instruction(const std::string name, Opcode opcode) : Emittable(name), opcode_(opcode) {}
+    Instruction(const std::string name, Opcode opcode) :
+        Emittable(name),
+        opcode_(opcode)
+    {}
 
     ~Instruction() = default;
 

@@ -17,7 +17,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(StringPool);
     DEFAULT_COPY_SEMANTIC(StringPool);
 
-    StringPool(const std::string name, EmitRef offset = 0) : Offsetable(name, offset) {}
+    StringPool(const std::string name, EmitRef offset = 0) :
+        Offsetable(name, offset)
+    {}
+
     ~StringPool() = default;
 
     size_t GetSize() const

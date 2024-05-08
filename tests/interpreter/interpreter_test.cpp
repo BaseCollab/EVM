@@ -824,4 +824,5 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
     ASSERT_EQ(vm_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
 
+
 } // namespace evm
