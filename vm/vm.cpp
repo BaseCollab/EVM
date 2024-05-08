@@ -1,12 +1,28 @@
 #include "vm.h"
-#include "runtime/memory/allocator/bump_allocator.h"
+#include "runtime/runtime.h"
 
 namespace evm {
 
-VirtualMachine::VirtualMachine()
+/* static */
+runtime::Runtime *EVM::CreateRuntime()
 {
-    interpreter_ = std::make_unique<Interpreter>(this);
-    allocator_ = std::make_unique<memory::BumpAllocator>(/* default size*/);
+    if(!runtime::Runtime::Create()) {
+        std::cerr << "The Runtime has already been created." << std::endl;
+        return nullptr;
+    }
+
+    return runtime::Runtime::GetInstance();
+}
+
+/* static */
+bool EVM::DestroyRuntime()
+{
+    if (!runtime::runtime::Runtime::Destroy()) {
+        std::cerr << "Runtime has alreade been destroyed." << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace evm

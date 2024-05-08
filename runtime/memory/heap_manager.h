@@ -1,0 +1,32 @@
+#ifndef MEMORY_HEAP_MANAGER_H
+#define MEMORY_HEAP_MANAGER_H
+
+#include "runtime/memory/allocator/allocator.h"
+#include "runtime/memory/frame.h"
+
+#include <cstddef>
+
+namespace evm::memory {
+
+class HeapManager {
+public:
+    NO_COPY_SEMANTIC(HeapManager);
+    NO_MOVE_SEMANTIC(HeapManager);
+
+    explicit HeapManager(size_t heap_size);
+    ~HeapManager();
+
+    void *AllocateObject(size_t size);
+    // TODO: implement AllocateFrame function
+    Frame *AllocateFrame();
+
+private:
+    size_t heap_size_ {0};
+    uint8_t *heap_ {nullptr};
+    // TODO: use free-list allocator to allocate object when this allocator will be implemented
+    std::unique_ptr<AllocatorBase> objectAllocator_;
+};
+
+} // namespace evm::memory
+
+#endif // MEMORY_HEAP_MANAGER_H

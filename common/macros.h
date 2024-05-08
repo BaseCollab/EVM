@@ -35,4 +35,11 @@
 
 #define MEMBER_OFFSET(T, F) offsetof(T, F)
 
+// Inline (disabled for DEBUG)
+#if !defined(NDEBUG)
+#define ALWAYS_INLINE
+#else
+#define ALWAYS_INLINE __attribute__((always_inline)) inline
+#endif   
+
 #endif // EVM_COMMON_MACROS_H
