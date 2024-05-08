@@ -129,7 +129,7 @@ public:
         size_t instances_size = 0;
 
         for (auto &it : instances_) {
-            instances_size += it->GetSize();
+            instances_size += it.GetSize();
         }
 
         return instances_size + Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize);

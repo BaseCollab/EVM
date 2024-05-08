@@ -6,12 +6,12 @@
 #include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
 #include "header.h"
-#include "code_section.h"
 
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <stack>
 #include <vector>
 #include <unordered_map>
 
@@ -21,12 +21,10 @@ bool AsmToByte::ParseAsm()
 {
     PrepareLinesFromBuffer();
 
-    if (!GenRawInstructions(&header_, &code_section_)) {
+    if (!CreateInstructionsFromLines(&header_)) {
         std::cerr << "Error in CreateInstructionsFromLines" << std::endl;
         return false;
     }
-
-    ResolveDependencies(&header_, &code_section_);
 
     return true;
 }
@@ -48,7 +46,7 @@ bool AsmToByte::ParseAsmString(const std::string &asm_string)
 
 bool AsmToByte::EmitBytecode()
 {
-    header_.EmitBytecode(&bytecode_);
+    header_.EmitBytecode(bytecode_);
 
     // bytecode_.insert(bytecode_.end(), HeaderReference::STRING_PULL, 0);
 
@@ -61,12 +59,12 @@ bool AsmToByte::EmitBytecode()
     //     code_section_offset += string_size + 1;
     // }
 
-    // std::memcpy(bytecode_.data() + CODE_SECTION_PTR,
-    //     &code_section_offset, sizeof(code_section_offset));
+    std::memcpy(bytecode_.data() + CODE_SECTION_PTR,
+        &code_section_offset, sizeof(code_section_offset));
 
-    // for (auto &it : instructions_) {
-    //     it->EmitBytecode(&bytecode_);
-    // }
+    for (auto &it : instructions_) {
+        it->EmitBytecode(&bytecode_);
+    }
 
     return true;
 }
@@ -155,23 +153,20 @@ void AsmToByte::PrepareLinesFromBuffer()
     }
 }
 
-bool AsmToByte::ResolveDependencies(Header *header, CodeSection *code_section)
+bool AsmToByte::FillHeaderAndResolve(Header *header)
 {
     ClassSection *class_section = header->GetClassSection();
     StringPool *string_pool = header->GetStringPool();
-
-    // here we set all offsets to sections and resolve after
-
-    if (string_pool->ResolveInstrs() == false) {
-        std::cerr << "Couldn't resolve all strings pool references" << std::endl;
-        return false;
-    }
 }
 
-bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
+bool AsmToByte::CreateInstructionsFromLines(Header *header)
 {
     ClassSection *class_section = header->GetClassSection();
     StringPool *string_pool = header->GetStringPool();
+
+    std::stack<std::pair<std::string, Instruction *>> label_resolving_table;
+
+    size_t code_section_offset_cur = 0; // offset in bytecode from the beginning of the code section
 
     bool in_class_defition = false;
 
@@ -180,8 +175,8 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
 
         // Label
         if (line_args[0].back() == ':') {
-            code_section->AddLabel(line_args[0]);
-            continue;
+            labels_.insert({line_args[0].substr(0, line_args[0].size() - 1), code_section_offset_cur});
+            continue; // no opcode in the line with label:
         }
 
         // Class definition start/end
@@ -209,12 +204,16 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
             continue;
         }
 
+        std::cout << line_args[0] << std::endl;
+
         // If we here, only assembler instruction is assumed to be in a line
-        Opcode opcode = common::StringToOpcode(line_args[0]);
         Instruction *instr = nullptr;
+        Opcode opcode = common::StringToOpcode(line_args[0]);
 
         if (opcode != Opcode::INVALID) {
-            instr = code_section->AddInstr(opcode);
+            auto unique_instr = std::make_unique<Instruction>(opcode);
+            instr = unique_instr.get();
+            instructions_.push_back(std::move(unique_instr));
         }
 
         // clang-format off
@@ -301,7 +300,7 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
                     double double_imm = std::stod(line_args[2]);
                     std::memcpy(&immediate, &double_imm, sizeof(immediate));
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    label_resolving_table.push({line_args[2], instr});
                     immediate = 0;
                 }
 
@@ -323,7 +322,8 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    label_resolving_table.push({line_args[2], instr});
+                    immediate = -code_section_offset_cur;
                 }
 
                 instr->Set32Imm(immediate);
@@ -359,7 +359,8 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[1], instr);
+                    label_resolving_table.push({line_args[1], instr});
+                    immediate = -code_section_offset_cur;
                 }
 
                 instr->Set32Imm(immediate);
@@ -413,11 +414,13 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
             }
 
             case Opcode::STRING: {
-                if (!string_pool->HasInstance(line_args[2])) {
-                    string_pool->AddInstance(line_args[2]);
+                auto string_pos = string_pull_.find(line_args[2]);
+                if (string_pos == string_pull_.end()) {
+                    string_pull_[line_args[2]] = string_pull_size + STRING_PULL;
+                    string_pull_size += std::strlen(line_args[2].c_str()) + 1;
                 }
 
-                string_pool->AddInstrToResolve(instr);
+                string_resolving_table.push(instr);
 
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetStringOp(line_args[2]);
@@ -431,7 +434,41 @@ bool AsmToByte::GenRawInstructions(Header *header, CodeSection *code_section)
         }
         // clang-format on
 
-        code_section->ValidateLastInstr();
+        instr->SetOffset(code_section_offset_cur);
+        code_section_offset_cur += instr->GetBytesSize();
+    }
+
+    size_t n_unresolved_labels = 0;
+
+    while (!label_resolving_table.empty()) {
+        auto to_resolve = label_resolving_table.top();
+
+        if (labels_.find(to_resolve.first) != labels_.end()) {
+            size_t imm_size = to_resolve.second->GetImmSize();
+            switch (imm_size) {
+                case sizeof(int32_t):
+                    to_resolve.second->Add32Imm(labels_[to_resolve.first]);
+                    break;
+                case sizeof(int64_t):
+                    to_resolve.second->Add64Imm(labels_[to_resolve.first] + HeaderReference::STRING_PULL +
+                                                string_pull_size);
+                    break;
+            }
+        } else {
+            std::cerr << "Label " << std::quoted(to_resolve.first) << "is unresolved" << std::endl;
+            n_unresolved_labels++;
+        }
+
+        label_resolving_table.pop();
+    }
+
+    if (n_unresolved_labels > 0)
+        return false;
+
+    while (!string_resolving_table.empty()) {
+        auto to_resolve = string_resolving_table.top();
+        to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()]);
+        string_resolving_table.pop();
     }
 
     return true;
