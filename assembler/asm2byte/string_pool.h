@@ -35,16 +35,6 @@ public:
         return offset_;
     }
 
-    size_t GetStringsStart() const
-    {
-        return offset_ + Emittable::GetSize();
-    }
-
-    size_t GetSize() const
-    {
-        return Emittable::GetSize() + size_;
-    }
-
     bool HasInstance(const std::string &str) const
     {
         auto string_pos = string_pull_.find(str);
@@ -54,7 +44,7 @@ public:
     void AddInstance(const std::string &str)
     {
         string_pull_[str] = size_;
-        size_ += str.size() + 1;
+        size_ += std::strlen(str.c_str()) + 1;
     }
 
     void AddInstrToResolve(Instruction *instr)
@@ -64,14 +54,13 @@ public:
 
     bool ResolveInstrs()
     {
-        // Not set offset => don't know real offset of string literals => cannot resolve instsrs
         if (!offset_) {
             return false;
         }
 
         while (!resolution_table_.empty()) {
             Instruction *to_resolve = resolution_table_.top();
-            to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()] + GetStringsStart());
+            to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()] + offset_);
             resolution_table_.pop();
         }
 
@@ -80,16 +69,12 @@ public:
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
-        EmitSize emit_size = 0;
 
-        emit_size += Emittable::EmitBytecode(out_arr);
+    }
 
-        for (auto &str_inst : string_pull_) {
-            size_t str_size = str_inst.first.size();
-            emit_size += Emittable::EmitBytecode(out_arr, str_inst.first.c_str(), str_size + 1, str_size);
-        }
-
-        return emit_size;
+    size_t GetSize() const
+    {
+        return size_;
     }
 
 private:
