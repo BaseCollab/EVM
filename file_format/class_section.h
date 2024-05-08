@@ -9,7 +9,7 @@
 #include <cstring>
 #include <string>
 
-namespace evm::file_format {
+namespace evm::asm2byte {
 
 class ClassField : Emittable {
 public:
@@ -138,6 +138,6 @@ using Class = Section<ClassField>;
 using ClassSection = Section<Class>;
 
 
-} // namespace evm::file_format
+} // namespace evm::asm2byte
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__CLASS_SECTION_H

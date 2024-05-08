@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <stack>
 
-namespace evm::file_format {
+namespace evm::asm2byte {
 
 class CodeSection : public Offsetable {
 public:
@@ -119,6 +119,6 @@ private:
 
 };
 
-} // namespace evm::file_format
+} // namespace evm::asm2byte
 
 #endif // EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H

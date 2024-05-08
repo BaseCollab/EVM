@@ -10,15 +10,18 @@ int Main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    file_format::File file_arch("out.ea");
-
     auto asm2byte = AsmToByte();
-    bool parsed = asm2byte.ParseAsmFile(argv[1], &file_arch);
+    bool parsed = asm2byte.ParseAsmFile(argv[1]);
     if (!parsed) {
         std::cerr << "Error when parsing asm file '" << argv[1] << "'" << std::endl;
     }
 
-    bool dumped = file_arch.EmitBytecode();
+    bool emitted = asm2byte.EmitBytecode();
+    if (!emitted) {
+        std::cerr << "Error when emitting bytecode of file '" << argv[1] << "'" << std::endl;
+    }
+
+    bool dumped = asm2byte.DumpBytesInBytecode("out.ea");
     if (!dumped) {
         std::cerr << "Error when dumping bytecode of file '" << argv[1] << "'" << std::endl;
     }
