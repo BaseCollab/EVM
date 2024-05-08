@@ -129,11 +129,6 @@ public:
         return bytcode_offset_;
     }
 
-    Opcode GetOpcode() const
-    {
-        return opcode_;
-    }
-
     size_t GetBytesSize() const
     {
         return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;

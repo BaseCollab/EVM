@@ -31,20 +31,19 @@ public:
 
     bool HasInstance(const std::string &str) const
     {
-        auto string_pos = string_map_.find(str);
-        return string_pos != string_map_.end();
+        auto string_pos = string_pull_.find(str);
+        return string_pos != string_pull_.end();
     }
 
     void AddInstance(const std::string &str)
     {
-        string_map_[str] = size_;
-        string_pull_.push_back(str);
+        string_pull_[str] = size_;
         size_ += str.size() + 1;
     }
 
     void AddInstrToResolve(Instruction *instr)
     {
-        resolution_table_.push_back(instr);
+        resolution_table_.push(instr);
     }
 
     bool ResolveInstrs()
@@ -54,11 +53,11 @@ public:
             return false;
         }
 
-        for (auto &to_resolve : resolution_table_) {
-            to_resolve->Set32Imm(string_map_[to_resolve->GetStringOp()] + GetDataOffset());
+        while (!resolution_table_.empty()) {
+            Instruction *to_resolve = resolution_table_.top();
+            to_resolve->Set32Imm(string_pull_[to_resolve->GetStringOp()] + GetDataOffset());
+            resolution_table_.pop();
         }
-
-        resolution_table_.clear();
 
         return true;
     }
@@ -70,17 +69,16 @@ public:
         emit_size += Emittable::EmitBytecode(out_arr);
 
         for (auto &str_inst : string_pull_) {
-            size_t str_size = str_inst.size();
-            emit_size += Emittable::EmitBytecode(out_arr, str_inst.c_str(), str_size + 1, str_size);
+            size_t str_size = str_inst.first.size();
+            emit_size += Emittable::EmitBytecode(out_arr, str_inst.first.c_str(), str_size + 1, str_size);
         }
 
         return emit_size;
     }
 
 private:
-    std::unordered_map<std::string, size_t> string_map_;
-    std::vector<std::string> string_pull_;
-    std::vector<Instruction *> resolution_table_;
+    std::unordered_map<std::string, size_t> string_pull_;
+    std::stack<Instruction *> resolution_table_;
 
     size_t size_ = 0;
 };
