@@ -372,12 +372,13 @@ DEFINE_INSTR
     }
 )
 
-// Object operations
+// Array operations
 
 DEFINE_INSTR
 (
     // newarr rd, type, size
     // pseudo: new type(size)
+    /// TODO: Add object/str/array types additionally to primitive ones
     NEWARR, 0x28,
     {
         RD_I_ASSIGN(CREATE_ARR(GET_ARRAY_TYPE(), IMM_I32()));
@@ -389,6 +390,7 @@ DEFINE_INSTR
 (
     // larr rd, rs1(ptr), rs2(idx)
     // pseudo: rd = ptr[idx]
+    /// Load element from array to register
     LARR, 0x29,
     {
         RD_I_ASSIGN(LOAD_FROM_ARR(RS1_I(), RS2_I()));
@@ -401,6 +403,7 @@ DEFINE_INSTR
     // starr rs1(ptr), rs2(idx), rs3(src_reg_idx)
     // val = registers[src_reg_idx]
     // pseudo: ptr[idx] = val
+    /// Store element from register to array
     STARR, 0x2a,
     {
         STORE_TO_ARR(RS1_I(), RS2_I(), RS3_I());
@@ -408,9 +411,13 @@ DEFINE_INSTR
     }
 )
 
+// String operations
+
 DEFINE_INSTR
 (
-    STRING, 0x2b,
+    /// Put offset in string-pool to register
+    /// TODO: Remove this instruction (?)
+    STR_IMMUT, 0x2b,
     {
         RD_I_ASSIGN(IMM_I32());
         PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
@@ -419,9 +426,78 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
-    PRSTR, 0x2c,
+    /// Create string-object from offset in string-pool, put ptr to register
+    NEWSTR, 0x2c,
+    {
+        /// TODO: add implementation
+    }
+)
+
+DEFINE_INSTR
+(
+    /// Create new string-object with concatenated string
+    STRCONCAT, 0x2d,
+    {
+        /// TODO: add implementation
+    }
+)
+
+DEFINE_INSTR
+(
+    /// Print string-object
+    PRSTR, 0x2e,
+    {
+        /// TODO: add implementation
+    }
+)
+
+DEFINE_INSTR
+(
+    /// Print immutable string from offset in string-pool
+    PRSTR_IMMUT, 0x2f,
     {
         printf("%s\n", BYTECODE_OFFSET(RS1_I()));
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+// Object-class operations
+
+DEFINE_INSTR
+(
+    /// Create object, put ptr to register
+    NEWOBJ, 0x30,
+    {
+        /// TODO: add implementation
+    }
+)
+
+DEFINE_INSTR
+(
+    /// Put field of an object to register (by class offset)
+    OBJ_GET_FIELD, 0x31,
+    {
+        /// TODO: add implementation
+    }
+)
+
+DEFINE_INSTR
+(
+    /// Set field of an object from register (by class offset)
+    OBJ_SET_FIELD, 0x32,
+    {
+        /// TODO: add implementation
+    }
+)
+
+// General object operations
+
+DEFINE_INSTR
+(
+    /// Create object, which is a copy of another object
+    /// Works for objects-classes, strings, arrays
+    CPOBJ, 0x33,
+    {
+        /// TODO: add implementation
     }
 )
