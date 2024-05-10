@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <iostream>
 
-namespace evm {
+namespace evm::runtime {
 
 Frame::Frame(size_t restore_pc, size_t n_local_vars, Register arg1, Register arg2, Register arg3, Register arg4)
     : restore_pc_ {restore_pc}
@@ -44,4 +44,4 @@ void Frame::SetRestorePC(size_t restore_pc)
     restore_pc_ = restore_pc;
 }
 
-} // namespace evm
+} // namespace evm::runtime

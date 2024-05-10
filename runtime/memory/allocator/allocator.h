@@ -1,12 +1,12 @@
-#ifndef EVM_MEMORY_ALLOCATOR_H
-#define EVM_MEMORY_ALLOCATOR_H
+#ifndef EVM_RUNTIME_MEMORY_ALLOCATOR_ALLOCATOR_H
+#define EVM_RUNTIME_MEMORY_ALLOCATOR_ALLOCATOR_H
 
 #include "common/macros.h"
 
 #include <cstddef>
 #include <memory>
 
-namespace evm::memory {
+namespace evm::runtime {
 
 class Array;
 
@@ -16,8 +16,6 @@ public:
         INVALID = -1,
         BUMP = 0,
     };
-
-    static constexpr size_t DEFAULT_HEAP_SIZE = 1 << 20; // 1 Mb
 
 public:
     NO_COPY_SEMANTIC(AllocatorBase);
@@ -39,6 +37,6 @@ private:
     AllocatorType allocator_type_ {AllocatorType::BUMP};
 };
 
-} // namespace evm::memory
+} // namespace evm::runtime
 
-#endif // EVM_MEMORY_ALLOCATOR_H
+#endif // EVM_RUNTIME_MEMORY_ALLOCATOR_ALLOCATOR_H

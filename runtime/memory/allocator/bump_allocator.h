@@ -1,9 +1,9 @@
-#ifndef EVM_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
-#define EVM_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
+#ifndef EVM_RUNTIME_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
+#define EVM_RUNTIME_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
 
 #include "allocator.h"
 
-namespace evm::memory {
+namespace evm::runtime {
 
 class Array;
 
@@ -28,8 +28,11 @@ public:
     NO_COPY_SEMANTIC(BumpAllocator);
     NO_MOVE_SEMANTIC(BumpAllocator);
 
-    explicit BumpAllocator(size_t heap_capacity = DEFAULT_HEAP_SIZE);
-    ~BumpAllocator() override;
+    explicit BumpAllocator(uint8_t *heap, size_t heap_capacity)
+        : heap_(heap), next_alloc_(heap_), heap_capacity_(heap_capacity)
+    {
+    }
+    ~BumpAllocator() override = default;
 
     size_t GetHeapCapacity() const override
     {
@@ -51,6 +54,6 @@ private:
     size_t heap_capacity_ {0};
 };
 
-} // namespace evm::memory
+} // namespace evm::runtime
 
-#endif // EVM_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H
+#endif // EVM_RUNTIME_MEMORY_ALLOCATOR_BUMP_ALLOCATOR_H

@@ -1,19 +1,19 @@
-#include "array.h"
-#include "runtime/memory/allocator/bump_allocator.h"
+#include "runtime/memory/types/array.h"
+#include "runtime/runtime.h"
 
 #include <iostream>
 
-namespace evm::memory {
+namespace evm::runtime {
 
-void *Array::Create(const VirtualMachine &vm, Array::Type array_type, size_t count)
+void *Array::Create(Array::Type array_type, size_t count)
 {
-    auto *allocator = vm.GetAllocator();
-    assert(allocator != nullptr);
+    auto *heap_manager = Runtime::GetInstance()->GetHeapManager();
+    assert(heap_manager != nullptr);
 
     size_t elem_size = GetSizeOfArrayType(array_type);
 
-    void *array_ptr = allocator->Alloc(sizeof(Array));
-    void *array_data = allocator->Alloc(count * elem_size);
+    void *array_ptr = heap_manager->AllocateObject(sizeof(Array));
+    void *array_data = heap_manager->AllocateObject(count * elem_size);
 
     Array array;
     array.SetSize(count);
@@ -138,4 +138,4 @@ Array::Type Array::GetTypeFromString(std::string_view string)
     return Array::Type::INVALID;
 }
 
-} // namespace evm::memory
+} // namespace evm::runtime

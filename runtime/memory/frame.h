@@ -9,7 +9,7 @@
 #include <vector>
 #include <cstddef>
 
-namespace evm {
+namespace evm::runtime {
 
 class Frame {
 public:
@@ -35,6 +35,6 @@ private:
     size_t restore_pc_ {0}; // pc to save before call of another function
 };
 
-} // namespace evm
+} // namespace evm::runtime
 
 #endif // EVM_MEMORY_FRAME_H

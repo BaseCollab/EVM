@@ -317,7 +317,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::CALL: {
                 instr->SetRs1(GetRegisterIdxFromString(line_args[1]));
 
-                size_t n_args = std::min(line_args.size() - 2, Frame::N_PASSED_ARGS_DEFAULT);
+                size_t n_args = std::min(line_args.size() - 2, runtime::Frame::N_PASSED_ARGS_DEFAULT);
                 for (size_t i = 0; i < n_args; ++i) {
                     instr->SetArg(i, GetRegisterIdxFromString(line_args[2 + i]));
                 }
@@ -328,7 +328,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
 
-                auto arr_type = memory::Array::GetTypeFromString(line_args[2]);
+                auto arr_type = runtime::Array::GetTypeFromString(line_args[2]);
                 instr->SetRs1(static_cast<byte_t>(arr_type));
 
                 int32_t arr_size = 0;

@@ -1,5 +1,5 @@
-#ifndef EVM_INTERPRETER_H
-#define EVM_INTERPRETER_H
+#ifndef EVM_RUNTIME_INTERPRETER_H
+#define EVM_RUNTIME_INTERPRETER_H
 
 #include "common/macros.h"
 #include "common/constants.h"
@@ -10,24 +10,20 @@
 #include <cstddef>
 #include <stack>
 
-namespace evm {
-
-class VirtualMachine;
+namespace evm::runtime {
 
 class Interpreter {
 public:
     NO_COPY_SEMANTIC(Interpreter);
     NO_MOVE_SEMANTIC(Interpreter);
 
-    Interpreter(VirtualMachine *vm) : vm_(vm) {}
+    Interpreter() = default;
     ~Interpreter() = default;
 
     void Run(const byte_t *bytecode);
     const Frame *getCurrFrame() const;
 
 private:
-    VirtualMachine *vm_ {nullptr};
-
     std::stack<Frame> frames_;
 
     Frame *frame_cur_ {nullptr};
@@ -36,6 +32,6 @@ private:
     Register accum_;
 };
 
-} // namespace evm
+} // namespace evm::runtime
 
-#endif // EVM_INTERPRETER_H
+#endif // EVM_RUNTIME_INTERPRETER_H

@@ -11,7 +11,7 @@
 #include <cstdio>
 #include <cmath>
 
-namespace evm {
+namespace evm::runtime {
 
 // Disable warning because the function uses computed goto
 #if defined(__clang__)
@@ -105,18 +105,18 @@ void Interpreter::Run(const byte_t *bytecode)
     #define GET_ARRAY_TYPE() ISA_GET_TYPE(bytecode + pc_)
 
     #define CREATE_ARR(type, size) \
-        reinterpret_cast<int64_t>(memory::Array::Create(*vm_, static_cast<memory::Array::Type>(type), size))
+        reinterpret_cast<int64_t>(Array::Create(static_cast<Array::Type>(type), size))
 
     #define LOAD_FROM_ARR(array_ptr, idx)                                    \
     ({                                                                       \
-        memory::Array *array = reinterpret_cast<memory::Array *>(array_ptr); \
+        Array *array = reinterpret_cast<Array *>(array_ptr); \
         int64_t value = 0;                                                   \
         array->Get(&value, idx);                                             \
         value;                                                               \
     })
 
     #define STORE_TO_ARR(array_ptr, array_idx, src_reg)                      \
-        memory::Array *array = reinterpret_cast<memory::Array *>(array_ptr); \
+        Array *array = reinterpret_cast<Array *>(array_ptr); \
         array->Set(src_reg, array_idx);
 
     #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                            \
@@ -164,4 +164,4 @@ const Frame *Interpreter::getCurrFrame() const
 #pragma GCC diagnostic pop
 #endif
 
-} // namespace evm
+} // namespace evm::runtime
