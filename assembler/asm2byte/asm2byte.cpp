@@ -1,7 +1,7 @@
 #include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
-#include "runtime/memory/types/array.h"
+#include "runtime/memory/type.h"
 #include "file_format/file.h"
 #include "file_format/header.h"
 #include "file_format/code_section.h"
@@ -148,9 +148,9 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
         // Class definition fields
         if (in_class_defition == true) {
-            file_format::ClassField::Type type = file_format::ClassField::FieldTypeFromString(line_args[0]);
+            file_format::ClassField::Type type = memory::GetTypeFromString(line_args[0]);
 
-            if (type == file_format::ClassField::Type::USER_CLASS) {
+            if (type == file_format::ClassField::Type::OBJECT) {
                 class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
             } else {
                 class_section->GetInstances()->back().AddInstance({line_args[1], type});
@@ -328,13 +328,14 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
 
-                auto arr_type = runtime::Array::GetTypeFromString(line_args[2]);
+                /// TODO: replace classes to offsets: add top resolution_table, atfre that resolve
+                auto arr_type = memory::GetTypeFromString(line_args[2]);
                 instr->SetRs1(static_cast<byte_t>(arr_type));
 
                 int32_t arr_size = 0;
                 if (common::IsNumber<int32_t>(line_args[3])) {
                     arr_size = std::stol(line_args[3]);
-                } else if (common::IsNumber<double>(line_args[3])) {
+                } else {
                     std::cerr << "Error immediate in newarr arg " << std::stol(line_args[1]) << "; Arg should be integer"
                               << std::endl;
                     return false;
@@ -358,18 +359,19 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
-            case Opcode::STRING: {
-                if (!string_pool->HasInstance(line_args[2])) {
-                    string_pool->AddInstance(line_args[2]);
-                }
+            (void) string_pool;
+            // case Opcode::STRING: {
+            //     if (!string_pool->HasInstance(line_args[2])) {
+            //         string_pool->AddInstance(line_args[2]);
+            //     }
 
-                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
-                instr->SetStringOp(line_args[2]);
+            //     instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+            //     instr->SetStringOp(line_args[2]);
 
-                string_pool->AddInstrToResolve(instr);
+            //     string_pool->AddInstrToResolve(instr);
 
-                break;
-            }
+            //     break;
+            // }
 
             default:
                 std::cerr << "Default should not be reachable" << std::endl;

@@ -4,6 +4,7 @@
 #include "common/macros.h"
 #include "common/constants.h"
 #include "common/emittable.h"
+#include "runtime/memory/type.h"
 
 #include <vector>
 #include <cstring>
@@ -13,17 +14,7 @@ namespace evm::file_format {
 
 class ClassField : Emittable {
 public:
-    // clang-format off
-    enum Type : Emittable::EmitType {
-        INVALID    = 0,
-        DOUBLE     = 1,
-        BYTE       = 2,
-        INT        = 3,
-        USER_CLASS = 4,
-        ARRAY      = 5, // not used actually right now
-        STRING     = 6, // not used actually right now
-    };
-    // clang-format on
+    using Type = memory::Type;
 
 public:
     DEFAULT_MOVE_SEMANTIC(ClassField);
@@ -44,6 +35,11 @@ public:
     const std::string &GetTypeName() const
     {
         return type_name_;
+    }
+
+    size_t GetTypeSize() const
+    {
+        return static_cast<size_t>(memory::GetSizeOfType(type_));
     }
 
     void SetType(Type type)
@@ -89,51 +85,14 @@ public:
         return parsed_size - already_parsed;
     }
 
-    static std::string FieldTypeToString(Type type)
-    {
-        switch (type) {
-            case DOUBLE:
-                return "double";
-            case BYTE:
-                return "byte";
-            case INT:
-                return "int";
-            case USER_CLASS:
-                return "class";
-            case ARRAY:
-                return "array";
-            case STRING:
-                return "string";
-            default:
-                return "<invalid>";
-        }
-    }
-
-    static Type FieldTypeFromString(const std::string &type)
-    {
-        if (!type.compare("double")) {
-            return Type::DOUBLE;
-        } else if (!type.compare("byte")) {
-            return Type::BYTE;
-        } else if (!type.compare("int")) {
-            return Type::INT;
-        } else if (!type.compare("class")) {
-            return Type::USER_CLASS;
-        } else if (!type.compare("array")) {
-            return Type::ARRAY;
-        } else if (!type.compare("string")) {
-            return Type::STRING;
-        }
-
-        return Type::INVALID;
-    }
-
 private:
     Type type_ = Type::INVALID;
     std::string type_name_;
 };
 
+/// TODO: Add additional functionality to get info about offset of fields
 using Class = Section<ClassField>;
+
 using ClassSection = Section<Class>;
 
 } // namespace evm::file_format

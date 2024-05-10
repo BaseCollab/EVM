@@ -376,8 +376,8 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
-    // newarr rd, type, size
-    // pseudo: new type(size)
+    /// newarr rd, type, size
+    /// pseudo: new type(size)
     /// TODO: Add object/str/array types additionally to primitive ones
     NEWARR, 0x28,
     {

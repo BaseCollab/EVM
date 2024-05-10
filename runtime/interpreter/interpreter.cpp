@@ -105,7 +105,7 @@ void Interpreter::Run(const byte_t *bytecode)
     #define GET_ARRAY_TYPE() ISA_GET_TYPE(bytecode + pc_)
 
     #define CREATE_ARR(type, size) \
-        reinterpret_cast<int64_t>(Array::Create(static_cast<Array::Type>(type), size))
+        reinterpret_cast<int64_t>(Array::Create(static_cast<memory::Type>(type), size))
 
     #define LOAD_FROM_ARR(array_ptr, idx)                                    \
     ({                                                                       \
