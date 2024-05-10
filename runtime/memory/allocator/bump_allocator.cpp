@@ -4,26 +4,7 @@
 #include <iostream>
 #include <cassert>
 
-namespace evm::memory {
-
-BumpAllocator::BumpAllocator(size_t heap_capacity) : heap_capacity_(heap_capacity)
-{
-    if (heap_capacity <= 0) {
-        std::cerr << "Invalid heap size, can not allocate heap" << std::endl;
-        return;
-    }
-
-    heap_ = new uint8_t[heap_capacity_];
-    assert(heap_ && "Can not allocate heap");
-
-    next_alloc_ = heap_;
-}
-
-/* override */
-BumpAllocator::~BumpAllocator()
-{
-    delete[] heap_;
-}
+namespace evm::runtime {
 
 /* override */
 void *BumpAllocator::Alloc(size_t size)
@@ -41,4 +22,4 @@ void *BumpAllocator::Alloc(size_t size)
     return alloc_ptr;
 }
 
-} // namespace evm::memory
+} // namespace evm::runtime

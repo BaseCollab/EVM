@@ -7,7 +7,7 @@
 
 #include <cstddef>
 
-namespace evm {
+namespace evm::runtime {
 
 class Register {
 public:
@@ -77,6 +77,6 @@ private:
     };
 };
 
-} // namespace evm
+} // namespace evm::runtime
 
 #endif // EVM_MEMORY_REG_H

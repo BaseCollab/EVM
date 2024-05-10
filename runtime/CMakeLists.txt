@@ -7,6 +7,8 @@ set(SOURCES
     memory/allocator/bump_allocator.cpp
     memory/types/array.cpp
     memory/frame.cpp
+    memory/heap_manager.cpp
+    runtime.cpp
 )
 
 add_library(runtime_impl OBJECT ${SOURCES})

@@ -112,7 +112,7 @@ public:
     {
         have_args_ = true;
 
-        assert(arg_num < Frame::N_PASSED_ARGS_DEFAULT);
+        assert(arg_num < runtime::Frame::N_PASSED_ARGS_DEFAULT);
         args_[arg_num] = arg_reg;
     }
 
@@ -133,7 +133,7 @@ public:
 
     size_t GetBytesSize() const
     {
-        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * Frame::N_PASSED_ARGS_DEFAULT;
+        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * runtime::Frame::N_PASSED_ARGS_DEFAULT;
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
@@ -150,7 +150,7 @@ public:
                 (imm_.num_bytes_ == 4) ? static_cast<void *>(&(imm_.imm32_)) : static_cast<void *>(&(imm_.imm64_));
             std::memcpy(out_arr->data() + prev_size, imm_ptr, imm_.num_bytes_);
         } else if (have_args_ == true) {
-            for (size_t i = 0; i < Frame::N_PASSED_ARGS_DEFAULT; ++i) {
+            for (size_t i = 0; i < runtime::Frame::N_PASSED_ARGS_DEFAULT; ++i) {
                 out_arr->push_back(args_[i]);
             }
         }
@@ -172,7 +172,7 @@ private:
     std::string string_op_;
 
     bool have_args_ {false};
-    byte_t args_[Frame::N_PASSED_ARGS_DEFAULT] = {0};
+    byte_t args_[runtime::Frame::N_PASSED_ARGS_DEFAULT] = {0};
 };
 
 } // namespace evm::file_format

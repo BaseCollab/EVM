@@ -3,12 +3,11 @@
 
 #include "common/macros.h"
 
-#include "vm/vm.h"
-
 #include <cstddef>
 #include <cstring>
+#include <string_view>
 
-namespace evm::memory {
+namespace evm::runtime {
 
 class Array {
 public:
@@ -29,7 +28,7 @@ public:
     Array() = default;
     ~Array() = default;
 
-    static void *Create(const VirtualMachine &vm, Type array_type, size_t count);
+    static void *Create(Type array_type, size_t count);
 
     const void *GetData() const
     {
@@ -86,6 +85,6 @@ private:
     void *data_ {nullptr};
 };
 
-} // namespace evm::memory
+} // namespace evm::runtime
 
 #endif // EVM_MEMORY_OBJECTS_ARRAY_H
