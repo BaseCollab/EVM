@@ -150,8 +150,6 @@ private:
                 case memory::Type::INVALID: { // case of object type
                     ssize_t class_num = class_section->GetIdxOfInstance(to_resolve.first);
 
-                    std::cout << "HEHEHE " << to_resolve.first << "\n";
-
                     if (class_num >= 0) {
                         if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
                             std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES <<
