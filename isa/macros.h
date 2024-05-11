@@ -15,7 +15,8 @@ using instr_size_t = word_t;
 #define ISA_GET_RS2(instr_ptr) *(instr_ptr + 3)
 #define ISA_GET_RS3(instr_ptr) ISA_GET_RD(instr_ptr)
 
-#define ISA_GET_TYPE(instr_ptr) *(instr_ptr + 2)
+/// TODO: Get class type if number is >= 0
+#define ISA_GET_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 2))
 
 #define ISA_CALL_GET_REG1(instr_ptr) *(instr_ptr + 4)
 #define ISA_CALL_GET_REG2(instr_ptr) *(instr_ptr + 5)

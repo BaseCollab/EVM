@@ -746,9 +746,9 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 TEST_F(InterpreterTest, STRING_PULL)
 {
     auto source = R"(
-        string x0, 'kek lol'
-        string x1, 'kek lol'
-        string x2, 'kek lol'
+        str_immut x0, 'kek lol'
+        str_immut x1, 'kek lol'
+        str_immut x2, 'kek lol'
 
         exit
     )";
@@ -808,9 +808,9 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
             double i;
         .class
 
-        string x0, 'kek lol'
-        string x1, 'kek lol'
-        string x2, 'kek lol cheburek'
+        str_immut x0, 'kek lol'
+        str_immut x1, 'kek lol'
+        str_immut x2, 'kek lol cheburek'
 
         movif x1, 23
         exit

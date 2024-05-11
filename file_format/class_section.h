@@ -52,6 +52,11 @@ public:
         return type_;
     }
 
+    size_t GetRuntimeSize() const
+    {
+        return GetTypeSize();
+    }
+
     size_t GetSize() const
     {
         return sizeof(Type) + sizeof(EmitNameSize) + type_name_.size() + 1 + Emittable::GetSize();
@@ -90,10 +95,34 @@ private:
     std::string type_name_;
 };
 
-/// TODO: Add additional functionality to get info about offset of fields
-using Class = Section<ClassField>;
+class Class : public Section<ClassField>
+{
+public:
+    Class(const std::string name = "") : Section<ClassField>(name) {}
+    ~Class() = default;
 
-using ClassSection = Section<Class>;
+    size_t GetRuntimeSize() const
+    {
+        size_t runtime_size = 0;
+        for (auto &it : instances_) {
+            runtime_size += it.GetRuntimeSize();
+        }
+
+        return runtime_size;
+    }
+};
+
+class ClassSection : public Section<Class>
+{
+public:
+    ClassSection(const std::string name = "") : Section<Class>(name) {}
+    ~ClassSection() = default;
+
+    size_t GetRuntimeSize() const
+    {
+        return 0; // Class section do nothing in runtime
+    }
+};
 
 } // namespace evm::file_format
 

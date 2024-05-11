@@ -327,13 +327,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
-
-                /// TODO: replace classes to offsets: add top resolution_table, after that resolve
-
-                auto arr_type = memory::GetTypeFromString(line_args[2]);
-                instr->SetRs1(static_cast<byte_t>(arr_type));
-
-                code_section->AddInstrToResolve(line_args[1], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
 
                 int32_t arr_size = 0;
                 if (common::IsNumber<int32_t>(line_args[3])) {
@@ -362,19 +356,18 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
-            (void) string_pool;
-            // case Opcode::STRING: {
-            //     if (!string_pool->HasInstance(line_args[2])) {
-            //         string_pool->AddInstance(line_args[2]);
-            //     }
+            case Opcode::STR_IMMUT: {
+                if (!string_pool->HasInstance(line_args[2])) {
+                    string_pool->AddInstance(line_args[2]);
+                }
 
-            //     instr->SetRd(GetRegisterIdxFromString(line_args[1]));
-            //     instr->SetStringOp(line_args[2]);
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                instr->SetStringOp(line_args[2]);
 
-            //     string_pool->AddInstrToResolve(instr);
+                string_pool->AddInstrToResolve(instr);
 
-            //     break;
-            // }
+                break;
+            }
 
             default:
                 std::cerr << "Default should not be reachable" << std::endl;

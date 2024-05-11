@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 
+#include "common/config.h"
 #include "common/utils/bitops.h"
 #include "common/macros.h"
 #include "common/constants.h"
@@ -144,17 +145,29 @@ private:
         while (!class_resolution_table_.empty()) {
             auto to_resolve = class_resolution_table_.top();
 
-            ssize_t class_num = class_section->GetIdxOfInstance(to_resolve.first);
-            if (class_num >= 0) {
-                if (static_cast<dword_t>(class_num) & ~bitops::Ones<bitops::BitSizeof<hword_t>() - 1, 0>()) {
-                    std::cerr << __func__ << ": amount of classes is more than " << (1 << bitops::BitSizeof<hword_t>()) <<
-                            " (access in class-section for class #" << class_num << std::endl;
-                    return false;
-                }
+            memory::Type type = memory::GetTypeFromString(to_resolve.first);
+            switch (type) {
+                case memory::Type::INVALID: { // case of object type
+                    ssize_t class_num = class_section->GetIdxOfInstance(to_resolve.first);
 
-                to_resolve.second->SetRs12(static_cast<hword_t>(class_num));
-            } else {
-                n_unresolved_class_offsets++;
+                    std::cout << "HEHEHE " << to_resolve.first << "\n";
+
+                    if (class_num >= 0) {
+                        if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
+                            std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES <<
+                                    " (access in class-section for class #" << class_num << std::endl;
+                            return false;
+                        }
+                    } else {
+                        n_unresolved_class_offsets++;
+                    }
+
+                    to_resolve.second->SetRs12(static_cast<hword_t>(class_num));
+                    break;
+                }
+                default: {
+                    to_resolve.second->SetRs12(static_cast<hword_t>(type));
+                }
             }
 
             class_resolution_table_.pop();

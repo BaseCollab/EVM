@@ -10,13 +10,14 @@
 namespace evm::memory {
 
 // clang-format off
+/// Negative numbers emphasize built-in types, positive ones — user-defined classes
 enum class Type : int8_t {
     INVALID = -1,
-    DOUBLE  = 0,
-    INT     = 1,
-    OBJECT  = 2,
-    STRING  = 3,
-    ARRAY   = 4
+    DOUBLE  = -2,
+    INT     = -3,
+    OBJECT  = -4,
+    STRING  = -5,
+    ARRAY   = -6
 };
 
 enum TypeSize : int8_t {
