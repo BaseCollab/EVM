@@ -44,7 +44,7 @@ namespace evm::runtime {
 #define RS3_I_FRAME(frame) frame->GetReg(RS3_IDX())->GetInt64()
 #define RS3_F_FRAME(frame) frame->GetReg(RS3_IDX())->GetDouble()
 
-void Interpreter::Run(const byte_t *bytecode)
+void Interpreter::Run(const byte_t *bytecode, size_t entrypoint)
 {
     #define DEFINE_INSTR(instr, opcode, interpret) \
         &&instr,
@@ -58,10 +58,7 @@ void Interpreter::Run(const byte_t *bytecode)
     frames_.push(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
     frame_cur_ = &frames_.top();
 
-    file_format::File file_arch;
-    file_arch.ParseBytecode(bytecode);
-
-    pc_ = file_arch.GetCodeSection()->GetOffset();
+    pc_ = entrypoint;
 
     #define CALL_REG1()          ISA_CALL_GET_REG1(bytecode + pc_)
     #define CALL_REG2()          ISA_CALL_GET_REG2(bytecode + pc_)

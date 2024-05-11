@@ -4,8 +4,8 @@
 #include "runtime/memory/heap_manager.h"
 #include "runtime/interpreter/interpreter.h"
 
-namespace evm {
-class VirtualMachine;
+namespace evm::file_format {
+class File;
 };
 
 namespace evm::runtime {
@@ -36,10 +36,7 @@ public:
         return interpreter_.get();
     }
 
-    void Execute(const byte_t *bytecode)
-    {
-        interpreter_->Run(bytecode);
-    }
+    void Execute(file_format::File *file);
 
 private:
     Runtime() = default;

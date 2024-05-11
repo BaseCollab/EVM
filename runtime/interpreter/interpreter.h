@@ -20,7 +20,7 @@ public:
     Interpreter() = default;
     ~Interpreter() = default;
 
-    void Run(const byte_t *bytecode);
+    void Run(const byte_t *bytecode, size_t entrypoint);
     const Frame *getCurrFrame() const;
 
 private:

@@ -26,6 +26,15 @@ public:
         ASSERT_TRUE(runtime::Runtime::Destroy());
     }
 
+    void ExecuteFromSource(const char *source)
+    {
+        file_format::File file_arch;
+        asm2byte::AsmToByte asm2byte;
+        asm2byte.ParseAsmString(source, &file_arch);
+
+        runtime_->Execute(&file_arch);
+    }
+
 protected:
     runtime::Runtime *runtime_ {nullptr};
 };
@@ -41,13 +50,7 @@ TEST_F(InterpreterTest, ADD_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), 1 + -10);
 }
@@ -61,13 +64,7 @@ TEST_F(InterpreterTest, SUB_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 - (-23423));
 }
@@ -81,13 +78,7 @@ TEST_F(InterpreterTest, MUL_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 * (-23423));
 }
@@ -101,13 +92,7 @@ TEST_F(InterpreterTest, DIV_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -23423 / (-11));
 }
@@ -121,13 +106,7 @@ TEST_F(InterpreterTest, AND_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) & (-234656723));
 }
@@ -141,13 +120,7 @@ TEST_F(InterpreterTest, OR_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) | (-234656723));
 }
@@ -161,13 +134,7 @@ TEST_F(InterpreterTest, XOR_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) ^ (-234656723));
 }
@@ -182,13 +149,7 @@ TEST_F(InterpreterTest, MOV)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetDouble(), 3.14);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), -11);
@@ -212,13 +173,7 @@ TEST_F(InterpreterTest, SLTI)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
@@ -242,13 +197,7 @@ TEST_F(InterpreterTest, SMEI)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
@@ -272,13 +221,7 @@ TEST_F(InterpreterTest, EQ_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
@@ -302,13 +245,7 @@ TEST_F(InterpreterTest, NEQ_INT64)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
@@ -326,13 +263,7 @@ TEST_F(InterpreterTest, CONVIF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetDouble(), -123.0);
 }
@@ -345,13 +276,7 @@ TEST_F(InterpreterTest, CONVFI)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), -123);
 }
@@ -367,13 +292,7 @@ TEST_F(InterpreterTest, ADDF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 - 10.0);
 }
@@ -387,13 +306,7 @@ TEST_F(InterpreterTest, SUBF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 + 10.0);
 }
@@ -407,13 +320,7 @@ TEST_F(InterpreterTest, MULF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 * 4.12);
 }
@@ -427,13 +334,7 @@ TEST_F(InterpreterTest, DIVF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 / 4.12);
 }
@@ -456,13 +357,7 @@ TEST_F(InterpreterTest, SLTF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
@@ -486,13 +381,7 @@ TEST_F(InterpreterTest, SMEF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
@@ -516,13 +405,7 @@ TEST_F(InterpreterTest, EQF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
@@ -546,13 +429,7 @@ TEST_F(InterpreterTest, NEQF)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
@@ -573,13 +450,7 @@ TEST_F(InterpreterTest, SIN_COS)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
@@ -606,13 +477,7 @@ TEST_F(InterpreterTest, JMP_IMM)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), 16);
 }
@@ -627,13 +492,7 @@ TEST_F(InterpreterTest, RACC_ACCR)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 2.0);
 }
@@ -657,13 +516,7 @@ TEST_F(InterpreterTest, CALL_RET)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
 }
@@ -685,13 +538,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_1)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 3);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 6);
@@ -728,13 +575,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetDouble(), 9.0);
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetDouble(), 7.0);
@@ -753,13 +594,7 @@ TEST_F(InterpreterTest, STRING_PULL)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
               runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
@@ -784,13 +619,7 @@ TEST_F(InterpreterTest, CLASS_SECTION)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
@@ -816,13 +645,7 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
@@ -856,13 +679,7 @@ TEST_F(InterpreterTest, CLASS_OBJECTS)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     std::cerr << "\n!!!! test is banned temporarily (not implemented some features) !!!!\n\n";
 
@@ -883,13 +700,7 @@ TEST_F(InterpreterTest, STRING_OBJECTS)
         exit
     )";
 
-    file_format::File file_arch;
-    asm2byte::AsmToByte asm2byte;
-    std::vector<byte_t> bytecode;
-
-    asm2byte.ParseAsmString(source, &file_arch);
-    file_arch.EmitBytecode(&bytecode);
-    runtime_->Execute(bytecode.data());
+    ExecuteFromSource(source);
 
     /// TODO: uncomment after string-objects operations are implemented
     // Strings shouldn'e be equal even for the same string-literals
