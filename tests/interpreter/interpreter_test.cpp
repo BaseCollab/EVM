@@ -827,4 +827,76 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
 
+TEST_F(InterpreterTest, CLASS_OBJECTS)
+{
+    auto source = R"(
+        .class Foo
+            int x;
+            double y;
+        .class
+
+        .class Boom
+            class Foo f1;
+            double i;
+            class Foo f2;
+        .class
+
+        movif x1, 23
+        movif x2, -11212
+
+        newobj x7, Boom
+        obj_set_field x7, Boom@i, x1
+
+        obj_get_field x8, Boom@f2, x7
+        obj_set_field x8, Foo@y, x2
+
+        obj_get_field x10, Foo@y, x8
+        obj_get_field x11, Boom@i, x7
+
+        exit
+    )";
+
+    file_format::File file_arch;
+    asm2byte::AsmToByte asm2byte;
+    std::vector<byte_t> bytecode;
+
+    asm2byte.ParseAsmString(source, &file_arch);
+    file_arch.EmitBytecode(&bytecode);
+    runtime_->Execute(bytecode.data());
+
+    std::cerr << "\n!!!! test is banned temporarily (not implemented some features) !!!!\n\n";
+
+    /// TODO: uncomment after object operations are implemented
+    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x10)->GetInt64(), 23);
+    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
+}
+
+TEST_F(InterpreterTest, STRING_OBJECTS)
+{
+    auto source = R"(
+        newstr x0, 'kek lol'
+        newstr x1, 'kek lol kek'
+        newstr x2, 'kek lol'
+
+        prstr x1
+
+        exit
+    )";
+
+    file_format::File file_arch;
+    asm2byte::AsmToByte asm2byte;
+    std::vector<byte_t> bytecode;
+
+    asm2byte.ParseAsmString(source, &file_arch);
+    file_arch.EmitBytecode(&bytecode);
+    runtime_->Execute(bytecode.data());
+
+    /// TODO: uncomment after string-objects operations are implemented
+    // Strings shouldn'e be equal even for the same string-literals
+    // ASSERT_NEQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
+    //            runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
+    // ASSERT_NEQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(),
+    //            runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64());
+}
+
 } // namespace evm

@@ -92,7 +92,19 @@ public:
             return false;
         }
 
-        return ResolveLabelRefs() && ResolveClassRefs(class_section) && ResolveClassFieldsRefs(class_section);
+        bool resolved_labels = (ResolveLabelRefs() == 0);
+        bool resolved_classes = (ResolveClassRefs(class_section) == 0);
+        bool resolved_class_fields = (ResolveClassFieldsRefs(class_section) == 0);
+
+        if (!resolved_labels) {
+            std::cerr << __func__ << ": couldn't resolve all labels" << std::endl;
+        } else if (!resolved_classes) {
+            std::cerr << __func__ << ": couldn't resolve all class names" << std::endl;
+        } else if (!resolved_class_fields) {
+            std::cerr << __func__ << ": couldn't resolve all class fields" << std::endl;
+        }
+
+        return resolved_labels && resolved_classes && resolved_class_fields;
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
@@ -116,7 +128,7 @@ public:
     }
 
 private:
-    bool ResolveLabelRefs()
+    size_t ResolveLabelRefs()
     {
         size_t n_unresolved_labels = 0;
 
@@ -140,10 +152,10 @@ private:
             label_resolution_table_.pop();
         }
 
-        return n_unresolved_labels == 0;
+        return n_unresolved_labels;
     }
 
-    bool ResolveClassRefs(ClassSection *class_section)
+    size_t ResolveClassRefs(ClassSection *class_section)
     {
         size_t n_unresolved_class_offsets = 0;
 
@@ -177,10 +189,10 @@ private:
             class_resolution_table_.pop();
         }
 
-        return n_unresolved_class_offsets == 0;
+        return n_unresolved_class_offsets;
     }
 
-    bool ResolveClassFieldsRefs(ClassSection *class_section)
+    size_t ResolveClassFieldsRefs(ClassSection *class_section)
     {
         size_t n_unresolved_class_fields_offsets = 0;
         std::vector<Class> *classes = class_section->GetInstances();
@@ -209,7 +221,7 @@ private:
             class_fields_resolution_table_.pop();
         }
 
-        return n_unresolved_class_fields_offsets == 0;
+        return n_unresolved_class_fields_offsets;
     }
 
 private:
