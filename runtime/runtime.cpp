@@ -1,4 +1,5 @@
 #include "runtime/runtime.h"
+#include "file_format/file.h"
 
 #include <iostream>
 
@@ -42,6 +43,17 @@ void Runtime::InitializeRuntime()
 {
     heap_manager_ = std::make_unique<HeapManager>(DEFAULT_HEAP_SIZE);
     interpreter_ = std::make_unique<Interpreter>();
+}
+
+void Runtime::Execute(file_format::File *file)
+{
+    assert(file != nullptr);
+
+    std::vector<byte_t> bytecode;
+    file->EmitBytecode(&bytecode);
+
+    size_t entrypoint = file->GetCodeSection()->GetOffset();
+    interpreter_->Run(bytecode.data(), entrypoint);
 }
 
 } // namespace evm::runtime
