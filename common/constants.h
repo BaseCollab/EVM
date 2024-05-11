@@ -24,6 +24,8 @@ static constexpr size_t BITS_PER_BYTE = 1 << 3;
 static constexpr size_t KBYTE_SIZE    = 1 << 10;
 static constexpr size_t MBYTE_SIZE    = 1 << 20;
 
+using bit_size_t = byte_t;
+
 // clang-format on
 
 } // namespace evm

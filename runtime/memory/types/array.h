@@ -2,6 +2,7 @@
 #define EVM_MEMORY_OBJECTS_ARRAY_H
 
 #include "common/macros.h"
+#include "runtime/memory/type.h"
 
 #include <cstddef>
 #include <cstring>
@@ -11,24 +12,13 @@ namespace evm::runtime {
 
 class Array {
 public:
-    // clang-format off
-    enum class Type {
-        INVALID = -1,
-        DOUBLE  = 2,
-        BYTE    = 3,
-        SHORT   = 4,
-        INT     = 5,
-        LONG    = 6
-    };
-    // clang-format on
-public:
     NO_COPY_SEMANTIC(Array);
     NO_MOVE_SEMANTIC(Array);
 
     Array() = default;
     ~Array() = default;
 
-    static void *Create(Type array_type, size_t count);
+    static void *Create(memory::Type array_type, size_t count);
 
     const void *GetData() const
     {
@@ -45,7 +35,7 @@ public:
         return size_;
     }
 
-    Type GetType() const
+    memory::Type GetType() const
     {
         return type_;
     }
@@ -55,7 +45,7 @@ public:
         size_ = size;
     }
 
-    void SetType(Type type)
+    void SetType(memory::Type type)
     {
         type_ = type;
     }
@@ -74,11 +64,8 @@ public:
         return MEMBER_OFFSET(Array, data_);
     }
 
-    static size_t GetSizeOfArrayType(Type array_type);
-    static Type GetTypeFromString(std::string_view string);
-
 private:
-    Type type_ {Type::INVALID};
+    memory::Type type_ {memory::Type::INVALID};
     size_t elem_size_ {0};
     size_t size_ {0};
 

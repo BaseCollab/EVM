@@ -23,7 +23,6 @@ public:
     DEFAULT_COPY_SEMANTIC(Emittable);
 
     Emittable(const std::string &name) : name_(name) {}
-
     ~Emittable() = default;
 
     void SetName(const std::string &name)
@@ -150,8 +149,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(Section);
     DEFAULT_COPY_SEMANTIC(Section);
 
-    Section(const std::string name = "", std::vector<T> instances = {}) : Offsetable(name), instances_(instances) {}
-
+    Section(const std::string name = "", std::vector<T> instances = {})
+        : Offsetable(name), instances_(std::move(instances))
+    {
+    }
     ~Section() = default;
 
     std::vector<T> *GetInstances()
@@ -169,6 +170,57 @@ public:
         instances_.clear();
     }
 
+    // Used in code section for replacing class-names to class indices
+    ssize_t GetIdxOfInstance(const std::string &instance_name) const
+    {
+        ssize_t idx = -1;
+        for (size_t i = 0, size = instances_.size(); i < size; ++i) {
+            if (instances_[i].GetName().compare(instance_name) == 0) {
+                idx = i;
+                break;
+            }
+        }
+
+        return idx;
+    }
+
+    std::pair<ssize_t, ssize_t> GetRuntimeOffsetOfInstance(const std::string &instance_name) const
+    {
+        ssize_t offset = 0;
+        size_t i = 0;
+
+        for (size_t size = instances_.size(); i < size; ++i) {
+            if (instances_[i].GetName().compare(instance_name) == 0) {
+                break;
+            }
+
+            offset += instances_[i].GetRuntimeSize();
+        }
+
+        return std::pair(offset, instances_[i].GetRuntimeSize());
+    }
+
+    std::pair<ssize_t, ssize_t> GetRelativeOffsetOfInstance(const std::string &instance_name) const
+    {
+        ssize_t offset = 0;
+        size_t i = 0;
+
+        for (size_t size = instances_.size(); i < size; ++i) {
+            if (instances_[i].GetName().compare(instance_name) == 0) {
+                break;
+            }
+
+            offset += instances_[i].GetSize();
+        }
+
+        return std::pair(offset, instances_[i].GetSize());
+    }
+
+    ssize_t GetAbsoluteOffsetOfInstance(const std::string &instance_name) const
+    {
+        return GetRelativeOffsetOfInstance(instance_name).first + GetDataOffset();
+    }
+
     size_t GetSize() const
     {
         const EmitSize n_instances = instances_.size();
@@ -178,13 +230,13 @@ public:
             instances_size += it.GetSize();
         }
 
-        return Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize) + instances_size;
+        return Emittable::GetSize() + sizeof(EmitSize) + n_instances * sizeof(EmitRef) + instances_size;
     }
 
     size_t GetDataOffset() const
     {
         const EmitSize n_instances = instances_.size();
-        return offset_ + Emittable::GetSize() + n_instances * sizeof(EmitRef) + sizeof(EmitSize);
+        return offset_ + Emittable::GetSize() + sizeof(EmitSize) + n_instances * sizeof(EmitRef);
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
@@ -233,7 +285,7 @@ public:
         return parsed_size - already_parsed;
     }
 
-private:
+protected:
     std::vector<T> instances_;
 };
 

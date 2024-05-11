@@ -50,7 +50,7 @@ public:
         class_section->SetOffset(string_pool->GetOffset() + string_pool->GetSize());
 
         code_section_.SetOffset(class_section->GetOffset() + class_section->GetSize());
-        if (code_section_.ResolveInstrs() == false) {
+        if (code_section_.ResolveInstrs(class_section) == false) {
             std::cerr << "Couldn't resolve some dependencies in code section" << std::endl;
             return false;
         }

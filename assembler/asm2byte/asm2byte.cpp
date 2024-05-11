@@ -1,7 +1,7 @@
 #include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
-#include "runtime/memory/types/array.h"
+#include "runtime/memory/type.h"
 #include "file_format/file.h"
 #include "file_format/header.h"
 #include "file_format/code_section.h"
@@ -105,8 +105,8 @@ void AsmToByte::PrepareLinesFromBuffer()
                     in_string = false;
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
                        file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'' &&
-                       file_buffer_[i] != ';' && file_buffer_[i] != ';' && file_buffer_[i] != '{' &&
-                       file_buffer_[i] != '}') {
+                       file_buffer_[i] != ';' && file_buffer_[i] != '{' && file_buffer_[i] != '}' &&
+                       file_buffer_[i] != '@') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -148,9 +148,9 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
         // Class definition fields
         if (in_class_defition == true) {
-            file_format::ClassField::Type type = file_format::ClassField::FieldTypeFromString(line_args[0]);
+            file_format::ClassField::Type type = memory::GetTypeFromString(line_args[0]);
 
-            if (type == file_format::ClassField::Type::USER_CLASS) {
+            if (type == file_format::ClassField::Type::OBJECT) {
                 class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
             } else {
                 class_section->GetInstances()->back().AddInstance({line_args[1], type});
@@ -203,7 +203,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::EQF:
             case Opcode::NEQF:
 
-            case Opcode::POWER: {
+            case Opcode::POWER:
+            case Opcode::STRCONCAT: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetRs1(GetRegisterIdxFromString(line_args[2]));
                 instr->SetRs2(GetRegisterIdxFromString(line_args[3]));
@@ -215,7 +216,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::RACC:
             case Opcode::PRINTI:
             case Opcode::PRINTF:
-            case Opcode::PRSTR: {
+            case Opcode::PRSTR:
+            case Opcode::PRSTR_IMMUT: {
                 instr->SetRs1(GetRegisterIdxFromString(line_args[1]));
                 break;
             }
@@ -223,6 +225,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             // RD = f(RS1)
 
             case Opcode::MOV:
+            case Opcode::CPOBJ:
 
             case Opcode::CONVIF:
             case Opcode::CONVFI:
@@ -247,7 +250,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                     double double_imm = std::stod(line_args[2]);
                     std::memcpy(&immediate, &double_imm, sizeof(immediate));
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                     immediate = 0;
                 }
 
@@ -269,7 +272,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                 }
 
                 instr->Set32Imm(immediate);
@@ -305,7 +308,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[1], instr);
+                    code_section->AddInstrToResolve(line_args[1], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                 }
 
                 instr->Set32Imm(immediate);
@@ -325,16 +328,34 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
+            case Opcode::NEWOBJ: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
+                break;
+            }
+
+            case Opcode::OBJ_SET_FIELD: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[3]));
+                instr->SetObjRs(GetRegisterIdxFromString(line_args[1]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_FIELD_REF);
+                break;
+            }
+
+            case Opcode::OBJ_GET_FIELD: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                instr->SetObjRs(GetRegisterIdxFromString(line_args[3]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_FIELD_REF);
+                break;
+            }
+
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
-
-                auto arr_type = runtime::Array::GetTypeFromString(line_args[2]);
-                instr->SetRs1(static_cast<byte_t>(arr_type));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
 
                 int32_t arr_size = 0;
                 if (common::IsNumber<int32_t>(line_args[3])) {
                     arr_size = std::stol(line_args[3]);
-                } else if (common::IsNumber<double>(line_args[3])) {
+                } else {
                     std::cerr << "Error immediate in newarr arg " << std::stol(line_args[1]) << "; Arg should be integer"
                               << std::endl;
                     return false;
@@ -358,7 +379,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
-            case Opcode::STRING: {
+            case Opcode::NEWSTR:
+            case Opcode::STR_IMMUT: {
                 if (!string_pool->HasInstance(line_args[2])) {
                     string_pool->AddInstance(line_args[2]);
                 }
@@ -372,7 +394,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             }
 
             default:
-                std::cerr << "Default should not be reachable" << std::endl;
+                std::cerr << __func__ << ": cannot handle instruction " << line_args[0] << std::endl;
                 return false;
         }
         // clang-format on
