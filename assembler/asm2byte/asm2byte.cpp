@@ -247,7 +247,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                     double double_imm = std::stod(line_args[2]);
                     std::memcpy(&immediate, &double_imm, sizeof(immediate));
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                     immediate = 0;
                 }
 
@@ -269,7 +269,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[2], instr);
+                    code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                 }
 
                 instr->Set32Imm(immediate);
@@ -305,7 +305,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                               << std::endl;
                     return false;
                 } else {
-                    code_section->AddInstrToResolve(line_args[1], instr);
+                    code_section->AddInstrToResolve(line_args[1], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
                 }
 
                 instr->Set32Imm(immediate);
@@ -328,9 +328,12 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
 
-                /// TODO: replace classes to offsets: add top resolution_table, atfre that resolve
+                /// TODO: replace classes to offsets: add top resolution_table, after that resolve
+
                 auto arr_type = memory::GetTypeFromString(line_args[2]);
                 instr->SetRs1(static_cast<byte_t>(arr_type));
+
+                code_section->AddInstrToResolve(line_args[1], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
 
                 int32_t arr_size = 0;
                 if (common::IsNumber<int32_t>(line_args[3])) {

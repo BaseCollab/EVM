@@ -169,6 +169,20 @@ public:
         instances_.clear();
     }
 
+    // Used in code section for replacing class-names to class indices
+    ssize_t GetIdxOfInstance(const std::string &instance_name)
+    {
+        ssize_t idx = -1;
+        for (size_t i = 0, size = instances_.size(); i < size; ++i) {
+            if (instances_[i].GetName().compare(instance_name) == 0) {
+                idx = i;
+                break;
+            }
+        }
+
+        return idx;
+    }
+
     size_t GetSize() const
     {
         const EmitSize n_instances = instances_.size();

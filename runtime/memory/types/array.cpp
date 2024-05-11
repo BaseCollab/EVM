@@ -37,10 +37,12 @@ void Array::Set(int64_t value, size_t idx)
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value, elem_size_);
             break;
         case memory::Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]" << std::endl;
+            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]"
+                      << std::endl;
             break;
         default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx << "]" << std::endl;
+            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx
+                      << "]" << std::endl;
             break;
     }
 }
@@ -59,10 +61,12 @@ void Array::Get(int64_t *value, size_t idx) const
             std::memcpy(value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
             break;
         case memory::Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]" << std::endl;
+            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]"
+                      << std::endl;
             break;
         default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx  << "]" << std::endl;
+            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx
+                      << "]" << std::endl;
             break;
     }
 }

@@ -63,6 +63,7 @@ public:
     {
         return MEMBER_OFFSET(Array, data_);
     }
+
 private:
     memory::Type type_ {memory::Type::INVALID};
     size_t elem_size_ {0};

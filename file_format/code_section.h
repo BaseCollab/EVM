@@ -1,10 +1,12 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 
+#include "common/utils/bitops.h"
 #include "common/macros.h"
 #include "common/constants.h"
 #include "common/emittable.h"
 #include "instruction.h"
+#include "class_section.h"
 
 #include <vector>
 #include <string>
@@ -16,6 +18,11 @@ namespace evm::file_format {
 class CodeSection : public Offsetable {
 public:
     static constexpr size_t N_MAX_INSTRS = 1 << 15;
+
+    enum class ResolutionReason {
+        LABEL_REF,
+        CLASS_REF
+    };
 
 public:
     DEFAULT_MOVE_SEMANTIC(CodeSection);
@@ -41,7 +48,14 @@ public:
 
     Instruction *AddInstr(const std::string &name, const Opcode opcode)
     {
+        if (need_to_validate_last_instr_ == true) {
+            std::cerr << __func__ << ": cannot add instruction [" << name << ", opcode=" << (int)opcode
+                      << "] without validating previous instruction" << std::endl;
+            return nullptr;
+        }
+
         instructions_.push_back({name, opcode});
+        need_to_validate_last_instr_ = true;
         return &instructions_.back();
     }
 
@@ -49,19 +63,55 @@ public:
     {
         instructions_.back().SetOffset(size_);
         size_ += instructions_.back().GetBytesSize();
+        need_to_validate_last_instr_ = false;
     }
 
-    void AddInstrToResolve(const std::string &str, Instruction *instr)
+    void AddInstrToResolve(const std::string &str, Instruction *instr,
+                           ResolutionReason reason = ResolutionReason::LABEL_REF)
     {
-        label_resolution_table_.push({str, instr});
+        switch (reason) {
+            case ResolutionReason::LABEL_REF:
+                label_resolution_table_.push({str, instr});
+                break;
+            case ResolutionReason::CLASS_REF:
+                class_resolution_table_.push({str, instr});
+            default:
+                return;
+        }
     }
 
-    bool ResolveInstrs()
+    bool ResolveInstrs(ClassSection *class_section)
     {
         if (!GetOffset()) {
             return false;
         }
 
+        return ResolveLabelRefs() && ResolveClassRefs(class_section);
+    }
+
+    EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
+    {
+        EmitSize instrs_size = 0;
+        for (auto &it : instructions_) {
+            instrs_size += it.EmitBytecode(out_arr);
+        }
+
+        return instrs_size;
+    }
+
+    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
+    {
+        // Code section shouldn't be parsed, only emitted
+        // So code here is valid
+        (void)in_arr;
+        (void)already_parsed;
+
+        return 0;
+    }
+
+private:
+    bool ResolveLabelRefs()
+    {
         size_t n_unresolved_labels = 0;
 
         while (!label_resolution_table_.empty()) {
@@ -87,33 +137,41 @@ public:
         return n_unresolved_labels == 0;
     }
 
-    EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
+    bool ResolveClassRefs(ClassSection *class_section)
     {
-        EmitSize instrs_size = 0;
-        for (auto &it : instructions_) {
-            instrs_size += it.EmitBytecode(out_arr);
+        size_t n_unresolved_class_offsets = 0;
+
+        while (!class_resolution_table_.empty()) {
+            auto to_resolve = class_resolution_table_.top();
+
+            ssize_t class_num = class_section->GetIdxOfInstance(to_resolve.first);
+            if (class_num >= 0) {
+                if (static_cast<dword_t>(class_num) & ~bitops::Ones<bitops::BitSizeof<hword_t>() - 1, 0>()) {
+                    std::cerr << __func__ << ": amount of classes is more than " << (1 << bitops::BitSizeof<hword_t>()) <<
+                            " (access in class-section for class #" << class_num << std::endl;
+                    return false;
+                }
+
+                to_resolve.second->SetRs12(static_cast<hword_t>(class_num));
+            } else {
+                n_unresolved_class_offsets++;
+            }
+
+            class_resolution_table_.pop();
         }
 
-        return instrs_size;
-    }
-
-    EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
-    {
-        // Code section shouldn't be parsed, only emitted
-        // So code here is valid
-        (void)in_arr;
-        (void)already_parsed;
-
-        return 0;
+        return n_unresolved_class_offsets == 0;
     }
 
 private:
     std::stack<std::pair<std::string, Instruction *>> label_resolution_table_;
+    std::stack<std::pair<std::string, Instruction *>> class_resolution_table_;
     std::unordered_map<std::string, size_t> labels_;
 
     std::vector<Instruction> instructions_;
 
     size_t size_ = 0;
+    bool need_to_validate_last_instr_ = false;
 };
 
 } // namespace evm::file_format

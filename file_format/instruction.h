@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__INSTURCTION_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__INSTURCTION_H
 
+#include "common/utils/bitops.h"
 #include "common/macros.h"
 #include "common/constants.h"
 #include "common/emittable.h"
@@ -66,6 +67,12 @@ public:
     void SetRs2(byte_t rs2)
     {
         rs2_ = rs2;
+    }
+
+    void SetRs12(hword_t rs12)
+    {
+        rs1_ = bitops::GetBits<bitops::BitSizeof<byte_t>() - 1, 0>(rs12);
+        rs2_ = bitops::GetBits<2 * bitops::BitSizeof<byte_t>() - 1, bitops::BitSizeof<byte_t>()>(rs12);
     }
 
     void SetRs3(byte_t rs3)
