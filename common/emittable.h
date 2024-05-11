@@ -23,7 +23,6 @@ public:
     DEFAULT_COPY_SEMANTIC(Emittable);
 
     Emittable(const std::string &name) : name_(name) {}
-
     ~Emittable() = default;
 
     void SetName(const std::string &name)
@@ -150,7 +149,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(Section);
     DEFAULT_COPY_SEMANTIC(Section);
 
-    Section(const std::string name = "", std::vector<T> instances = {}) : Offsetable(name), instances_(std::move(instances)) {}
+    Section(const std::string name = "", std::vector<T> instances = {})
+        : Offsetable(name), instances_(std::move(instances))
+    {
+    }
     ~Section() = default;
 
     std::vector<T> *GetInstances()
@@ -182,22 +184,41 @@ public:
         return idx;
     }
 
-    ssize_t GetRelativeOffsetOfInstance(const std::string &instance_name) const
+    std::pair<ssize_t, ssize_t> GetRuntimeOffsetOfInstance(const std::string &instance_name) const
     {
-        ssize_t offset = -1;
-        for (size_t i = 0, size = instances_.size(); i < size; ++i) {
+        ssize_t offset = 0;
+        size_t i = 0;
+
+        for (size_t size = instances_.size(); i < size; ++i) {
             if (instances_[i].GetName().compare(instance_name) == 0) {
-                offset += instances_[i].GetSize();
                 break;
             }
+
+            offset += instances_[i].GetRuntimeSize();
         }
 
-        return offset;
+        return std::pair(offset, instances_[i].GetRuntimeSize());
+    }
+
+    std::pair<ssize_t, ssize_t> GetRelativeOffsetOfInstance(const std::string &instance_name) const
+    {
+        ssize_t offset = 0;
+        size_t i = 0;
+
+        for (size_t size = instances_.size(); i < size; ++i) {
+            if (instances_[i].GetName().compare(instance_name) == 0) {
+                break;
+            }
+
+            offset += instances_[i].GetSize();
+        }
+
+        return std::pair(offset, instances_[i].GetSize());
     }
 
     ssize_t GetAbsoluteOffsetOfInstance(const std::string &instance_name) const
     {
-        return GetRelativeOffsetOfInstance(instance_name) + GetDataOffset();
+        return GetRelativeOffsetOfInstance(instance_name).first + GetDataOffset();
     }
 
     size_t GetSize() const

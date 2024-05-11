@@ -71,4 +71,4 @@ void Array::Get(int64_t *value, size_t idx) const
     }
 }
 
-} // namespace evm::memory
+} // namespace evm::runtime

@@ -432,6 +432,7 @@ DEFINE_INSTR
     NEWSTR, 0x2c,
     {
         /// TODO: add implementation
+        PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -441,6 +442,7 @@ DEFINE_INSTR
     STRCONCAT, 0x2d,
     {
         /// TODO: add implementation
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -450,6 +452,7 @@ DEFINE_INSTR
     PRSTR, 0x2e,
     {
         /// TODO: add implementation
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -471,6 +474,7 @@ DEFINE_INSTR
     NEWOBJ, 0x30,
     {
         /// TODO: add implementation
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -480,6 +484,7 @@ DEFINE_INSTR
     OBJ_GET_FIELD, 0x31,
     {
         /// TODO: add implementation
+        PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -489,6 +494,7 @@ DEFINE_INSTR
     OBJ_SET_FIELD, 0x32,
     {
         /// TODO: add implementation
+        PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
@@ -501,5 +507,6 @@ DEFINE_INSTR
     CPOBJ, 0x33,
     {
         /// TODO: add implementation
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )

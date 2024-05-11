@@ -69,7 +69,8 @@ public:
         rs2_ = rs2;
     }
 
-    void SetRs12(hword_t rs12)
+    /// Put hword_t number to rs1 and rs2 registers as little endian
+    void SetClassOffset(hword_t rs12)
     {
         rs1_ = bitops::GetBits<bitops::BitSizeof<byte_t>() - 1, 0>(rs12);
         rs2_ = bitops::GetBits<2 * bitops::BitSizeof<byte_t>() - 1, bitops::BitSizeof<byte_t>()>(rs12);
@@ -78,6 +79,23 @@ public:
     void SetRs3(byte_t rs3)
     {
         rd_ = rs3;
+    }
+
+    void SetObjRs(byte_t obj_rs)
+    {
+        obj_rs_ = obj_rs;
+        obj_op_ = true;
+    }
+
+    void SetObjFieldSize(byte_t obj_field_size)
+    {
+        obj_field_size_ = obj_field_size;
+        obj_op_ = true;
+    }
+
+    bool IsObjInstr() const
+    {
+        return obj_op_;
     }
 
     void Set32Imm(int32_t imm)
@@ -150,6 +168,11 @@ public:
         out_arr->push_back(rs1_);
         out_arr->push_back(rs2_);
 
+        if (obj_op_ == true) {
+            out_arr->push_back(obj_rs_);
+            out_arr->push_back(obj_field_size_);
+        }
+
         if (imm_.is_set_) {
             size_t prev_size = out_arr->size();
             out_arr->insert(out_arr->end(), imm_.num_bytes_, 0);
@@ -173,6 +196,11 @@ private:
     byte_t rd_ {0};
     byte_t rs1_ {0};
     byte_t rs2_ {0};
+
+    /// No additional space for object-ptr encoding in register above
+    byte_t obj_rs_ {0};
+    byte_t obj_field_size_ {0};
+    bool obj_op_ = false;
 
     Immediate imm_;
 

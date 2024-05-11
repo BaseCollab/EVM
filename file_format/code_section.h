@@ -22,7 +22,8 @@ public:
 
     enum class ResolutionReason {
         LABEL_REF,
-        CLASS_REF
+        CLASS_REF,
+        CLASS_FIELD_REF
     };
 
 public:
@@ -67,15 +68,19 @@ public:
         need_to_validate_last_instr_ = false;
     }
 
-    void AddInstrToResolve(const std::string &str, Instruction *instr,
+    void AddInstrToResolve(const std::string &unresolved_name, Instruction *instr,
                            ResolutionReason reason = ResolutionReason::LABEL_REF)
     {
         switch (reason) {
             case ResolutionReason::LABEL_REF:
-                label_resolution_table_.push({str, instr});
+                label_resolution_table_.push({unresolved_name, instr});
                 break;
             case ResolutionReason::CLASS_REF:
-                class_resolution_table_.push({str, instr});
+                class_resolution_table_.push({unresolved_name, instr});
+                break;
+            case ResolutionReason::CLASS_FIELD_REF:
+                class_fields_resolution_table_.push({unresolved_name, instr});
+                break;
             default:
                 return;
         }
@@ -87,7 +92,7 @@ public:
             return false;
         }
 
-        return ResolveLabelRefs() && ResolveClassRefs(class_section);
+        return ResolveLabelRefs() && ResolveClassRefs(class_section) && ResolveClassFieldsRefs(class_section);
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
@@ -152,19 +157,20 @@ private:
 
                     if (class_num >= 0) {
                         if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
-                            std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES <<
-                                    " (access in class-section for class #" << class_num << std::endl;
+                            std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES
+                                      << " (access in class-section for class #" << class_num << std::endl;
                             return false;
                         }
                     } else {
                         n_unresolved_class_offsets++;
+                        continue;
                     }
 
-                    to_resolve.second->SetRs12(static_cast<hword_t>(class_num));
+                    to_resolve.second->SetClassOffset(static_cast<hword_t>(class_num));
                     break;
                 }
                 default: {
-                    to_resolve.second->SetRs12(static_cast<hword_t>(type));
+                    to_resolve.second->SetClassOffset(static_cast<hword_t>(type));
                 }
             }
 
@@ -174,11 +180,44 @@ private:
         return n_unresolved_class_offsets == 0;
     }
 
+    bool ResolveClassFieldsRefs(ClassSection *class_section)
+    {
+        size_t n_unresolved_class_fields_offsets = 0;
+        std::vector<Class> *classes = class_section->GetInstances();
+
+        while (!class_fields_resolution_table_.empty()) {
+            auto to_resolve = class_fields_resolution_table_.top();
+
+            size_t delimiter_pos = to_resolve.first.find("@");
+
+            ssize_t class_num = class_section->GetIdxOfInstance(to_resolve.first.substr(0, delimiter_pos));
+            if (class_num < 0) {
+                n_unresolved_class_fields_offsets++;
+                continue;
+            } else if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
+                std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES
+                          << " (access in class-section for class #" << class_num << std::endl;
+                return false;
+            }
+
+            auto offset_size =
+                (*classes)[class_num].GetRuntimeOffsetOfInstance(to_resolve.first.substr(delimiter_pos + 1));
+
+            to_resolve.second->SetClassOffset(static_cast<hword_t>(offset_size.first));
+            to_resolve.second->SetObjFieldSize(offset_size.second);
+
+            class_fields_resolution_table_.pop();
+        }
+
+        return n_unresolved_class_fields_offsets == 0;
+    }
+
 private:
     std::stack<std::pair<std::string, Instruction *>> label_resolution_table_;
     std::stack<std::pair<std::string, Instruction *>> class_resolution_table_;
-    std::unordered_map<std::string, size_t> labels_;
+    std::stack<std::pair<std::string, Instruction *>> class_fields_resolution_table_;
 
+    std::unordered_map<std::string, size_t> labels_;
     std::vector<Instruction> instructions_;
 
     size_t size_ = 0;

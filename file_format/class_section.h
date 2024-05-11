@@ -12,7 +12,7 @@
 
 namespace evm::file_format {
 
-class ClassField : Emittable {
+class ClassField : public Emittable {
 public:
     using Type = memory::Type;
 
@@ -95,8 +95,7 @@ private:
     std::string type_name_;
 };
 
-class Class : public Section<ClassField>
-{
+class Class : public Section<ClassField> {
 public:
     Class(const std::string name = "") : Section<ClassField>(name) {}
     ~Class() = default;
@@ -112,8 +111,7 @@ public:
     }
 };
 
-class ClassSection : public Section<Class>
-{
+class ClassSection : public Section<Class> {
 public:
     ClassSection(const std::string name = "") : Section<Class>(name) {}
     ~ClassSection() = default;

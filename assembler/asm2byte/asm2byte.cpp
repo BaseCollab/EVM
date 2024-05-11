@@ -105,8 +105,8 @@ void AsmToByte::PrepareLinesFromBuffer()
                     in_string = false;
             } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
                        file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'' &&
-                       file_buffer_[i] != ';' && file_buffer_[i] != ';' && file_buffer_[i] != '{' &&
-                       file_buffer_[i] != '}') {
+                       file_buffer_[i] != ';' && file_buffer_[i] != '{' && file_buffer_[i] != '}' &&
+                       file_buffer_[i] != '@') {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -225,6 +225,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             // RD = f(RS1)
 
             case Opcode::MOV:
+            case Opcode::CPOBJ:
 
             case Opcode::CONVIF:
             case Opcode::CONVFI:
@@ -327,6 +328,26 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
+            case Opcode::NEWOBJ: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
+                break;
+            }
+
+            case Opcode::OBJ_SET_FIELD: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[3]));
+                instr->SetObjRs(GetRegisterIdxFromString(line_args[1]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_FIELD_REF);
+                break;
+            }
+
+            case Opcode::OBJ_GET_FIELD: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                instr->SetObjRs(GetRegisterIdxFromString(line_args[3]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_FIELD_REF);
+                break;
+            }
+
             case Opcode::NEWARR: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
@@ -373,7 +394,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             }
 
             default:
-                std::cerr << "Default should not be reachable" << std::endl;
+                std::cerr << __func__ << ": cannot handle instruction " << line_args[0] << std::endl;
                 return false;
         }
         // clang-format on
