@@ -372,7 +372,7 @@ DEFINE_INSTR
     }
 )
 
-// Array operations
+// =============================== Array operations ================================
 
 DEFINE_INSTR
 (
@@ -382,7 +382,7 @@ DEFINE_INSTR
     /// TODO: refactore implementation
     NEWARR, 0x28,
     {
-        RD_I_ASSIGN(CREATE_ARR(GET_ARRAY_TYPE(), IMM_I32()));
+        RD_I_ASSIGN(HandleCreateArray(GET_ARRAY_TYPE(), IMM_I32()));
         PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
     }
 )
@@ -395,7 +395,7 @@ DEFINE_INSTR
     /// TODO: refactore implementation
     LARR, 0x29,
     {
-        RD_I_ASSIGN(LOAD_FROM_ARR(RS1_I(), RS2_I()));
+        RD_I_ASSIGN(HandleLoadFromArray(RS1_I(), RS2_I()));
         PC_ADD(0x4);// 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -409,12 +409,12 @@ DEFINE_INSTR
     /// TODO: refactore implementation
     STARR, 0x2a,
     {
-        STORE_TO_ARR(RS1_I(), RS2_I(), RS3_I());
+        HandleStoreToArray(RS1_I(), RS2_I(), RS3_I());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
-// String operations
+// =============================== String operations ===============================
 
 DEFINE_INSTR
 (
@@ -428,30 +428,48 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
+    /// newstr rd(ptr), imm(str_offset)
     /// Create string-object from offset in string-pool, put ptr to register
     NEWSTR, 0x2c,
     {
-        /// TODO: add implementation
+        RD_I_ASSIGN(HandleCreateStringObject(IMM_I32()));
         PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
 DEFINE_INSTR
 (
+    /// strconcat rd, rs1, rs2
     /// Create new string-object with concatenated string
     STRCONCAT, 0x2d,
     {
-        /// TODO: add implementation
+        RD_I_ASSIGN(HandleStringConcatenation(RS1_I(), RS2_I()));
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
 DEFINE_INSTR
 (
-    /// Print string-object
-    PRSTR, 0x2e,
+    /// strcmp rd, rs1, rs2
+    /// Compare two strings
+    /// Return value:
+    /// Negative value if rs1 appears before rs2 in lexicographical order.
+    /// Zero if rs1 and rs2 compare equal.
+    /// Positive value if rs1 appears rs2 rhs in lexicographical order.    
+    STRCMP, 0x2e,
     {
-        /// TODO: add implementation
+        RD_I_ASSIGN(HandleStringComparison(RS1_I(), RS2_I()));
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    /// print_str rs1(ptr)
+    /// Print string-object
+    PRINT_STR, 0x2f,
+    {
+        HandlePrintString(RS1_I());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -459,19 +477,19 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Print immutable string from offset in string-pool
-    PRSTR_IMMUT, 0x2f,
+    PRINT_STR_IMMUT, 0x30,
     {
         printf("%s\n", BYTECODE_OFFSET(RS1_I()));
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
-// Object-class operations
+// ============================ Object-class operations ============================
 
 DEFINE_INSTR
 (
     /// Create object, put ptr to register
-    NEWOBJ, 0x30,
+    NEWOBJ, 0x31,
     {
         /// TODO: add implementation
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
@@ -481,7 +499,7 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Put field of an object to register (by class offset)
-    OBJ_GET_FIELD, 0x31,
+    OBJ_GET_FIELD, 0x32,
     {
         /// TODO: add implementation
         PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
@@ -491,20 +509,20 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Set field of an object from register (by class offset)
-    OBJ_SET_FIELD, 0x32,
+    OBJ_SET_FIELD, 0x33,
     {
         /// TODO: add implementation
         PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
     }
 )
 
-// General object operations
+// =========================== General object operations ===========================
 
 DEFINE_INSTR
 (
     /// Create object, which is a copy of another object
     /// Works for objects-classes, strings, arrays
-    CPOBJ, 0x33,
+    CPOBJ, 0x34,
     {
         /// TODO: add implementation
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction

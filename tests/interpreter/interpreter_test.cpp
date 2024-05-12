@@ -688,26 +688,51 @@ TEST_F(InterpreterTest, CLASS_OBJECTS)
     // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
 }
 
-TEST_F(InterpreterTest, STRING_OBJECTS)
+TEST_F(InterpreterTest, STRING_COMPARASION)
 {
     auto source = R"(
-        newstr x0, 'kek lol'
-        newstr x1, 'kek lol kek'
-        newstr x2, 'kek lol'
+        newstr x0, 'one'
+        newstr x1, 'two'
+        newstr x2, 'two'
+        newstr x3, 'one two'
 
-        prstr x1
+        print_str x0
+        print_str x1
+        print_str x3
+
+        strcmp x4, x1, x2
+        strcmp x5, x0, x1
 
         exit
     )";
 
     ExecuteFromSource(source);
 
-    /// TODO: uncomment after string-objects operations are implemented
     // Strings shouldn'e be equal even for the same string-literals
-    // ASSERT_NEQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
-    //            runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
-    // ASSERT_NEQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(),
-    //            runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64());
+    ASSERT_NE(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(),
+              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64());
+
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+}
+
+TEST_F(InterpreterTest, STRING_CONCAT)
+{
+    auto source = R"(
+        newstr x0, 'one '
+        newstr x1, 'two'
+        newstr x2, 'one two'
+
+        strconcat x3, x0, x1
+        print_str x3
+        strcmp x4, x2, x3
+
+        exit
+    )";
+
+    ExecuteFromSource(source);
+
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), 0);
 }
 
 } // namespace evm
