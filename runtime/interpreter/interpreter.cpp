@@ -1,6 +1,6 @@
 #include "common/constants.h"
 #include "common/config.h"
-#include "runtime/interpreter/interpreter.h"
+#include "runtime/interpreter/interpreter-inl.h"
 #include "runtime/memory/types/array.h"
 #include "file_format/file.h"
 #include "isa/macros.h"
@@ -104,21 +104,6 @@ void Interpreter::Run(const byte_t *bytecode, size_t entrypoint)
     #define GET_ACCUM()   accum_
     #define GET_I_ACCUM() accum_.GetInt64()
     #define GET_F_ACCUM() accum_.GetDouble()
-
-    #define CREATE_ARR(type, size) \
-        reinterpret_cast<int64_t>(Array::Create(static_cast<memory::Type>(type), size))
-
-    #define LOAD_FROM_ARR(array_ptr, idx)                                    \
-    ({                                                                       \
-        Array *array = reinterpret_cast<Array *>(array_ptr); \
-        int64_t value = 0;                                                   \
-        array->Get(&value, idx);                                             \
-        value;                                                               \
-    })
-
-    #define STORE_TO_ARR(array_ptr, array_idx, src_reg)                      \
-        Array *array = reinterpret_cast<Array *>(array_ptr); \
-        array->Set(src_reg, array_idx);
 
     #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                            \
         frame_cur_->SetRestorePC(restore_pc);                                \

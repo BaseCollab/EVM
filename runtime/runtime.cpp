@@ -49,11 +49,29 @@ void Runtime::Execute(file_format::File *file)
 {
     assert(file != nullptr);
 
-    std::vector<byte_t> bytecode;
-    file->EmitBytecode(&bytecode);
+    file->EmitBytecode(&bytecode_);
 
     size_t entrypoint = file->GetCodeSection()->GetOffset();
-    interpreter_->Run(bytecode.data(), entrypoint);
+    interpreter_->Run(bytecode_.data(), entrypoint);
+}
+
+const std::string *Runtime::GetStringFromCache(uint32_t string_offset)
+{
+    if (auto find = string_сache_.find(string_offset); find != string_сache_.end()) {
+        return &(find->second);
+    }
+    return nullptr;
+}
+
+const std::string *Runtime::CreateStringAndSetInCache(uint32_t string_offset)
+{
+    // Strings in bytecode are null-terminated.
+    std::string str(reinterpret_cast<char *>(bytecode_.data()) + string_offset);
+
+    auto pair = string_сache_.insert({string_offset, std::move(str)});
+    auto iter = pair.first;
+
+    return &(iter->second);
 }
 
 } // namespace evm::runtime

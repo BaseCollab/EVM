@@ -204,7 +204,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::NEQF:
 
             case Opcode::POWER:
-            case Opcode::STRCONCAT: {
+            case Opcode::STRCONCAT:
+            case Opcode::STRCMP: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetRs1(GetRegisterIdxFromString(line_args[2]));
                 instr->SetRs2(GetRegisterIdxFromString(line_args[3]));
@@ -216,8 +217,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::RACC:
             case Opcode::PRINTI:
             case Opcode::PRINTF:
-            case Opcode::PRSTR:
-            case Opcode::PRSTR_IMMUT: {
+            case Opcode::PRINT_STR:
+            case Opcode::PRINT_STR_IMMUT: {
                 instr->SetRs1(GetRegisterIdxFromString(line_args[1]));
                 break;
             }

@@ -6,6 +6,7 @@ set(SOURCES
     interpreter/interpreter.cpp
     memory/allocator/bump_allocator.cpp
     memory/types/array.cpp
+    memory/types/string.cpp
     memory/frame.cpp
     memory/heap_manager.cpp
     runtime.cpp

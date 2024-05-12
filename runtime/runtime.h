@@ -4,6 +4,10 @@
 #include "runtime/memory/heap_manager.h"
 #include "runtime/interpreter/interpreter.h"
 
+#include <vector>
+#include <string>
+#include <unordered_map>
+
 namespace evm::file_format {
 class File;
 };
@@ -38,6 +42,9 @@ public:
 
     void Execute(file_format::File *file);
 
+    const std::string *GetStringFromCache(uint32_t string_offset);
+    const std::string *CreateStringAndSetInCache(uint32_t string_offset);
+
 private:
     Runtime() = default;
     ~Runtime() = default;
@@ -49,6 +56,9 @@ private:
 
     std::unique_ptr<HeapManager> heap_manager_;
     std::unique_ptr<Interpreter> interpreter_;
+
+    std::vector<byte_t> bytecode_;
+    std::unordered_map<uint32_t, std::string> string_сache_;
 };
 
 } // namespace evm::runtime
