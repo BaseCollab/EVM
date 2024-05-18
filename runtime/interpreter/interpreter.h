@@ -27,6 +27,10 @@ public:
     const Frame *GetCurrFrame() const;
     const std::vector<Frame> &GetFramesStack() const;
 
+    void MigrateToNewFrame(size_t new_pc, size_t restore_pc,
+                           const std::array<Register, Frame::N_PASSED_ARGS_DEFAULT> &passed_args);
+    void ReturnToPrevFrame();
+
 private:
     std::vector<Frame> frames_;
 

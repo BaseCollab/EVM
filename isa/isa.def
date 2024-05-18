@@ -342,7 +342,8 @@ DEFINE_INSTR
 (
     CALL, 0x24,
     {
-        FRAME_NEW_MIGRATE(PC() + 0x8, RS1_I());
+        MigrateToNewFrame(RS1_I(), PC() + 0x8,
+            {CALL_REG1(), CALL_REG2(), CALL_REG3(), CALL_REG4()});
     }
 )
 
@@ -350,7 +351,7 @@ DEFINE_INSTR
 (
     RET, 0x25,
     {
-        FRAME_OLD_MIGRATE();
+        ReturnToPrevFrame();
     }
 )
 
