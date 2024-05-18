@@ -121,7 +121,7 @@ ALWAYS_INLINE void HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg
     auto type = static_cast<memory::Type>(field_type);
     printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", static_cast<void *>(cls), field_idx, field_type);
     // int64_t because all existing field types take up 8 bytes
-    [[maybe_unused]] int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx), type);
+    int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx), type);
     frame->GetReg(reg_idx)->SetInt64(raw_field);
 }
 

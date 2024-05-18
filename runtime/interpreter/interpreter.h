@@ -27,6 +27,9 @@ public:
     const Frame *GetCurrFrame() const;
     const std::vector<Frame> &GetFramesStack() const;
 
+    void MarkAccum(bool is_root);
+    bool IsAccumMarked() const;
+
     void MigrateToNewFrame(size_t new_pc, size_t restore_pc,
                            const std::array<Register, Frame::N_PASSED_ARGS_DEFAULT> &passed_args);
     void ReturnToPrevFrame();
@@ -37,7 +40,10 @@ private:
     Frame *frame_cur_ {nullptr};
     size_t pc_ {0}; // pc of the current frame
 
+    size_t instr_counter_ {0}; // for GC/JIT work
+
     Register accum_;
+    bool is_accum_root_ {false};
 };
 
 } // namespace evm::runtime

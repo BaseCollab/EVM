@@ -15,6 +15,7 @@ DEFINE_INSTR
     ADD, 0x1,
     {
         RD_I_ASSIGN(RS1_I() + RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -24,6 +25,7 @@ DEFINE_INSTR
     SUB, 0x2,
     {
         RD_I_ASSIGN(RS1_I() - RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -33,6 +35,7 @@ DEFINE_INSTR
     MUL, 0x3,
     {
         RD_I_ASSIGN(RS1_I() * RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -41,6 +44,7 @@ DEFINE_INSTR
     DIV, 0x4,
     {
         RD_I_ASSIGN(RS1_I() / RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -50,6 +54,7 @@ DEFINE_INSTR
     ADDF, 0x5,
     {
         RD_F_ASSIGN(RS1_F() + RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -59,6 +64,7 @@ DEFINE_INSTR
     SUBF, 0x6,
     {
         RD_F_ASSIGN(RS1_F() - RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -68,6 +74,7 @@ DEFINE_INSTR
     MULF, 0x7,
     {
         RD_F_ASSIGN(RS1_F() * RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -77,6 +84,7 @@ DEFINE_INSTR
     DIVF, 0x8,
     {
         RD_F_ASSIGN(RS1_F() / RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -86,6 +94,7 @@ DEFINE_INSTR
     AND, 0x9,
     {
         RD_I_ASSIGN(RS1_I() & RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -95,6 +104,7 @@ DEFINE_INSTR
     OR, 0xa,
     {
         RD_I_ASSIGN(RS1_I() | RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -104,6 +114,7 @@ DEFINE_INSTR
     XOR, 0xb,
     {
         RD_I_ASSIGN(RS1_I() ^ RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -115,6 +126,7 @@ DEFINE_INSTR
     MOV, 0xc,
     {
         RD_I_ASSIGN(RS1_I());
+        MARK_RD_AS_ROOT(IS_RS1_MARKED_AS_ROOT());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -124,6 +136,7 @@ DEFINE_INSTR
     MOVIF, 0xd,
     {
         RD_I_ASSIGN(IMM_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0xc); // 0xc bytes per instruction, not branch instruction
     }
 )
@@ -134,6 +147,7 @@ DEFINE_INSTR
     SLTI, 0xe,
     {
         RD_I_ASSIGN(RS1_I() < RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -143,6 +157,7 @@ DEFINE_INSTR
     SMEI, 0xf,
     {
         RD_I_ASSIGN(RS1_I() >= RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -152,6 +167,7 @@ DEFINE_INSTR
     SLTF, 0x10,
     {
         RD_I_ASSIGN(RS1_F() < RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -161,6 +177,7 @@ DEFINE_INSTR
     SMEF, 0x11,
     {
         RD_I_ASSIGN(RS1_F() >= RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -170,6 +187,7 @@ DEFINE_INSTR
     EQI, 0x12,
     {
         RD_I_ASSIGN(RS1_I() == RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -179,6 +197,7 @@ DEFINE_INSTR
     NEQI, 0x13,
     {
         RD_I_ASSIGN(RS1_I() != RS2_I());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -188,6 +207,7 @@ DEFINE_INSTR
     EQF, 0x14,
     {
         RD_I_ASSIGN(RS1_F() == RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -197,6 +217,7 @@ DEFINE_INSTR
     NEQF, 0x15,
     {
         RD_I_ASSIGN(RS1_F() != RS2_F());
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -206,6 +227,7 @@ DEFINE_INSTR
     CONVIF, 0x16,
     {
         RD_F_ASSIGN(static_cast<double>(RS1_I()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -215,6 +237,7 @@ DEFINE_INSTR
     CONVFI, 0x17,
     {
         RD_I_ASSIGN(static_cast<int64_t>(RS1_F()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -245,6 +268,7 @@ DEFINE_INSTR
         scanf("%ld", &__tmp);
         RD_I_ASSIGN(__tmp);
 
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -257,6 +281,7 @@ DEFINE_INSTR
         scanf("%lf", &__tmp);
         RD_F_ASSIGN(__tmp);
 
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -266,6 +291,7 @@ DEFINE_INSTR
     SIN, 0x1c,
     {
         RD_F_ASSIGN(std::sin(RS1_F()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -275,6 +301,7 @@ DEFINE_INSTR
     COS, 0x1d,
     {
         RD_F_ASSIGN(std::cos(RS1_F()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -284,6 +311,7 @@ DEFINE_INSTR
     POWER, 0x1e,
     {
         RD_F_ASSIGN(std::pow(RS1_F(), RS2_F()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -360,6 +388,7 @@ DEFINE_INSTR
     ACCR, 0x26,
     {
         RD_I_ASSIGN(GET_I_ACCUM());
+        MARK_RD_AS_ROOT(IsAccumMarked());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -369,6 +398,7 @@ DEFINE_INSTR
     RACC, 0x27,
     {
         PUT_I_ACCUM(RS1_I());
+        MarkAccum(IS_RS1_MARKED_AS_ROOT());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -384,6 +414,7 @@ DEFINE_INSTR
     NEWARR, 0x28,
     {
         RD_I_ASSIGN(HandleCreateArrayObject(GET_ARRAY_TYPE(), IMM_I32()));
+        MARK_RD_AS_ROOT(true);
         PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
     }
 )
@@ -397,6 +428,7 @@ DEFINE_INSTR
     LARR, 0x29,
     {
         RD_I_ASSIGN(HandleLoadFromArray(RS1_I(), RS2_I()));
+        MARK_RD_AS_ROOT(false); // TODO: change IsElementObj() if enable recursive object allocation
         PC_ADD(0x4);// 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -434,7 +466,8 @@ DEFINE_INSTR
     NEWSTR, 0x2c,
     {
         RD_I_ASSIGN(HandleCreateStringObject(IMM_I32()));
-        PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
+        MARK_RD_AS_ROOT(true);
+        PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
     }
 )
 
@@ -445,6 +478,7 @@ DEFINE_INSTR
     STRCONCAT, 0x2d,
     {
         RD_I_ASSIGN(HandleStringConcatenation(RS1_I(), RS2_I()));
+        MARK_RD_AS_ROOT(true);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -460,6 +494,7 @@ DEFINE_INSTR
     STRCMP, 0x2e,
     {
         RD_I_ASSIGN(HandleStringComparison(RS1_I(), RS2_I()));
+        MARK_RD_AS_ROOT(false);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -494,6 +529,7 @@ DEFINE_INSTR
     NEWOBJ, 0x31,
     {
         RD_I_ASSIGN(HandleCreateObject(file, GET_OBJ_TYPE()));
+        MARK_RD_AS_ROOT(true);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -504,7 +540,8 @@ DEFINE_INSTR
     OBJ_GET_FIELD, 0x32,
     {
         HandleObjGetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS(), GET_OBJ_FIELD_TYPE());
-        PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
+        MARK_RD_AS_ROOT(false);
+        PC_ADD(0x6); // 0x6 bytes per instruction, not branch instruction
     }
 )
 
@@ -514,7 +551,8 @@ DEFINE_INSTR
     OBJ_SET_FIELD, 0x33,
     {
         HandleObjSetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS(), GET_OBJ_FIELD_TYPE());
-        PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
+
+        PC_ADD(0x6); // 0x6 bytes per instruction, not branch instruction
     }
 )
 
@@ -527,6 +565,7 @@ DEFINE_INSTR
     CPOBJ, 0x34,
     {
         /// TODO: add implementation
+        MARK_RD_AS_ROOT(true);
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )

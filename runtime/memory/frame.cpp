@@ -32,10 +32,16 @@ const Register *Frame::GetReg(size_t reg_idx) const
     return &regs_[reg_idx];
 }
 
-void Frame::MarkReg(size_t reg_idx, bool is_object)
+void Frame::MarkReg(size_t reg_idx, bool is_root)
 {
     assert(reg_idx < regs_.size());
-    obj_regs_indicators_.set(reg_idx, is_object);
+    obj_regs_indicators_.set(reg_idx, is_root);
+}
+
+bool Frame::IsRegMarked(size_t reg_idx) const
+{
+    assert(reg_idx < regs_.size());
+    return obj_regs_indicators_[reg_idx];
 }
 
 const std::bitset<Frame::N_FRAME_REGS_DEFAULT> &Frame::GetObjectBitMask() const

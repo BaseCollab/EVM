@@ -44,6 +44,12 @@ namespace evm::runtime {
 #define RS3_I_FRAME(frame) frame->GetReg(RS3_IDX())->GetInt64()
 #define RS3_F_FRAME(frame) frame->GetReg(RS3_IDX())->GetDouble()
 
+#define RD_MARK_REG_AS_ROOT(frame, is_obj) \
+    frame->MarkReg(RD_IDX(), is_obj)
+
+#define RS1_IS_MARKED_AS_ROOT(frame) \
+    frame->IsRegMarked(RS1_IDX())
+
 void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t entrypoint)
 {
     #define DEFINE_INSTR(instr, opcode, interpret) \
@@ -106,7 +112,17 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define GET_I_ACCUM() accum_.GetInt64()
     #define GET_F_ACCUM() accum_.GetDouble()
 
-    #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
+    #define MARK_RD_AS_ROOT(is_obj) \
+        RD_MARK_REG_AS_ROOT(frame_cur_, is_obj)
+
+    #define IS_RS1_MARKED_AS_ROOT() \
+        RS1_IS_MARKED_AS_ROOT(frame_cur_)
+
+    #define CHECK_GC_INVOKE() \
+        Runtime::GetInstance()->GetGC()->UpdateState();
+
+    #define DISPATCH() \
+        goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
 
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
 
@@ -114,6 +130,7 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     instr:                                            \
         PRINT_DEBUG(instr);                           \
         interpret;                                    \
+        CHECK_GC_INVOKE();                            \
         DISPATCH();
 
     #include "isa/isa.def"
@@ -145,6 +162,16 @@ void Interpreter::ReturnToPrevFrame()
     frames_.pop_back();
     frame_cur_ = &frames_.back();
     pc_ = frame_cur_->GetRestorePC();
+}
+
+void Interpreter::MarkAccum(bool is_root)
+{
+    is_accum_root_ = is_root;
+}
+
+bool Interpreter::IsAccumMarked() const
+{
+    return is_accum_root_;
 }
 
 #pragma GCC diagnostic pop

@@ -880,7 +880,7 @@ TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS_2)
     ExecuteFromSource(source);
 }
 
-TEST_F(InterpreterTest, STRING_COMPARASION)
+TEST_F(InterpreterTest, STRING_COMPARISON)
 {
     auto source = R"(
         newstr x0, 'one'

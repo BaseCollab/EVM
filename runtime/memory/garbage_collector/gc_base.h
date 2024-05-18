@@ -14,8 +14,9 @@ public:
     GarbageCollector() = default;
     ~GarbageCollector() = default;
 
-    virtual void Mark(Interpreter *interpreter) = 0;
-    virtual void Sweep(AllocatorBase *allocator) = 0;
+    // Must be called after each instruction
+    virtual void UpdateState() = 0;
+    virtual void CleanMemory() = 0;
 };
 
 } // namespace evm::runtime

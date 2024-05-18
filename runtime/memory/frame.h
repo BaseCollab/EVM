@@ -28,7 +28,8 @@ public:
     size_t GetRestorePC() const;
     void SetRestorePC(size_t pc);
 
-    void MarkReg(size_t reg_idx, bool is_object = true);
+    bool IsRegMarked(size_t reg_idx) const;
+    void MarkReg(size_t reg_idx, bool is_root = true);
 
     const std::bitset<N_FRAME_REGS_DEFAULT> &GetObjectBitMask() const;
 

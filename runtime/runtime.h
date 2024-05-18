@@ -32,12 +32,22 @@ public:
         return instance_;
     }
 
-    HeapManager *GetHeapManager() const
+    const HeapManager *GetHeapManager() const
     {
         return heap_manager_.get();
     }
 
-    Interpreter *GetInterpreter() const
+    HeapManager *GetHeapManager()
+    {
+        return heap_manager_.get();
+    }
+
+    const Interpreter *GetInterpreter() const
+    {
+        return interpreter_.get();
+    }
+
+    Interpreter *GetInterpreter()
     {
         return interpreter_.get();
     }
@@ -45,6 +55,16 @@ public:
     file_format::File *GetExecutableFile()
     {
         return file_;
+    }
+
+    const GarbageCollectorSTW *GetGC() const
+    {
+        return gc_.get();
+    }
+
+    GarbageCollectorSTW *GetGC()
+    {
+        return gc_.get();
     }
 
     void Execute(file_format::File *file);
@@ -68,7 +88,6 @@ private:
 
     std::unique_ptr<HeapManager> heap_manager_;
     std::unique_ptr<Interpreter> interpreter_;
-
     std::unique_ptr<GarbageCollectorSTW> gc_;
 
     std::vector<byte_t> bytecode_;
