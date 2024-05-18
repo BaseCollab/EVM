@@ -55,8 +55,8 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
 
     #undef DEFINE_INSTR
 
-    frames_.push(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
-    frame_cur_ = &frames_.top();
+    frames_.push_back(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
+    frame_cur_ = &frames_.back();
 
     pc_ = entrypoint;
 
@@ -108,17 +108,19 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
 
     #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                            \
         frame_cur_->SetRestorePC(restore_pc);                                \
-        frames_.push(Frame(new_pc, Frame::N_FRAME_LOCAL_REGS_DEFAULT,        \
-                     *frame_cur_->GetReg(CALL_REG1()),                       \
-                     *frame_cur_->GetReg(CALL_REG2()),                       \
-                     *frame_cur_->GetReg(CALL_REG3()),                       \
-                     *frame_cur_->GetReg(CALL_REG4())));                     \
+        printf("HERE@@@@ %ld\n", (long)restore_pc); \
+        frames_.push_back(Frame(new_pc, Frame::N_FRAME_LOCAL_REGS_DEFAULT,   \
+                          *frame_cur_->GetReg(CALL_REG1()),                  \
+                          *frame_cur_->GetReg(CALL_REG2()),                  \
+                          *frame_cur_->GetReg(CALL_REG3()),                  \
+                          *frame_cur_->GetReg(CALL_REG4())));                \
         PC_ASSIGN(new_pc);                                                   \
-        frame_cur_ = &frames_.top();
+        printf("HERE@@@@\n"); \
+        frame_cur_ = &frames_.back();
 
     #define FRAME_OLD_MIGRATE()                                              \
-        frames_.pop();                                                       \
-        frame_cur_ = &frames_.top();                                         \
+        frames_.pop_back();                                                  \
+        frame_cur_ = &frames_.back();                                        \
         PC_ASSIGN(frame_cur_->GetRestorePC());
 
     #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
@@ -136,7 +138,12 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #undef DEFINE_INSTR
 }
 
-const Frame *Interpreter::getCurrFrame() const
+const std::vector<Frame> &Interpreter::GetFramesStack() const
+{
+    return frames_;
+}
+
+const Frame *Interpreter::GetCurrFrame() const
 {
     return frame_cur_;
 }

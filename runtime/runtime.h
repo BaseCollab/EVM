@@ -1,6 +1,7 @@
 #ifndef EVM_RUNTIME_RUNTIME_H
 #define EVM_RUNTIME_RUNTIME_H
 
+#include "runtime/memory/garbage_collector/gc_stw.h"
 #include "runtime/memory/heap_manager.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/memory/class_manager.h"
@@ -67,6 +68,8 @@ private:
 
     std::unique_ptr<HeapManager> heap_manager_;
     std::unique_ptr<Interpreter> interpreter_;
+
+    std::unique_ptr<GarbageCollectorSTW> gc_;
 
     std::vector<byte_t> bytecode_;
     std::unordered_map<uint32_t, std::string> string_cache_;

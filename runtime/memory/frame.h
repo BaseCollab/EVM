@@ -5,9 +5,9 @@
 #include "common/constants.h"
 #include "runtime/memory/reg.h"
 
-#include <cassert>
 #include <vector>
 #include <cstddef>
+#include <bitset>
 
 namespace evm::runtime {
 
@@ -29,8 +29,14 @@ public:
     size_t GetRestorePC() const;
     void SetRestorePC(size_t pc);
 
+    void MarkRegAsObject(size_t reg_idx);
+    void MarkRegAsNotObject(size_t reg_idx);
+
+    const std::bitset<N_FRAME_REGS_DEFAULT> &GetObjectBitMask() const;
+
 private:
     std::vector<Register> regs_;
+    std::bitset<N_FRAME_REGS_DEFAULT> obj_regs_indicators_;
 
     size_t restore_pc_ {0}; // pc to save before call of another function
 };

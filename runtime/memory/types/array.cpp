@@ -3,6 +3,7 @@
 #include "runtime/runtime.h"
 #include "runtime/memory/allocator/bump_allocator.h"
 
+#include <cassert>
 #include <iostream>
 
 namespace evm::runtime::types {

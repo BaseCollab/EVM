@@ -455,7 +455,7 @@ DEFINE_INSTR
     /// Return value:
     /// Negative value if rs1 appears before rs2 in lexicographical order.
     /// Zero if rs1 and rs2 compare equal.
-    /// Positive value if rs1 appears rs2 rhs in lexicographical order.    
+    /// Positive value if rs1 appears rs2 rhs in lexicographical order.
     STRCMP, 0x2e,
     {
         RD_I_ASSIGN(HandleStringComparison(RS1_I(), RS2_I()));

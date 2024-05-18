@@ -1,6 +1,6 @@
 #include "runtime/runtime.h"
 #include "file_format/file.h"
-#include "memory/class_description.h"
+#include "runtime/memory/garbage_collector/gc_stw.h"
 
 #include <iostream>
 
@@ -46,6 +46,7 @@ void Runtime::InitializeRuntime()
     interpreter_ = std::make_unique<Interpreter>();
 
     class_manager_.InitDefaultClassDescriptions();
+    gc_ = std::make_unique<GarbageCollectorSTW>();
 }
 
 void Runtime::Execute(file_format::File *file)
