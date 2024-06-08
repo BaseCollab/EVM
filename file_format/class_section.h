@@ -69,7 +69,7 @@ public:
 
     size_t GetSize() const
     {
-        return sizeof(Type) + sizeof(EmitClassIdx) + Emittable::GetSize();
+        return sizeof(Type) + sizeof(EmitClassIdx) + sizeof(EmitArraySize) + Emittable::GetSize();
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)

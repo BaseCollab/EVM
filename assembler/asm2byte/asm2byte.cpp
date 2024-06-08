@@ -157,30 +157,30 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
                 class_idx = class_section->GetIdxOfInstance(line_args[1]);
                 if (class_idx == -1) {
-                    std::cerr << "Usage of undefined class " << line_args[1] << std::endl;
+                    std::cerr << "Usage of undefined class \"" << line_args[1] << "\"" << std::endl;
                     return false;
                 }
             }
-
-            std::cout << line_args[idx_of_name] << "\n";
 
             evm::file_format::ClassField class_field {line_args[idx_of_name]};
 
             // Now check if it is array
             size_t size_occurance_start = line_args[idx_of_name].find("[");
             size_t size_occurance_end = line_args[idx_of_name].find("]");
-
-            std::cout << size_occurance_start << " " << size_occurance_end << "\n";
-
-            size_t array_size = 0;
+            ssize_t array_size = 0;
 
             if (size_occurance_start != std::string::npos) {
                 if (size_occurance_end > size_occurance_start && size_occurance_end != std::string::npos) {
                     array_size = std::stol(line_args[idx_of_name].substr(
                         size_occurance_start + 1, size_occurance_end - size_occurance_start - 1));
+                    if (array_size <= 0) {
+                        std::cerr << "Invalid size of array \"" << line_args[idx_of_name] << "\"" << std::endl;
+                        return false;
+                    }
+
                     type = file_format::ClassField::Type::ARRAY;
                 } else {
-                    std::cerr << "Invalid array declaration of class " << line_args[1] << std::endl;
+                    std::cerr << "Invalid array declaration of class \"" << line_args[1] << "\"" << std::endl;
                     return false;
                 }
             }

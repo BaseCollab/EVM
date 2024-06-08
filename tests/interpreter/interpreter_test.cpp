@@ -699,9 +699,12 @@ TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS)
         .class Boom
             class Foo f1;
             double i;
+
             class Foo f1[10];
             class Foo f2;
+
             double floats[9999];
+            str strings[3];
         .class
 
         exit
