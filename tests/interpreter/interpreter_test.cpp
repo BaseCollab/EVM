@@ -688,6 +688,34 @@ TEST_F(InterpreterTest, CLASS_OBJECTS)
     // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
 }
 
+TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS)
+{
+    auto source = R"(
+        .class Foo
+            int x;
+            double y;
+        .class
+
+        .class Boom
+            class Foo f1;
+            double i;
+            class Foo f1[10];
+            class Foo f2;
+            double floats[9999];
+        .class
+
+        exit
+    )";
+
+    ExecuteFromSource(source);
+
+    std::cerr << "\n!!!! test is banned temporarily (not implemented some features) !!!!\n\n";
+
+    /// TODO: uncomment after object operations are implemented
+    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x10)->GetInt64(), 23);
+    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
+}
+
 TEST_F(InterpreterTest, STRING_COMPARASION)
 {
     auto source = R"(
