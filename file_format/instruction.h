@@ -87,9 +87,9 @@ public:
         obj_op_ = true;
     }
 
-    void SetObjFieldSize(byte_t obj_field_size)
+    void SetObjFieldType(int8_t obj_field_type)
     {
-        obj_field_size_ = obj_field_size;
+        obj_field_type_ = obj_field_type;
         obj_op_ = true;
     }
 
@@ -170,7 +170,7 @@ public:
 
         if (obj_op_ == true) {
             out_arr->push_back(obj_rs_);
-            out_arr->push_back(obj_field_size_);
+            out_arr->push_back(obj_field_type_);
         }
 
         if (imm_.is_set_) {
@@ -199,7 +199,7 @@ private:
 
     /// No additional space for object-ptr encoding in register above
     byte_t obj_rs_ {0};
-    byte_t obj_field_size_ {0};
+    int8_t obj_field_type_ {0};
     bool obj_op_ = false;
 
     Immediate imm_;

@@ -3,10 +3,9 @@
 
 #include "common/macros.h"
 #include "mark_word.h"
+#include "runtime/memory/class_description.h"
 
 namespace evm::runtime {
-
-class ClassDescription;
 
 class ObjectHeader {
 public:
@@ -24,6 +23,21 @@ public:
     void SetMarkWord(MarkWord mark_word)
     {
         mark_word_ = mark_word;
+    }
+
+    void SetClassWord(ClassDescription *class_word)
+    {
+        class_word_ = class_word;
+    }
+
+    ClassDescription *GetClassWord()
+    {
+        return class_word_;
+    }
+
+    const ClassDescription *GetClassWord() const
+    {
+        return class_word_;
     }
 
 private:

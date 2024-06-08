@@ -7,8 +7,10 @@ set(SOURCES
     memory/allocator/bump_allocator.cpp
     memory/types/array.cpp
     memory/types/string.cpp
+    memory/types/class.cpp
     memory/frame.cpp
     memory/heap_manager.cpp
+    memory/class_manager.cpp
     runtime.cpp
 )
 

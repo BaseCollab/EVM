@@ -20,6 +20,9 @@ public:
     ~HeapManager();
 
     void *AllocateObject(size_t size);
+
+    void *AllocateInternalObject(size_t size);
+
     // TODO: implement AllocateFrame function
     Frame *AllocateFrame();
 

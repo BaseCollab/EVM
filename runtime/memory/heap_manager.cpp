@@ -31,4 +31,9 @@ void *HeapManager::AllocateObject(size_t size)
     return object_allocator_->Alloc(size);
 }
 
+void *HeapManager::AllocateInternalObject(size_t size)
+{
+    return object_allocator_->Alloc(size);
+}
+
 } // namespace evm::runtime

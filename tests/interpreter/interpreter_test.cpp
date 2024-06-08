@@ -650,42 +650,108 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
 
+TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_DOUBLE)
+{
+    auto source = R"(
+        .class Rectangle
+            double x;
+            double y;
+        .class
+
+        newobj x1, Rectangle
+        movif x2, -123.321
+        movif x3, 1234567.7654321
+        
+        obj_set_field x1, Rectangle@x, x2
+        obj_set_field x1, Rectangle@y, x3
+
+        obj_get_field x4, Rectangle@x, x1
+        obj_get_field x5, Rectangle@y, x1
+
+        printf x4
+        printf x5
+
+        exit
+    )";
+
+    ExecuteFromSource(source);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetRaw(),
+              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetRaw(),
+              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetDouble(), -123.321);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 1234567.7654321);
+}
+
+TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_INT)
+{
+    auto source = R"(
+        .class Rectangle
+            int x;
+            int y;
+        .class
+
+        newobj x1, Rectangle
+        movif x2, -123456789
+        movif x3, 987654321
+        
+        obj_set_field x1, Rectangle@x, x2
+        obj_set_field x1, Rectangle@y, x3
+
+        obj_get_field x4, Rectangle@x, x1
+        obj_get_field x5, Rectangle@y, x1
+
+        printi x4
+        printi x5
+
+        exit
+    )";
+
+    ExecuteFromSource(source);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetRaw(),
+              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetRaw(),
+              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), -123456789);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 987654321);
+}
+
 TEST_F(InterpreterTest, CLASS_OBJECTS)
 {
     auto source = R"(
-        .class Foo
+        .class A
             int x;
             double y;
         .class
 
-        .class Boom
-            class Foo f1;
-            double i;
-            class Foo f2;
+        .class B
+            class A a1;
+            double id;
+            class A a2;
         .class
 
-        movif x1, 23
-        movif x2, -11212
+        movif x1, -12345
+        movif x2, 432.123
 
-        newobj x7, Boom
-        obj_set_field x7, Boom@i, x1
+        newobj x3, B
 
-        obj_get_field x8, Boom@f2, x7
-        obj_set_field x8, Foo@y, x2
+        obj_set_field x3, B@id, x1
+        obj_get_field x4, B@a2, x3
+        obj_set_field x4, A@y, x2
 
-        obj_get_field x10, Foo@y, x8
-        obj_get_field x11, Boom@i, x7
+        obj_get_field x5, A@y, x4
+        obj_get_field x6, B@id, x3
+
+        printf x5
+        printi x6
 
         exit
     )";
 
     ExecuteFromSource(source);
 
-    std::cerr << "\n!!!! test is banned temporarily (not implemented some features) !!!!\n\n";
-
-    /// TODO: uncomment after object operations are implemented
-    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x10)->GetInt64(), 23);
-    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 432.123);
+    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), -12345);
 }
 
 TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS)

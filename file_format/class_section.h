@@ -62,6 +62,11 @@ public:
         return type_;
     }
 
+    bool IsObject() const
+    {
+        return type_ == Type::OBJECT;
+    }
+
     size_t GetRuntimeSize() const
     {
         return GetTypeSize();

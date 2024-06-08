@@ -4,6 +4,7 @@
 #include "common/constants.h"
 
 #include <type_traits>
+#include <cstring>
 
 namespace evm::bitops {
 
@@ -68,6 +69,14 @@ std::make_unsigned_t<T> MakeUnsigned(T signed_value)
 {
     static_assert(std::is_signed_v<T>);
     return static_cast<std::make_unsigned_t<T>>(signed_value);
+}
+
+template <typename To, typename From>
+To BitCast(From src)
+{
+    To dst;
+    std::memcpy(&dst, &src, sizeof(To));
+    return dst;
 }
 
 } // namespace evm::bitops

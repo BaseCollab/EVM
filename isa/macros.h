@@ -19,9 +19,9 @@ using instr_size_t = word_t;
 #define ISA_GET_ARRAY_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 2))
 
 /// All types are always objects, not need additional checks
-#define ISA_GET_OBJ_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 3))
+#define ISA_GET_OBJ_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 2))
 #define ISA_GET_OBJ_RS(instr_ptr) *(instr_ptr + 4)
-#define ISA_GET_OBJ_FIELD_SIZE(instr_ptr) *(instr_ptr + 5)
+#define ISA_GET_OBJ_FIELD_TYPE(instr_ptr) *(instr_ptr + 5)
 #define ISA_GET_OBJ_OP_RS(instr_ptr) ISA_GET_RD(instr_ptr)
 
 #define ISA_CALL_GET_REG1(instr_ptr) *(instr_ptr + 4)

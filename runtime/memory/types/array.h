@@ -8,7 +8,7 @@
 #include <cstring>
 #include <string_view>
 
-namespace evm::runtime {
+namespace evm::runtime::types {
 
 class Array {
 public:
@@ -72,6 +72,6 @@ private:
     void *data_ {nullptr};
 };
 
-} // namespace evm::runtime
+} // namespace evm::runtime::types
 
 #endif // EVM_MEMORY_OBJECTS_ARRAY_H
