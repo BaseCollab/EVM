@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__EMITTABLE_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__EMITTABLE_H
 
+#include "common/constants.h"
 #include "common/macros.h"
 
 #include <cstring>
@@ -12,11 +13,12 @@ namespace evm {
 
 class Emittable {
 public:
-    using EmitNameSize = uint8_t;
-    using EmitSize = uint32_t;
-    using EmitType = uint8_t;
+    using EmitNameSize = byte_t;
+    using EmitSize = word_t;
+    using EmitClassIdx = hword_t;
+    using EmitType = byte_t;
     using EmitRef = EmitSize;
-    using EmitMagic = uint32_t;
+    using EmitMagic = word_t;
 
 public:
     DEFAULT_MOVE_SEMANTIC(Emittable);
