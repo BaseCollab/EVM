@@ -15,6 +15,7 @@ class Emittable {
 public:
     using EmitNameSize = byte_t;
     using EmitSize = word_t;
+    using EmitArraySize = word_t;
     using EmitClassIdx = hword_t;
     using EmitType = byte_t;
     using EmitRef = EmitSize;

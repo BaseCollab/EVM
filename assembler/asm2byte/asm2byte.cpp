@@ -1,6 +1,7 @@
 #include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
+#include "file_format/class_section.h"
 #include "runtime/memory/type.h"
 #include "file_format/file.h"
 #include "file_format/header.h"
@@ -8,6 +9,8 @@
 #include "file_format/instruction.h"
 #include "asm2byte.h"
 
+#include <cstddef>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 
@@ -103,10 +106,7 @@ void AsmToByte::PrepareLinesFromBuffer()
                     in_string = true;
                 else
                     in_string = false;
-            } else if (isalnum(file_buffer_[i]) == 0 && file_buffer_[i] != ':' && file_buffer_[i] != '_' &&
-                       file_buffer_[i] != '.' && file_buffer_[i] != '-' && file_buffer_[i] != '\'' &&
-                       file_buffer_[i] != ';' && file_buffer_[i] != '{' && file_buffer_[i] != '}' &&
-                       file_buffer_[i] != '@') {
+            } else if (std::isprint(file_buffer_[i]) == 0) {
                 std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
             }
         }
@@ -149,19 +149,47 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
         // Class definition fields
         if (in_class_defition == true) {
             file_format::ClassField::Type type = memory::GetTypeFromString(line_args[0]);
+            auto class_idx = static_cast<ssize_t>(type);
+            size_t idx_of_name = 1;
 
             if (type == file_format::ClassField::Type::OBJECT) {
-                ssize_t class_idx = class_section->GetIdxOfInstance(line_args[1]);
+                idx_of_name = 2;
+
+                class_idx = class_section->GetIdxOfInstance(line_args[1]);
                 if (class_idx == -1) {
-                    std::cerr << "Usage of undefined class " << line_args[1] << std::endl;
+                    std::cerr << "Usage of undefined class \"" << line_args[1] << "\"" << std::endl;
                     return false;
                 }
-
-                class_section->GetInstances()->back().AddInstance(
-                    {line_args[2], type, static_cast<hword_t>(class_idx)});
-            } else {
-                class_section->GetInstances()->back().AddInstance({line_args[1], type});
             }
+
+            evm::file_format::ClassField class_field {line_args[idx_of_name]};
+
+            // Now check if it is array
+            size_t size_occurance_start = line_args[idx_of_name].find("[");
+            size_t size_occurance_end = line_args[idx_of_name].find("]");
+            ssize_t array_size = 0;
+
+            if (size_occurance_start != std::string::npos) {
+                if (size_occurance_end > size_occurance_start && size_occurance_end != std::string::npos) {
+                    array_size = std::stol(line_args[idx_of_name].substr(
+                        size_occurance_start + 1, size_occurance_end - size_occurance_start - 1));
+                    if (array_size <= 0) {
+                        std::cerr << "Invalid size of array \"" << line_args[idx_of_name] << "\"" << std::endl;
+                        return false;
+                    }
+
+                    type = file_format::ClassField::Type::ARRAY;
+                } else {
+                    std::cerr << "Invalid array declaration of class \"" << line_args[1] << "\"" << std::endl;
+                    return false;
+                }
+            }
+
+            class_field.SetType(type);
+            class_field.SetArraySize(array_size);
+            class_field.SetClassRefIdx(class_idx);
+
+            class_section->GetInstances()->back().AddInstance(class_field);
 
             continue;
         }
