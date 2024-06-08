@@ -488,10 +488,11 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
+    /// newobj rd, rs1(offset)
     /// Create object, put ptr to register
     NEWOBJ, 0x31,
     {
-        /// TODO: add implementation
+        RD_I_ASSIGN(HandleCreateObject(file, GET_OBJ_TYPE()));
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -501,7 +502,7 @@ DEFINE_INSTR
     /// Put field of an object to register (by class offset)
     OBJ_GET_FIELD, 0x32,
     {
-        /// TODO: add implementation
+        HandleObjGetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS(), GET_OBJ_FIELD_TYPE());
         PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -511,7 +512,7 @@ DEFINE_INSTR
     /// Set field of an object from register (by class offset)
     OBJ_SET_FIELD, 0x33,
     {
-        /// TODO: add implementation
+        HandleObjSetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS(), GET_OBJ_FIELD_TYPE());
         PC_ADD(0x6); // 0x4 bytes per instruction, not branch instruction
     }
 )

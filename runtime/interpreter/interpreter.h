@@ -10,6 +10,10 @@
 #include <cstddef>
 #include <stack>
 
+namespace evm::file_format {
+class File;
+} // namespace evm::file_format
+
 namespace evm::runtime {
 
 class Interpreter {
@@ -20,7 +24,7 @@ public:
     Interpreter() = default;
     ~Interpreter() = default;
 
-    void Run(const byte_t *bytecode, size_t entrypoint);
+    void Run(file_format::File *file, const byte_t *bytecode, size_t entrypoint);
     const Frame *getCurrFrame() const;
 
 private:

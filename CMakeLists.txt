@@ -54,4 +54,4 @@ add_subdirectory(tests)
 
 add_executable(evm vm/evm.cpp)
 target_include_directories(evm PUBLIC ${EVM_ROOT})
-target_link_libraries(evm PUBLIC evm_static)
+target_link_libraries(evm PUBLIC evm_static asm2byte_static)

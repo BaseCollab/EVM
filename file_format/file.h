@@ -32,6 +32,12 @@ public:
         return &code_section_;
     }
 
+    Class &GetClassFromClassSection(size_t idx_in_class_section)
+    {
+        auto *classes = header_.GetClassSection()->GetInstances();
+        return (*classes)[idx_in_class_section];
+    }
+
     bool ResolveDependencies()
     {
         if (resolved_dependencies_ == true) {

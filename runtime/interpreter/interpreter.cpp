@@ -44,7 +44,7 @@ namespace evm::runtime {
 #define RS3_I_FRAME(frame) frame->GetReg(RS3_IDX())->GetInt64()
 #define RS3_F_FRAME(frame) frame->GetReg(RS3_IDX())->GetDouble()
 
-void Interpreter::Run(const byte_t *bytecode, size_t entrypoint)
+void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t entrypoint)
 {
     #define DEFINE_INSTR(instr, opcode, interpret) \
         &&instr,
@@ -75,9 +75,10 @@ void Interpreter::Run(const byte_t *bytecode, size_t entrypoint)
 
     #define GET_ARRAY_TYPE()     ISA_GET_ARRAY_TYPE(bytecode + pc_)
     #define GET_OBJ_TYPE()       ISA_GET_OBJ_TYPE(bytecode + pc_)
+    #define GET_OBJ_FIELD_IDX()  ISA_GET_OBJ_TYPE(bytecode + pc_)
     #define GET_OBJ_RS()         ISA_GET_OBJ_RS(bytecode + pc_)
     #define GET_OBJ_OP_RS()      ISA_GET_OBJ_OP_RS(bytecode + pc_)
-    #define GET_OBJ_FIELD_SIZE() ISA_GET_OBJ_FIELD_SIZE(bytecode + pc_)
+    #define GET_OBJ_FIELD_TYPE() ISA_GET_OBJ_FIELD_TYPE(bytecode + pc_)
 
     #define BYTECODE_OFFSET(offset) bytecode + offset
 

@@ -20,7 +20,7 @@ enum class Type : int8_t {
     ARRAY   = -6
 };
 
-enum TypeSize : int8_t {
+enum TypeSize : uint8_t {
     ZERO    = 0,
     DOUBLE  = 8,
     INT     = 8,

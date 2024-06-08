@@ -5,7 +5,7 @@
 #include <cstring>
 #include <iostream>
 
-namespace evm::runtime {
+namespace evm::runtime::types {
 
 /* static */
 String *String::Create(const uint8_t *data, size_t length)
@@ -71,4 +71,4 @@ String *String::ConcatStrings(String *lhs_string, String *rhs_string)
     return concat_string;
 }
 
-} // namespace evm::runtime
+} // namespace evm::runtime::types

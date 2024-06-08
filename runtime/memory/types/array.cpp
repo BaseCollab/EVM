@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace evm::runtime {
+namespace evm::runtime::types {
 
 void *Array::Create(memory::Type array_type, size_t count)
 {
@@ -71,4 +71,4 @@ void Array::Get(int64_t *value, size_t idx) const
     }
 }
 
-} // namespace evm::runtime
+} // namespace evm::runtime::types

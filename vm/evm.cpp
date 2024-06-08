@@ -1,13 +1,32 @@
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <vector>
+
+#include "assembler/asm2byte/asm2byte.h"
+#include "runtime/runtime.h"
 
 namespace evm {
 
 int Main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
-    // TODO: add start execution from bytecode file
+    // TODO: improve error handling
+    if (argc != 2) {
+        std::cerr << "input file required" << std::endl;
+        return 1;
+    }
+
+    asm2byte::AsmToByte asm2byte;
+    file_format::File file;
+    asm2byte.ParseAsmFile(argv[1], &file);
+
+    if (!runtime::Runtime::Create()) {
+        std::cerr << "Failed to create runtime" << std::endl;
+        return 1;
+    }
+
+    runtime::Runtime::GetInstance()->Execute(&file);
+
     return 0;
 }
 

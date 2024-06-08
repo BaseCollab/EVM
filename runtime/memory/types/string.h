@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-namespace evm::runtime {
+namespace evm::runtime::types {
 
 class String : public ObjectHeader {
 public:
@@ -72,6 +72,6 @@ private:
     __extension__ uint8_t data_[0];
 };
 
-} // namespace evm::runtime
+} // namespace evm::runtime::types
 
 #endif // EVM_RUNTIME_MEMORY_TYPES_STRING
