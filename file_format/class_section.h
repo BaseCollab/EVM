@@ -20,21 +20,21 @@ public:
     DEFAULT_MOVE_SEMANTIC(ClassField);
     DEFAULT_COPY_SEMANTIC(ClassField);
 
-    ClassField(const std::string name = "", Type type = Type::INVALID, const std::string type_name = "")
-        : Emittable(name), type_(type), type_name_(type_name)
+    ClassField(const std::string name = "", Type type = Type::INVALID, hword_t class_idx = -1)
+        : Emittable(name), type_(type), class_idx_(class_idx)
     {
     }
 
     ~ClassField() = default;
 
-    void SetTypeName(const std::string &name)
+    void SetClassRefIdx(hword_t class_idx)
     {
-        type_name_ = name;
+        class_idx_ = class_idx;
     }
 
-    const std::string &GetTypeName() const
+    hword_t GetClassRefIdx() const
     {
-        return type_name_;
+        return class_idx_;
     }
 
     size_t GetTypeSize() const
@@ -59,17 +59,15 @@ public:
 
     size_t GetSize() const
     {
-        return sizeof(Type) + sizeof(EmitNameSize) + type_name_.size() + 1 + Emittable::GetSize();
+        return sizeof(Type) + sizeof(EmitClassIdx) + Emittable::GetSize();
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
     {
-        EmitNameSize type_name_size = type_name_.size() + 1;
         EmitSize emit_size = 0;
 
         emit_size += Emittable::EmitBytecode<Type>(out_arr, &type_);
-        emit_size += Emittable::EmitBytecode<EmitNameSize>(out_arr, &type_name_size);
-        emit_size += Emittable::EmitBytecode(out_arr, type_name_.c_str(), type_name_size, type_name_.size());
+        emit_size += Emittable::EmitBytecode<EmitClassIdx>(out_arr, &class_idx_);
         emit_size += Emittable::EmitBytecode(out_arr);
 
         return emit_size;
@@ -78,13 +76,9 @@ public:
     EmitSize ParseBytecode(const byte_t *in_arr, const EmitSize already_parsed)
     {
         EmitSize parsed_size = already_parsed;
-        EmitNameSize type_name_size = 0;
 
         parsed_size += Emittable::ParseBytecode<Type>(in_arr + parsed_size, &type_);
-        parsed_size += Emittable::ParseBytecode<EmitNameSize>(in_arr + parsed_size, &type_name_size);
-
-        type_name_.resize(type_name_size);
-        parsed_size += Emittable::ParseBytecode(in_arr + parsed_size, type_name_.data(), type_name_size);
+        parsed_size += Emittable::ParseBytecode<EmitClassIdx>(in_arr + parsed_size, &class_idx_);
         parsed_size += Emittable::ParseBytecode(in_arr, parsed_size);
 
         return parsed_size - already_parsed;
@@ -92,7 +86,7 @@ public:
 
 private:
     Type type_ = Type::INVALID;
-    std::string type_name_;
+    hword_t class_idx_ = -1;
 };
 
 class Class : public Section<ClassField> {

@@ -151,7 +151,14 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             file_format::ClassField::Type type = memory::GetTypeFromString(line_args[0]);
 
             if (type == file_format::ClassField::Type::OBJECT) {
-                class_section->GetInstances()->back().AddInstance({line_args[2], type, line_args[1]});
+                ssize_t class_idx = class_section->GetIdxOfInstance(line_args[1]);
+                if (class_idx == -1) {
+                    std::cerr << "Usage of undefined class " << line_args[1] << std::endl;
+                    return false;
+                }
+
+                class_section->GetInstances()->back().AddInstance(
+                    {line_args[2], type, static_cast<hword_t>(class_idx)});
             } else {
                 class_section->GetInstances()->back().AddInstance({line_args[1], type});
             }
