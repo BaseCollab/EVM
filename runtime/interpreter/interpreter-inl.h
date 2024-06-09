@@ -11,9 +11,18 @@
 
 namespace evm::runtime {
 
-ALWAYS_INLINE int64_t HandleCreateArray(hword_t type, int32_t size)
+ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
 {
-    return reinterpret_cast<int64_t>(types::Array::Create(static_cast<memory::Type>(type), size));
+    auto array_type = static_cast<memory::Type>(type);
+
+    auto *array_obj = types::Array::Create(array_type, size);
+    if (UNLIKELY(array_obj == nullptr)) {
+        printf("[HandleCreateStringObject] Error when creating object for array of type \"%s\"\n",
+               GetStringFromType(array_type).c_str());
+        UNREACHABLE();
+    }
+
+    return reinterpret_cast<int64_t>(array_obj);
 }
 
 ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx)
@@ -24,10 +33,12 @@ ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx)
     return value;
 }
 
-ALWAYS_INLINE void HandleStoreToArray(int64_t array_ptr, int64_t array_idx, int64_t src_reg)
+ALWAYS_INLINE void HandleStoreToArray(int64_t array_ptr, int64_t array_idx, int64_t src_reg_value)
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
-    array->Set(src_reg, array_idx);
+    assert(array != nullptr);
+    printf("array_ptr = %p, idx = %ld, src_reg_value = %ld\n", (void *)array_ptr, array_idx, src_reg_value);
+    array->Set(src_reg_value, array_idx);
 }
 
 ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
@@ -108,7 +119,7 @@ ALWAYS_INLINE void HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg
     assert(cls != nullptr);
 
     auto type = static_cast<memory::Type>(field_type);
-    // printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", cls, field_idx, field_type);
+    printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", static_cast<void *>(cls), field_idx, field_type);
     // int64_t because all existing field types take up 8 bytes
     [[maybe_unused]] int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx), type);
     frame->GetReg(reg_idx)->SetInt64(raw_field);

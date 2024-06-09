@@ -19,7 +19,8 @@ public:
         INVALID      = 0,
         INT_ARRAY    = 1,
         DOUBLE_ARRAY = 2,
-        STRING       = 3, // should be last
+        OBJECT_ARRAY = 3,
+        STRING       = 4, // should be last
     };
     // clang-format on
 public:

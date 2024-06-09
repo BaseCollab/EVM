@@ -92,6 +92,24 @@ static inline std::string GetStringFromType(Type type)
     }
 }
 
+static inline bool IsReferenceType(Type type)
+{
+    switch (type) {
+        case Type::DOUBLE:
+        case Type::INT:
+            return false;
+
+        case Type::CLASS_OBJECT:
+        case Type::STRING_OBJECT:
+        case Type::ARRAY_OBJECT:
+            return true;
+
+        default:
+            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
+            UNREACHABLE();
+    }
+}
+
 } // namespace evm::memory
 
 #endif // EVM_MEMORY_TYPE_H

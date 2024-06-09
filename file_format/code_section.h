@@ -217,7 +217,6 @@ private:
             size_t field_idx = current_class.GetIdxOfInstance(to_resolve.first.substr(delimiter_pos + 1));
 
             auto &current_field = (*(current_class.GetInstances()))[field_idx];
-
             to_resolve.second->SetClassOffset(field_idx); // set field idx (TODO: dirty hack, should be fixed)
             to_resolve.second->SetObjFieldType(static_cast<int8_t>(current_field.GetType())); // set field type
 

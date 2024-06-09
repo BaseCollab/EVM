@@ -3,6 +3,8 @@
 
 #include "common/macros.h"
 #include "runtime/memory/type.h"
+#include "runtime/memory/object_header.h"
+#include "runtime/memory/class_manager.h"
 
 #include <cstddef>
 #include <cstring>
@@ -10,54 +12,26 @@
 
 namespace evm::runtime::types {
 
-class Array {
+class Array : public ObjectHeader {
 public:
     NO_COPY_SEMANTIC(Array);
     NO_MOVE_SEMANTIC(Array);
 
-    Array() = default;
-    ~Array() = default;
-
-    static void *Create(memory::Type array_type, size_t count);
-
-    const void *GetData() const
-    {
-        return data_;
-    }
-
-    void SetData(void *data_ptr)
-    {
-        data_ = data_ptr;
-    }
-
-    size_t GetSize() const
-    {
-        return size_;
-    }
-
-    memory::Type GetType() const
-    {
-        return type_;
-    }
-
-    void SetSize(size_t size)
-    {
-        size_ = size;
-    }
-
-    void SetType(memory::Type type)
-    {
-        type_ = type;
-    }
-
-    void SetElemSize(size_t elem_size)
-    {
-        elem_size_ = elem_size;
-    }
+    static Array *Create(memory::Type array_type, size_t length);
 
     void Set(int64_t value, size_t idx);
 
     void Get(int64_t *value, size_t idx) const;
+
+    void SetLength(uint32_t length)
+    {
+        length_ = length;
+    }
+
+    size_t GetLength() const
+    {
+        return length_;
+    }
 
     static constexpr uint32_t GetDataOffset()
     {
@@ -65,11 +39,15 @@ public:
     }
 
 private:
-    memory::Type type_ {memory::Type::INVALID};
-    size_t elem_size_ {0};
-    size_t size_ {0};
+    Array() = default;
+    ~Array() = default;
 
-    void *data_ {nullptr};
+    static ClassManager::DefaultClassDescr GetDefaultClassDescrFromType(memory::Type array_type);
+    void ValidateAddressingInArray(size_t idx) const;
+
+private:
+    size_t length_ {0};
+    __extension__ uint8_t data_[0];
 };
 
 } // namespace evm::runtime::types
