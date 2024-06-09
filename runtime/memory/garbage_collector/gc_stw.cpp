@@ -18,7 +18,7 @@ void GarbageCollectorSTW::Mark()
 {
 #ifdef GC_STW_DEBUG_ON
     dump_file_.open(std::string("gc_stw_") + std::to_string(n_completed_marks_) + std::string(".dot"));
-    dump_file_ << "digraph G {" << std::endl;
+    dump_file_ << "digraph G {" << std::endl << "\tcompound = true;" << std::endl;
 #endif // GC_STW_DEBUG_ON
 
     auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
@@ -83,12 +83,22 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
 
     auto class_word = obj->GetClassWord();
 
-#ifdef GC_STW_DEBUG_ON
-    dump_file_ << "\tN_" << long(obj) << ";" << std::endl;
-#endif // GC_STW_DEBUG_ON
-
-    // TODO: check also strings & arrays besides classes
     types::Class *cls = reinterpret_cast<types::Class *>(obj);
+
+#ifdef GC_STW_DEBUG_ON
+    dump_file_ << "\tsubgraph cluster_" << long(obj) << " {" << std::endl <<
+        "\t\tstyle = filled;\n\t\tcolor = green;" << std::endl <<
+        "\t\tlabel = \"ptr: " << long(obj) << "\";" << std::endl <<
+        "\t\tnode [style = filled, color = grey];" << std::endl;
+
+    for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
+        const Field field = class_word->GetField(i);
+        dump_file_ << "\t\tf_" << long(cls + field.GetOffset()) << " [label = \""
+                   << memory::GetStringFromType(field.GetType()) << "\"];" << std::endl;
+    }
+
+    dump_file_ << "\t}\n" << std::endl;
+#endif // GC_STW_DEBUG_ON
 
     for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
         const Field field = class_word->GetField(i);
@@ -97,7 +107,8 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
             MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
 
 #ifdef GC_STW_DEBUG_ON
-            dump_file_ << "\tN_" << long(obj) << " -> N_" << long(obj_ptr)  << ";" << std::endl;
+            dump_file_ << "\tf_" << long(cls + field.GetOffset()) << " -> f_" << long(obj_ptr) << " [lhead = cluster_"
+                       << long(obj_ptr) << "];" << std::endl;
 #endif // GC_STW_DEBUG_ON
         }
     }

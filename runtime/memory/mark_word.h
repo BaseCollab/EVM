@@ -13,6 +13,6 @@ struct MarkWord {
 
 static_assert(sizeof(MarkWord) == 8);
 
-} // evm::runtime
+} // namespace evm::runtime
 
 #endif // EVM_RUNTIME_MEMORY_MARK_WORD_H

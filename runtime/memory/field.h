@@ -45,6 +45,11 @@ public:
         return size_;
     }
 
+    memory::Type GetType() const
+    {
+        return type_;
+    }
+
 private:
     memory::Type type_ {memory::Type::INVALID};
 
