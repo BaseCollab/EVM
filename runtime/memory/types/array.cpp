@@ -7,68 +7,95 @@
 
 namespace evm::runtime::types {
 
-void *Array::Create(memory::Type array_type, size_t count)
+/* static */
+Array *Array::Create(memory::Type array_type, size_t length)
 {
-    auto *heap_manager = Runtime::GetInstance()->GetHeapManager();
-    assert(heap_manager != nullptr);
+    auto *runtime = Runtime::GetInstance();
 
-    size_t elem_size = GetSizeOfType(array_type);
+    std::cout << "array_type = " << (int)array_type << std::endl;
+    size_t elem_size = memory::GetSizeOfType(array_type);
+    size_t array_size = Array::GetDataOffset() + length * elem_size;
 
-    void *array_ptr = heap_manager->AllocateObject(sizeof(Array));
-    void *array_data = heap_manager->AllocateObject(count * elem_size);
+    auto *array_obj = reinterpret_cast<Array *>(runtime->GetHeapManager()->AllocateObject(array_size));
+    if (UNLIKELY(array_obj == nullptr)) {
+        printf("[%s] Error when creating object for array of type \"%s\"\n", __func__,
+               GetStringFromType(array_type).c_str());
+        UNREACHABLE();
+    }
+    array_obj->SetLength(array_size);
 
-    Array array;
-    array.SetSize(count);
-    array.SetType(array_type);
-    array.SetElemSize(elem_size);
-    array.SetData(array_data);
+    auto classDescrType = GetDefaultClassDescrFromType(array_type);
+    auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
+    if (UNLIKELY(class_description == nullptr)) {
+        printf("[%s] ClassDescription for array should be initialized due Runtime creation\n", __func__);
+        UNREACHABLE();
+    }
 
-    std::memcpy(array_ptr, &array, sizeof(array));
+    assert(class_description->IsArrayObject());
+    array_obj->SetClassWord(class_description);
 
-    return array_ptr;
+    return array_obj;
+}
+
+/* static */
+ClassManager::DefaultClassDescr Array::GetDefaultClassDescrFromType(memory::Type array_type)
+{
+    switch (array_type) {
+        case memory::Type::DOUBLE:
+            return ClassManager::DefaultClassDescr::DOUBLE_ARRAY;
+
+        case memory::Type::INT:
+            return ClassManager::DefaultClassDescr::INT_ARRAY;
+
+        case memory::Type::CLASS_OBJECT:
+        case memory::Type::STRING_OBJECT:
+        case memory::Type::ARRAY_OBJECT:
+            return ClassManager::DefaultClassDescr::OBJECT_ARRAY;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+void Array::ValidateAddressingInArray(size_t idx) const
+{
+    if (idx >= length_) {
+        printf("[%s] Get by invalid idx = %ld in array of length %ld\n", __func__, idx, length_);
+        UNREACHABLE();
+    }
 }
 
 void Array::Set(int64_t value, size_t idx)
 {
-    switch (type_) {
-        case memory::Type::DOUBLE:
-        case memory::Type::INT:
-        case memory::Type::CLASS_OBJECT:
-            std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value, elem_size_);
-            break;
-        case memory::Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]"
-                      << std::endl;
-            break;
-        default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx
-                      << "]" << std::endl;
-            break;
+    ValidateAddressingInArray(idx);
+
+    auto array_type = GetClassWord()->GetArrayElementType();
+    if (UNLIKELY(array_type == memory::Type::INVALID)) {
+        printf("[%s] Array type is INVALID in array object header\n", __func__);
+        UNREACHABLE();
     }
+
+    size_t elem_size = GetSizeOfType(array_type);
+
+    uint8_t *data = reinterpret_cast<uint8_t *>(this) + Array::GetDataOffset();
+
+    std::memcpy(data + idx * elem_size, &value, elem_size * sizeof(uint8_t));
 }
 
 void Array::Get(int64_t *value, size_t idx) const
 {
-    if (idx >= size_) {
-        std::cerr << __func__ << ": invalid idx = " << idx << "; size = " << size_ << std::endl;
-        return;
+    ValidateAddressingInArray(idx);
+
+    auto array_type = GetClassWord()->GetArrayElementType();
+    if (UNLIKELY(array_type == memory::Type::INVALID)) {
+        printf("[%s] Array type is INVALID in array object header\n", __func__);
+        UNREACHABLE();
     }
 
-    switch (type_) {
-        case memory::Type::DOUBLE:
-        case memory::Type::INT:
-        case memory::Type::CLASS_OBJECT:
-            std::memcpy(value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
-            break;
-        case memory::Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type_) << "] at index [" << idx << "]"
-                      << std::endl;
-            break;
-        default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type_) << "] at index [" << idx
-                      << "]" << std::endl;
-            break;
-    }
+    size_t elem_size = GetSizeOfType(array_type);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(this) + Array::GetDataOffset();
+
+    std::memcpy(value, data + idx * elem_size, elem_size * sizeof(uint8_t));
 }
 
 } // namespace evm::runtime::types

@@ -1,4 +1,5 @@
 #include "runtime/memory/types/class.h"
+#include "runtime/memory/types/array.h"
 #include "runtime/runtime.h"
 #include "common/utils/bitops.h"
 
@@ -33,6 +34,19 @@ void Class::InitFields(file_format::Class &asm_class)
             class_obj->InitFields(field_asm_class);
 
             SetField(idx, memory::Type::CLASS_OBJECT, bitops::BitCast<int64_t>(class_obj));
+        } else if (current_asm_field.IsArrayObject()) {
+            printf("Array_size = %ld\n", current_asm_field.GetArraySize());
+
+            auto element_type = current_asm_field.GetArrayElementType();
+
+            auto *array_obj = types::Array::Create(element_type, current_asm_field.GetArraySize());
+
+            if (IsReferenceType(element_type)) {
+                // In case of reference default class description don't set element type
+                array_obj->GetClassWord()->SetArrayElementType(element_type);
+            }
+
+            SetField(idx, memory::Type::ARRAY_OBJECT, bitops::BitCast<int64_t>(array_obj));
         }
     }
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());

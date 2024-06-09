@@ -382,7 +382,7 @@ DEFINE_INSTR
     /// TODO: refactore implementation
     NEWARR, 0x28,
     {
-        RD_I_ASSIGN(HandleCreateArray(GET_ARRAY_TYPE(), IMM_I32()));
+        RD_I_ASSIGN(HandleCreateArrayObject(GET_ARRAY_TYPE(), IMM_I32()));
         PC_ADD(0x8); // 0x8 bytes per instruction, not branch instruction
     }
 )

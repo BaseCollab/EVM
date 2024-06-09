@@ -52,6 +52,12 @@ public:
         return static_cast<size_t>(memory::GetSizeOfType(type_));
     }
 
+    Type GetArrayElementType() const
+    {
+        assert(type_ == Type::ARRAY_OBJECT);
+        return static_cast<int16_t>(class_idx_) >= 0 ? Type::CLASS_OBJECT : static_cast<Type>(class_idx_);
+    }
+
     void SetType(Type type)
     {
         type_ = type;
@@ -65,6 +71,11 @@ public:
     bool IsClassObject() const
     {
         return type_ == Type::CLASS_OBJECT;
+    }
+
+    bool IsArrayObject() const
+    {
+        return type_ == Type::ARRAY_OBJECT;
     }
 
     size_t GetRuntimeSize() const
@@ -97,12 +108,15 @@ public:
         parsed_size += Emittable::ParseBytecode<EmitClassIdx>(in_arr + parsed_size, &class_idx_);
         parsed_size += Emittable::ParseBytecode<EmitArraySize>(in_arr + parsed_size, &array_size_);
         parsed_size += Emittable::ParseBytecode(in_arr, parsed_size);
-
         return parsed_size - already_parsed;
     }
 
 private:
     Type type_ = Type::INVALID;
+
+    // if type_ == ARRAY_OBJECT from class index we can get information about type of array element
+    // if class_idx_ >= 0 then element is user-defined
+    // if class_idx_ < 0 then element respond to cast static_cast<Type>(class_idx_)
     EmitClassIdx class_idx_ = -1;
     EmitArraySize array_size_ = 0;
 };

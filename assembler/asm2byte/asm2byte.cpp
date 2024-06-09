@@ -178,6 +178,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                         return false;
                     }
 
+                    class_field.SetName(line_args[idx_of_name].substr(0, size_occurance_start));
                     type = file_format::ClassField::Type::ARRAY_OBJECT;
                 } else {
                     std::cerr << "Invalid array declaration of class \"" << line_args[1] << "\"" << std::endl;

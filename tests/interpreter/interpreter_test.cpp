@@ -4,12 +4,15 @@
 #include <vector>
 #include <cstddef>
 #include <cmath>
+#include <cstring>
 
 #include "isa/macros.h"
 #include "isa/opcodes.h"
 #include "runtime/runtime.h"
 
 #include "assembler/asm2byte/asm2byte.h"
+#include "runtime/memory/types/array.h"
+#include "runtime/memory/types/class.h"
 
 namespace evm {
 
@@ -754,7 +757,105 @@ TEST_F(InterpreterTest, CLASS_OBJECTS)
     ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), -12345);
 }
 
-TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS)
+TEST_F(InterpreterTest, PRIMITIVE_ARRAY_IN_CLASS)
+{
+    auto source = R"(
+        .class Boom
+            double a[20];
+        .class
+
+        newobj x0, Boom
+        movif x1, 20
+        movif x2, 0
+        movif x3, 1
+
+        obj_get_field x10, Boom@a, x0
+
+        loop:
+            smei x4, x2, x1
+            jmp_if_imm x4, exit
+
+            starr x10, x2, x2
+            
+            add x2, x2, x3
+            jmp_imm loop
+
+        exit:
+            exit
+    )";
+
+    ExecuteFromSource(source);
+
+    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    ASSERT_NE(array, nullptr);
+
+    for (size_t idx = 0; idx < 20; ++idx) {
+        double curr_value =
+            static_cast<double>(*(array + runtime::types::Array::GetDataOffset() + idx * sizeof(double)));
+        ASSERT_EQ(curr_value, static_cast<double>(idx));
+    }
+}
+
+TEST_F(InterpreterTest, OBJECT_ARRAY_IN_CLASS)
+{
+    auto source = R"(
+        .class Foo
+            int x;
+        .class
+
+        .class Boom
+            class Foo f[10];
+        .class
+
+        newobj x0, Boom
+        movif x1, 10
+        movif x2, 0
+        movif x3, 1
+
+        obj_get_field x10, Boom@f, x0
+
+        loop:
+            smei x4, x2, x1
+            jmp_if_imm x4, exit
+
+            newobj x11, Foo
+            obj_set_field x11, Foo@x, x2
+            starr x10, x2, x11
+
+            add x2, x2, x3
+            jmp_imm loop
+
+        exit:
+            exit
+    )";
+
+    ExecuteFromSource(source);
+
+    auto *foo_obj_description = runtime_->GetClassManager()->GetClassDescriptionFromCache("Foo");
+    size_t foo_obj_size = foo_obj_description->GetClassSize();
+    ASSERT_EQ(foo_obj_size, 8); // size same as 'int x'
+
+    size_t fields_num = foo_obj_description->GetFieldsNum();
+    ASSERT_EQ(fields_num, 1); // only one field -- 'int x'
+
+    const auto &field = foo_obj_description->GetField(0);
+    size_t field_offset = field.GetOffset();
+    ASSERT_EQ(field_offset, 0); // data of 'int x' should align on the zero offset from object header of class
+
+    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    ASSERT_NE(array, nullptr);
+
+    for (size_t idx = 0; idx < 10; ++idx) {
+        uint64_t *current_foo_pointer =
+            reinterpret_cast<uint64_t *>(array + runtime::types::Array::GetDataOffset() + idx * sizeof(uint64_t *));
+        auto *klass = reinterpret_cast<runtime::types::Class *>(*current_foo_pointer);
+        int64_t current_value = klass->GetField(0, memory::Type::INT);
+
+        ASSERT_EQ(current_value, static_cast<int64_t>(idx));
+    }
+}
+
+TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS_2)
 {
     auto source = R"(
         .class Foo
@@ -777,12 +878,6 @@ TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS)
     )";
 
     ExecuteFromSource(source);
-
-    std::cerr << "\n!!!! test is banned temporarily (not implemented some features) !!!!\n\n";
-
-    /// TODO: uncomment after object operations are implemented
-    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x10)->GetInt64(), 23);
-    // ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x11)->GetInt64(), -11212);
 }
 
 TEST_F(InterpreterTest, STRING_COMPARASION)

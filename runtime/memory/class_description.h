@@ -31,6 +31,11 @@ public:
         object_type_ = object_type;
     }
 
+    void SetArrayElementType(memory::Type array_element_type)
+    {
+        element_type_ = array_element_type;
+    }
+
     bool IsStringObject() const
     {
         return object_type_ == memory::Type::STRING_OBJECT;
@@ -46,9 +51,19 @@ public:
         return object_type_;
     }
 
+    memory::Type GetArrayElementType() const
+    {
+        return element_type_;
+    }
+
     size_t GetClassSize() const
     {
         return fields_num_ * 8;
+    }
+
+    size_t GetFieldsNum() const
+    {
+        return fields_num_;
     }
 
     const Field &GetField(size_t field_idx)
@@ -62,6 +77,10 @@ public:
 private:
     size_t fields_num_ {0};
     Field *fields_ {nullptr};
+
+    // element_type_ used only for array
+    // if array consists from primitive types then in element_type_ will be write this type
+    memory::Type element_type_ {memory::Type::INVALID};
 
     memory::Type object_type_ {memory::Type::INVALID};
 };

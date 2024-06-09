@@ -2,6 +2,7 @@
 #define EVM_COMMON_MACROS_H
 
 #include <cstdint>
+#include <cassert>
 
 #define NO_COPY_CTOR(TypeName) TypeName(const TypeName &) = delete
 #define NO_COPY_OPERATOR(TypeName) TypeName &operator=(const TypeName &) = delete
@@ -45,10 +46,6 @@
 #define LIKELY(exp) (__builtin_expect((exp) != 0, true))
 #define UNLIKELY(exp) (__builtin_expect((exp) != 0, false))
 
-#if defined(_MSC_VER) && !defined(__clang__)
-#define UNREACHABLE() __assume(false);
-#else
-#define UNREACHABLE() __builtin_unreachable();
-#endif
+#define UNREACHABLE() assert(false && "This line should be unreachable!")
 
 #endif // EVM_COMMON_MACROS_H

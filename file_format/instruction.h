@@ -158,7 +158,8 @@ public:
 
     size_t GetBytesSize() const
     {
-        return MINIMAL_INSTR_SIZE + imm_.num_bytes_ + (have_args_ == true) * runtime::Frame::N_PASSED_ARGS_DEFAULT;
+        return MINIMAL_INSTR_SIZE + obj_op_ * 2 + imm_.num_bytes_ +
+               (have_args_ == true) * runtime::Frame::N_PASSED_ARGS_DEFAULT;
     }
 
     EmitSize EmitBytecode(std::vector<byte_t> *out_arr)
