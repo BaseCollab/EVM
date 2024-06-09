@@ -42,4 +42,13 @@
 #define ALWAYS_INLINE __attribute__((always_inline)) inline
 #endif
 
+#define LIKELY(exp) (__builtin_expect((exp) != 0, true))
+#define UNLIKELY(exp) (__builtin_expect((exp) != 0, false))
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#define UNREACHABLE() __assume(false);
+#else
+#define UNREACHABLE() __builtin_unreachable();
+#endif
+
 #endif // EVM_COMMON_MACROS_H

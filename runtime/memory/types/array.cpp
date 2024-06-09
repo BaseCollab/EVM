@@ -33,7 +33,7 @@ void Array::Set(int64_t value, size_t idx)
     switch (type_) {
         case memory::Type::DOUBLE:
         case memory::Type::INT:
-        case memory::Type::OBJECT:
+        case memory::Type::CLASS_OBJECT:
             std::memcpy(reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, &value, elem_size_);
             break;
         case memory::Type::INVALID:
@@ -57,7 +57,7 @@ void Array::Get(int64_t *value, size_t idx) const
     switch (type_) {
         case memory::Type::DOUBLE:
         case memory::Type::INT:
-        case memory::Type::OBJECT:
+        case memory::Type::CLASS_OBJECT:
             std::memcpy(value, reinterpret_cast<uint8_t *>(data_) + idx * elem_size_, elem_size_);
             break;
         case memory::Type::INVALID:

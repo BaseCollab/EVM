@@ -17,17 +17,17 @@ public:
 
     bool IsObject() const
     {
-        return type_ == memory::Type::OBJECT;
+        return type_ == memory::Type::CLASS_OBJECT;
     }
 
     bool IsString() const
     {
-        return type_ == memory::Type::STRING;
+        return type_ == memory::Type::STRING_OBJECT;
     }
 
     bool IsArray() const
     {
-        return type_ == memory::Type::ARRAY;
+        return type_ == memory::Type::ARRAY_OBJECT;
     }
 
     bool IsPrimitive() const

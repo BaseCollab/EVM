@@ -39,8 +39,24 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
         string = runtime->CreateStringAndSetInCache(string_offset);
     }
 
-    return reinterpret_cast<int64_t>(
-        types::String::Create(reinterpret_cast<const uint8_t *>(string->data()), string->size()));
+    auto *class_description =
+        runtime->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
+    assert(class_description->IsStringObject());
+
+    if (UNLIKELY(class_description == nullptr)) {
+        printf("HandleCreateStringObject::ClassDescription for string should be initialized due Runtime creation\n");
+        UNREACHABLE();
+    }
+
+    auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->data()), string->size());
+    if (UNLIKELY(string_obj == nullptr)) {
+        printf("HandleCreateStringObject:: Error when creating object for string \"%s\"\n", string->c_str());
+        UNREACHABLE();
+    }
+
+    string_obj->SetClassWord(class_description);
+
+    return reinterpret_cast<int64_t>(string_obj);
 }
 
 ALWAYS_INLINE void HandlePrintString(int64_t string_ptr)
