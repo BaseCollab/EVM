@@ -52,11 +52,18 @@ void Class::InitFields(file_format::Class &asm_class)
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());
 }
 
+bool Class::FieldIsPrimitive(size_t field_idx)
+{
+    const Field field = GetClassWord()->GetField(field_idx);
+    return field.IsPrimitive();
+}
+
 int64_t Class::GetField(size_t field_idx, memory::Type field_type)
 {
     assert(memory::GetSizeOfType(field_type) == sizeof(int64_t));
 
-    auto offset = GetClassWord()->GetField(field_idx).GetOffset();
+    const Field field = GetClassWord()->GetField(field_idx);
+    auto offset = field.GetOffset();
 
     int64_t raw_field = 0;
     uint8_t *field_ptr = reinterpret_cast<uint8_t *>(this) + GetDataOffset() + offset;

@@ -8,8 +8,8 @@ namespace evm::runtime {
 
 class Field {
 public:
-    NO_MOVE_SEMANTIC(Field);
-    NO_COPY_SEMANTIC(Field);
+    DEFAULT_MOVE_SEMANTIC(Field);
+    DEFAULT_COPY_SEMANTIC(Field);
 
     explicit Field(memory::Type type, size_t size, size_t offset) : type_(type), size_(size), offset_(offset) {}
 
