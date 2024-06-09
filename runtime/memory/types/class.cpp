@@ -17,7 +17,7 @@ void Class::InitFields(file_format::Class &asm_class)
 
     for (size_t idx = 0; idx < asm_fields->size(); ++idx) {
         auto &current_asm_field = (*asm_fields)[idx];
-        if (current_asm_field.IsObject()) {
+        if (current_asm_field.IsClassObject()) {
             auto &field_asm_class = file->GetClassFromClassSection(current_asm_field.GetClassRefIdx());
             // printf("field %s, name of class %s\n", current_asm_field.GetName().c_str(),
             //        field_asm_class.GetName().c_str());
@@ -32,7 +32,7 @@ void Class::InitFields(file_format::Class &asm_class)
             class_obj->SetClassWord(class_description);
             class_obj->InitFields(field_asm_class);
 
-            SetField(idx, memory::Type::OBJECT, bitops::BitCast<int64_t>(class_obj));
+            SetField(idx, memory::Type::CLASS_OBJECT, bitops::BitCast<int64_t>(class_obj));
         }
     }
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());

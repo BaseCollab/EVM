@@ -44,6 +44,8 @@ void Runtime::InitializeRuntime()
 {
     heap_manager_ = std::make_unique<HeapManager>(DEFAULT_HEAP_SIZE);
     interpreter_ = std::make_unique<Interpreter>();
+
+    class_manager_.InitDefaultClassDescriptions();
 }
 
 void Runtime::Execute(file_format::File *file)

@@ -26,6 +26,26 @@ public:
         fields_num_ = fields_num;
     }
 
+    void SetObjectType(memory::Type object_type)
+    {
+        object_type_ = object_type;
+    }
+
+    bool IsStringObject() const
+    {
+        return object_type_ == memory::Type::STRING_OBJECT;
+    }
+
+    bool IsArrayObject() const
+    {
+        return object_type_ == memory::Type::ARRAY_OBJECT;
+    }
+
+    memory::Type GetObjectType() const
+    {
+        return object_type_;
+    }
+
     size_t GetClassSize() const
     {
         return fields_num_ * 8;
@@ -42,6 +62,8 @@ public:
 private:
     size_t fields_num_ {0};
     Field *fields_ {nullptr};
+
+    memory::Type object_type_ {memory::Type::INVALID};
 };
 
 } // namespace evm::runtime

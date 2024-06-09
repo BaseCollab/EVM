@@ -12,12 +12,12 @@ namespace evm::memory {
 // clang-format off
 /// Negative numbers emphasize built-in types, positive ones — user-defined classes
 enum class Type : int8_t {
-    INVALID = -1,
-    DOUBLE  = -2,
-    INT     = -3,
-    OBJECT  = -4,
-    STRING  = -5,
-    ARRAY   = -6
+    INVALID       = -1,
+    DOUBLE        = -2,
+    INT           = -3,
+    CLASS_OBJECT  = -4,
+    STRING_OBJECT = -5,
+    ARRAY_OBJECT  = -6
 };
 
 enum TypeSize : uint8_t {
@@ -40,11 +40,11 @@ static inline TypeSize GetSizeOfType(Type type)
             return TypeSize::DOUBLE;
         case Type::INT:
             return TypeSize::INT;
-        case Type::OBJECT:
+        case Type::CLASS_OBJECT:
             return TypeSize::OBJECT;
-        case Type::STRING:
+        case Type::STRING_OBJECT:
             return TypeSize::STRING;
-        case Type::ARRAY:
+        case Type::ARRAY_OBJECT:
             return TypeSize::ARRAY;
         default:
             std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
@@ -59,13 +59,13 @@ static inline Type GetTypeFromString(std::string_view string)
     } else if (string == "int") {
         return Type::INT;
     } else if (string == "obj") {
-        return Type::OBJECT;
+        return Type::CLASS_OBJECT;
     } else if (string == "class") {
-        return Type::OBJECT;
+        return Type::CLASS_OBJECT;
     } else if (string == "str") {
-        return Type::STRING;
+        return Type::STRING_OBJECT;
     } else if (string == "arr") {
-        return Type::ARRAY;
+        return Type::ARRAY_OBJECT;
     }
     return Type::INVALID;
 }
@@ -80,11 +80,11 @@ static inline std::string GetStringFromType(Type type)
             return std::string("double");
         case Type::INT:
             return std::string("int");
-        case Type::OBJECT:
+        case Type::CLASS_OBJECT:
             return std::string("obj");
-        case Type::STRING:
+        case Type::STRING_OBJECT:
             return std::string("str");
-        case Type::ARRAY:
+        case Type::ARRAY_OBJECT:
             return std::string("arr");
         default:
             std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;

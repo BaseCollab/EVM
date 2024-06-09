@@ -152,7 +152,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             auto class_idx = static_cast<ssize_t>(type);
             size_t idx_of_name = 1;
 
-            if (type == file_format::ClassField::Type::OBJECT) {
+            if (type == file_format::ClassField::Type::CLASS_OBJECT) {
                 idx_of_name = 2;
 
                 class_idx = class_section->GetIdxOfInstance(line_args[1]);
@@ -178,7 +178,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                         return false;
                     }
 
-                    type = file_format::ClassField::Type::ARRAY;
+                    type = file_format::ClassField::Type::ARRAY_OBJECT;
                 } else {
                     std::cerr << "Invalid array declaration of class \"" << line_args[1] << "\"" << std::endl;
                     return false;
