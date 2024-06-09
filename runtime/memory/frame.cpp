@@ -6,7 +6,6 @@
 #include <bitset>
 #include <array>
 #include <cstddef>
-#include <iostream>
 
 namespace evm::runtime {
 

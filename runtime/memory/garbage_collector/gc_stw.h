@@ -2,6 +2,7 @@
 #define EVM_RUNTIME_GARBAGE_COLLECTOR_STW_H
 
 #include "runtime/memory/garbage_collector/gc_base.h"
+#include "runtime/memory/object_header.h"
 
 namespace evm::runtime {
 
@@ -27,6 +28,8 @@ public:
 private:
     void Mark();
     void Sweep();
+
+    void MarkObjectRecursive(ObjectHeader *obj);
 
 private:
     size_t n_instr_frequency_ {N_INSTRS_FREQUENCY_DEFAULT};

@@ -2,6 +2,8 @@
 #include "runtime/memory/allocator/allocator.h"
 #include "runtime/memory/frame.h"
 #include "runtime/runtime.h"
+#include "runtime/memory/type.h"
+#include "runtime/memory/types/class.h"
 #include "isa/macros.h"
 
 #include <vector>
@@ -19,23 +21,65 @@ void GarbageCollectorSTW::Mark()
         auto frame_reg_bitset = frames[i].GetObjectBitMask();
         for (size_t reg = 0; reg < frame_reg_bitset.size(); ++reg) {
             if (frame_reg_bitset.test(reg) == true) {
-                // frames[i].GetReg(reg)
+                reg_t obj_ptr = frames[i].GetReg(reg)->GetRaw();
+                MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
                 std::cout << "frame " << i << " reg " << reg << "\n";
             }
         }
+    }
+
+    if (interpreter->IsAccumMarked()) {
+        reg_t obj_ptr = interpreter->GetAccum().GetRaw();
+        MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
     }
 }
 
 void GarbageCollectorSTW::Sweep()
 {
+    auto runtime = runtime::Runtime::GetInstance();
+    auto heap_manager = runtime->GetHeapManager();
+    auto objects_list = heap_manager->GetObjectsList();
+
+    for (auto obj : objects_list) {
+        auto mark_word = obj->GetMarkWord();
+        if (mark_word.mark == 1) {
+            obj->SetMarkWord({.mark = 0});
+        } else {
+            continue;
+            // deallocate this obj (need new allocator)
+        }
+    }
+
     return;
-    // TODO: delete all marked object via allocator
 }
 
 void GarbageCollectorSTW::CleanMemory()
 {
     Mark();
     Sweep();
+}
+
+void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
+{
+    auto mark_word = obj->GetMarkWord();
+    if (mark_word.mark == 1) {
+        return;
+    }
+
+    auto class_word = obj->GetClassWord();
+
+    // TODO: check also strings & arrays besides classes
+    types::Class *cls = reinterpret_cast<types::Class *>(obj);
+
+    for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
+        const Field field = class_word->GetField(i);
+        if (!field.IsPrimitive()) {
+            reg_t obj_ptr = cls->GetField(i);
+            MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+        }
+    }
+
+    cls->SetMarkWord({.mark = 1});
 }
 
 bool GarbageCollectorSTW::SetInstrsFrequency(size_t n_instr_frequency)

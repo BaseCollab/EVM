@@ -26,9 +26,16 @@ HeapManager::~HeapManager()
     }
 }
 
+const std::vector<ObjectHeader *> &HeapManager::GetObjectsList() const
+{
+    return objects_;
+}
+
 void *HeapManager::AllocateObject(size_t size)
 {
-    return object_allocator_->Alloc(size);
+    void *alloc_obj = object_allocator_->Alloc(size);
+    objects_.push_back(reinterpret_cast<ObjectHeader *>(alloc_obj));
+    return alloc_obj;
 }
 
 void *HeapManager::AllocateInternalObject(size_t size)

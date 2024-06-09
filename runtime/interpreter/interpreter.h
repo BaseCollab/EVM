@@ -30,6 +30,8 @@ public:
     void MarkAccum(bool is_root);
     bool IsAccumMarked() const;
 
+    Register GetAccum() const;
+
     void MigrateToNewFrame(size_t new_pc, size_t restore_pc,
                            const std::array<Register, Frame::N_PASSED_ARGS_DEFAULT> &passed_args);
     void ReturnToPrevFrame();

@@ -112,16 +112,13 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
 }
 
 // reg_idx -- register in which object field will be set after getting from object
-ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg,
-                                     int8_t field_type)
+ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
 {
     auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
     assert(cls != nullptr);
 
-    auto type = static_cast<memory::Type>(field_type);
-    printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", static_cast<void *>(cls), field_idx, field_type);
     // int64_t because all existing field types take up 8 bytes
-    int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx), type);
+    int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx));
     bool is_primitive = cls->FieldIsPrimitive(static_cast<size_t>(field_idx));
 
     frame->GetReg(reg_idx)->SetInt64(raw_field);
@@ -130,17 +127,15 @@ ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg
 }
 
 // reg_idx -- register from which value will be set to field_idx
-ALWAYS_INLINE void HandleObjSetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg,
-                                     int8_t field_type)
+ALWAYS_INLINE void HandleObjSetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
 {
     auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
     assert(cls != nullptr);
 
-    auto type = static_cast<memory::Type>(field_type);
     // printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", cls, field_idx, field_type);
     // int64_t because all existing field types take up 8 bytes
     int64_t data = frame->GetReg(reg_idx)->GetInt64();
-    cls->SetField(static_cast<size_t>(field_idx), type, data);
+    cls->SetField(static_cast<size_t>(field_idx), data);
 }
 
 } // namespace evm::runtime

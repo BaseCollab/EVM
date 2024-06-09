@@ -1,6 +1,8 @@
+#include "runtime/interpreter/interpreter.h"
 #include "common/constants.h"
 #include "common/config.h"
 #include "runtime/interpreter/interpreter-inl.h"
+#include "runtime/memory/reg.h"
 #include "runtime/memory/types/array.h"
 #include "file_format/file.h"
 #include "isa/macros.h"
@@ -172,6 +174,11 @@ void Interpreter::MarkAccum(bool is_root)
 bool Interpreter::IsAccumMarked() const
 {
     return is_accum_root_;
+}
+
+Register Interpreter::GetAccum() const
+{
+    return accum_;
 }
 
 #pragma GCC diagnostic pop

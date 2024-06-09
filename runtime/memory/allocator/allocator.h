@@ -2,9 +2,7 @@
 #define EVM_RUNTIME_MEMORY_ALLOCATOR_ALLOCATOR_H
 
 #include "common/macros.h"
-
 #include <cstddef>
-#include <memory>
 
 namespace evm::runtime {
 
