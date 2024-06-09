@@ -9,11 +9,18 @@
 #include <vector>
 #include <bitset>
 #include <iostream>
+#include <fstream>
+#include <string>
 
 namespace evm::runtime {
 
 void GarbageCollectorSTW::Mark()
 {
+#ifdef GC_STW_DEBUG_ON
+    dump_file_.open(std::string("gc_stw_") + std::to_string(n_completed_marks_) + std::string(".dot"));
+    dump_file_ << "digraph G {" << std::endl;
+#endif // GC_STW_DEBUG_ON
+
     auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
 
     const std::vector<Frame> frames = interpreter->GetFramesStack();
@@ -23,7 +30,6 @@ void GarbageCollectorSTW::Mark()
             if (frame_reg_bitset.test(reg) == true) {
                 reg_t obj_ptr = frames[i].GetReg(reg)->GetRaw();
                 MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
-                std::cout << "frame " << i << " reg " << reg << "\n";
             }
         }
     }
@@ -32,6 +38,13 @@ void GarbageCollectorSTW::Mark()
         reg_t obj_ptr = interpreter->GetAccum().GetRaw();
         MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
     }
+
+#ifdef GC_STW_DEBUG_ON
+    dump_file_ << "}" << std::endl;
+    dump_file_.close();
+#endif // GC_STW_DEBUG_ON
+
+    n_completed_marks_++;
 }
 
 void GarbageCollectorSTW::Sweep()
@@ -49,6 +62,8 @@ void GarbageCollectorSTW::Sweep()
             // deallocate this obj (need new allocator)
         }
     }
+
+    n_completed_sweeps_++;
 
     return;
 }
@@ -68,6 +83,10 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
 
     auto class_word = obj->GetClassWord();
 
+#ifdef GC_STW_DEBUG_ON
+    dump_file_ << "\tN_" << long(obj) << ";" << std::endl;
+#endif // GC_STW_DEBUG_ON
+
     // TODO: check also strings & arrays besides classes
     types::Class *cls = reinterpret_cast<types::Class *>(obj);
 
@@ -76,6 +95,10 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
         if (!field.IsPrimitive()) {
             reg_t obj_ptr = cls->GetField(i);
             MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+
+#ifdef GC_STW_DEBUG_ON
+            dump_file_ << "\tN_" << long(obj) << " -> N_" << long(obj_ptr)  << ";" << std::endl;
+#endif // GC_STW_DEBUG_ON
         }
     }
 

@@ -4,6 +4,8 @@
 #include "runtime/memory/garbage_collector/gc_base.h"
 #include "runtime/memory/object_header.h"
 
+#include <fstream>
+
 namespace evm::runtime {
 
 class GarbageCollectorSTW : public GarbageCollector {
@@ -34,6 +36,13 @@ private:
 private:
     size_t n_instr_frequency_ {N_INSTRS_FREQUENCY_DEFAULT};
     size_t instrs_counter_ {0};
+
+    size_t n_completed_marks_ {0};
+    size_t n_completed_sweeps_ {0};
+
+#ifdef GC_STW_DEBUG_ON
+    std::ofstream dump_file_;
+#endif // GC_STW_DEBUG_ON
 };
 
 } // namespace evm::runtime
