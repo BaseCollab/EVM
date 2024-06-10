@@ -158,6 +158,11 @@ void GarbageCollectorIncremental::Sweep()
     return;
 }
 
+void GarbageCollectorIncremental::AddGreyObject(ObjectHeader *obj)
+{
+    grey_objects_.push(obj);
+}
+
 bool GarbageCollectorIncremental::SetInstrsFrequency(size_t n_instr_frequency)
 {
     if (n_instr_frequency > 0) {

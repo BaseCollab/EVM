@@ -536,8 +536,9 @@ DEFINE_INSTR
     /// Put field of an object to register (by class offset)
     OBJ_GET_FIELD, 0x32,
     {
-        MARK_RD_AS_ROOT(HandleObjGetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(),
-                                                      GET_OBJ_RS()));
+        bool is_field_obj = false;
+        OBJ_RS_OP_ASSIGN(HandleObjGetField(GET_OBJ_FIELD_IDX(), GET_OBJ_RS(), &is_field_obj));
+        MARK_RD_AS_ROOT(is_field_obj);
         PC_ADD(0x6); // 0x6 bytes per instruction, not branch instruction
     }
 )
@@ -547,8 +548,7 @@ DEFINE_INSTR
     /// Set field of an object from register (by class offset)
     OBJ_SET_FIELD, 0x33,
     {
-        HandleObjSetField(frame_cur_, GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(),
-                                      GET_OBJ_RS());
+        HandleObjSetField(GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS());
         MARK_RD_AS_ROOT(false);
         PC_ADD(0x6); // 0x6 bytes per instruction, not branch instruction
     }

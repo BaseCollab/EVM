@@ -68,25 +68,26 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
 
     pc_ = entrypoint;
 
-    #define CALL_REG1()          *frame_cur_->GetReg(ISA_CALL_GET_REG1(bytecode + pc_))
-    #define CALL_REG2()          *frame_cur_->GetReg(ISA_CALL_GET_REG2(bytecode + pc_))
-    #define CALL_REG3()          *frame_cur_->GetReg(ISA_CALL_GET_REG3(bytecode + pc_))
-    #define CALL_REG4()          *frame_cur_->GetReg(ISA_CALL_GET_REG4(bytecode + pc_))
+    #define CALL_REG1()             *frame_cur_->GetReg(ISA_CALL_GET_REG1(bytecode + pc_))
+    #define CALL_REG2()             *frame_cur_->GetReg(ISA_CALL_GET_REG2(bytecode + pc_))
+    #define CALL_REG3()             *frame_cur_->GetReg(ISA_CALL_GET_REG3(bytecode + pc_))
+    #define CALL_REG4()             *frame_cur_->GetReg(ISA_CALL_GET_REG4(bytecode + pc_))
 
-    #define RD_IDX()             ISA_GET_RD (bytecode + pc_)
-    #define RS1_IDX()            ISA_GET_RS1(bytecode + pc_)
-    #define RS2_IDX()            ISA_GET_RS2(bytecode + pc_)
-    #define RS3_IDX()            ISA_GET_RS3(bytecode + pc_)
-    #define IMM_I()              ISA_GET_IMM(bytecode + pc_, int64_t)
-    #define IMM_F()              ISA_GET_IMM(bytecode + pc_, double)
-    #define IMM_I32()            ISA_GET_IMM(bytecode + pc_, int32_t)
+    #define RD_IDX()                ISA_GET_RD (bytecode + pc_)
+    #define RS1_IDX()               ISA_GET_RS1(bytecode + pc_)
+    #define RS2_IDX()               ISA_GET_RS2(bytecode + pc_)
+    #define RS3_IDX()               ISA_GET_RS3(bytecode + pc_)
+    #define IMM_I()                 ISA_GET_IMM(bytecode + pc_, int64_t)
+    #define IMM_F()                 ISA_GET_IMM(bytecode + pc_, double)
+    #define IMM_I32()               ISA_GET_IMM(bytecode + pc_, int32_t)
 
-    #define GET_ARRAY_TYPE()     ISA_GET_ARRAY_TYPE(bytecode + pc_)
-    #define GET_OBJ_TYPE()       ISA_GET_OBJ_TYPE(bytecode + pc_)
-    #define GET_OBJ_FIELD_IDX()  ISA_GET_OBJ_TYPE(bytecode + pc_)
-    #define GET_OBJ_RS()         ISA_GET_OBJ_RS(bytecode + pc_)
-    #define GET_OBJ_OP_RS()      ISA_GET_OBJ_OP_RS(bytecode + pc_)
-    #define GET_OBJ_FIELD_TYPE() ISA_GET_OBJ_FIELD_TYPE(bytecode + pc_)
+    #define GET_ARRAY_TYPE()        ISA_GET_ARRAY_TYPE(bytecode + pc_)
+    #define GET_OBJ_TYPE()          ISA_GET_OBJ_TYPE(bytecode + pc_)
+    #define GET_OBJ_FIELD_IDX()     ISA_GET_OBJ_TYPE(bytecode + pc_)
+    #define GET_OBJ_FIELD_TYPE()    ISA_GET_OBJ_FIELD_TYPE(bytecode + pc_)
+    #define GET_OBJ_RS()            frame_cur_->GetReg(ISA_GET_OBJ_RS(bytecode + pc_))->GetRaw()
+    #define GET_OBJ_OP_RS()         frame_cur_->GetReg(ISA_GET_OBJ_OP_RS(bytecode + pc_))->GetRaw()
+    #define OBJ_RS_OP_ASSIGN(value) frame_cur_->GetReg(ISA_GET_OBJ_OP_RS(bytecode + pc_))->SetInt64(value)
 
     #define BYTECODE_OFFSET(offset) bytecode + offset
 
@@ -120,8 +121,10 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define IS_RS1_MARKED_AS_ROOT() \
         RS1_IS_MARKED_AS_ROOT(frame_cur_)
 
-    #define CHECK_GC_INVOKE() \
-        Runtime::GetInstance()->GetGC()->UpdateState();
+    #define CHECK_GC_INVOKE()
+
+    // #define CHECK_GC_INVOKE() \
+    //     Runtime::GetInstance()->GetGC()->UpdateState();
 
     #define DISPATCH() \
         goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];

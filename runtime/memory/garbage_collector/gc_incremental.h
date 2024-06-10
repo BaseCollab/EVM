@@ -29,6 +29,8 @@ public:
     bool SetInstrsFrequency(size_t n_instr_frequency);
     size_t GetInstrsFrequency() const;
 
+    void AddGreyObject(ObjectHeader *obj);
+
 private:
     void MarkRoots();
     void MarkStep();

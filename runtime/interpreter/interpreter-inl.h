@@ -28,14 +28,14 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
 ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx, bool *load_obj)
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
+    assert(array != nullptr);
+
     int64_t value = 0;
     array->Get(&value, idx);
 
-    if (memory::IsReferenceType(array->GetClassWord()->GetArrayElementType()) && value != 0) {
-        *load_obj = true;
-    } else {
-        *load_obj = false;
-    }
+    auto arr_type = array->GetClassWord()->GetArrayElementType();
+    bool is_primitive = !memory::IsReferenceType(arr_type);
+    *load_obj = (!is_primitive) && (value != 0);
 
     return value;
 }
@@ -44,6 +44,19 @@ ALWAYS_INLINE void HandleStoreToArray(int64_t array_ptr, int64_t array_idx, int6
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
     assert(array != nullptr);
+
+    auto *gc = runtime::Runtime::GetInstance()->GetGC();
+    auto arr_type = array->GetClassWord()->GetArrayElementType();
+    auto arr_mark_word = array->GetMarkWord();
+
+    if (memory::IsReferenceType(arr_type) && src_reg_value != 0) {
+        auto *obj_ptr = reinterpret_cast<ObjectHeader *>(src_reg_value);
+        if (obj_ptr->GetMarkWord().mark == 0 && arr_mark_word.mark == 1 && arr_mark_word.neighbour == 1) {
+            array->SetMarkWord({.mark = 1, .neighbour = 0});
+            gc->AddGreyObject(array);
+        }
+    }
+
     printf("array_ptr = %p, idx = %ld, src_reg_value = %ld\n", (void *)array_ptr, array_idx, src_reg_value);
     array->Set(src_reg_value, array_idx);
 }
@@ -120,30 +133,39 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
 }
 
 // reg_idx -- register in which object field will be set after getting from object
-ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
+ALWAYS_INLINE int64_t HandleObjGetField(int16_t field_idx, int64_t obj_ptr, bool *load_obj)
 {
-    auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
+    auto *cls = reinterpret_cast<types::Class *>(obj_ptr);
     assert(cls != nullptr);
 
     // int64_t because all existing field types take up 8 bytes
     int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx));
-    bool is_primitive = cls->FieldIsPrimitive(static_cast<size_t>(field_idx));
+    bool is_primitive = cls->IsFieldPrimitive(static_cast<size_t>(field_idx));
+    *load_obj = (!is_primitive) && (raw_field != 0);
 
-    frame->GetReg(reg_idx)->SetInt64(raw_field);
-
-    return (!is_primitive) && (raw_field != 0);
+    return raw_field;
 }
 
-// reg_idx -- register from which value will be set to field_idx
-ALWAYS_INLINE void HandleObjSetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
+// reg -- register value which will be set to field_idx
+ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t obj_ptr)
 {
-    auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
+    auto *cls = reinterpret_cast<types::Class *>(obj_ptr);
     assert(cls != nullptr);
 
+    auto *gc = runtime::Runtime::GetInstance()->GetGC();
+    auto field_type = cls->GetClassWord()->GetField(field_idx).GetType();
+    auto cls_mark_word = cls->GetMarkWord();
+
+    if (memory::IsReferenceType(field_type) && reg != 0) {
+        auto *obj_ptr = reinterpret_cast<ObjectHeader *>(reg);
+        if (obj_ptr->GetMarkWord().mark == 0 && cls_mark_word.mark == 1 && cls_mark_word.neighbour == 1) {
+            cls->SetMarkWord({.mark = 1, .neighbour = 0});
+            gc->AddGreyObject(cls);
+        }
+    }
+
     // printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", cls, field_idx, field_type);
-    // int64_t because all existing field types take up 8 bytes
-    int64_t data = frame->GetReg(reg_idx)->GetInt64();
-    cls->SetField(static_cast<size_t>(field_idx), data);
+    cls->SetField(static_cast<size_t>(field_idx), reg);
 }
 
 } // namespace evm::runtime

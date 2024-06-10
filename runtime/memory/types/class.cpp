@@ -51,7 +51,7 @@ void Class::InitFields(file_format::Class &asm_class)
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());
 }
 
-bool Class::FieldIsPrimitive(size_t field_idx)
+bool Class::IsFieldPrimitive(size_t field_idx)
 {
     const Field &field = GetClassWord()->GetField(field_idx);
     return field.IsPrimitive();

@@ -46,7 +46,7 @@ void Runtime::InitializeRuntime()
     interpreter_ = std::make_unique<Interpreter>();
 
     class_manager_.InitDefaultClassDescriptions();
-    gc_ = std::make_unique<GarbageCollectorSTW>();
+    gc_ = std::make_unique<GarbageCollectorIncremental>();
 }
 
 void Runtime::Execute(file_format::File *file)
