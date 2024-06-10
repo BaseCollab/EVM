@@ -1,6 +1,7 @@
 #include "runtime/memory/garbage_collector/gc_stw.h"
 #include "runtime/memory/allocator/allocator.h"
 #include "runtime/memory/frame.h"
+#include "runtime/memory/types/array.h"
 #include "runtime/runtime.h"
 #include "runtime/memory/type.h"
 #include "runtime/memory/types/class.h"
@@ -82,38 +83,99 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
     }
 
     auto class_word = obj->GetClassWord();
+    auto obj_type = class_word->GetObjectType();
 
-    types::Class *cls = reinterpret_cast<types::Class *>(obj);
+    switch (obj_type) {
+        case memory::Type::STRING_OBJECT: {
+#ifdef GC_STW_DEBUG_ON
+            dump_file_ << "\tel_" << long(obj) << " [label = \"str\"];" << std::endl;
+#endif // GC_STW_DEBUG_ON
+            obj->SetMarkWord({.mark = 1});
+            return;
+        }
+        case memory::Type::CLASS_OBJECT: {
+            types::Class *cls = reinterpret_cast<types::Class *>(obj);
 
 #ifdef GC_STW_DEBUG_ON
-    dump_file_ << "\tsubgraph cluster_" << long(obj) << " {" << std::endl <<
-        "\t\tstyle = filled;\n\t\tcolor = green;" << std::endl <<
-        "\t\tlabel = \"ptr: " << long(obj) << "\";" << std::endl <<
-        "\t\tnode [style = filled, color = grey];" << std::endl;
+            dump_file_ << "\tsubgraph cluster_class_" << long(obj) << " {" << std::endl
+                       << "\t\tstyle = filled;\n\t\tcolor = green;" << std::endl
+                       << "\t\tlabel = \"ptr: " << long(obj) << "\";" << std::endl
+                       << "\t\tnode [style = filled, color = grey];" << std::endl;
 
-    for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
-        const Field field = class_word->GetField(i);
-        dump_file_ << "\t\tf_" << long(cls + field.GetOffset()) << " [label = \""
-                   << memory::GetStringFromType(field.GetType()) << "\"];" << std::endl;
-    }
+            for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
+                const Field field = class_word->GetField(i);
+                dump_file_ << "\t\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " [label = \""
+                           << memory::GetStringFromType(field.GetType()) << "\"];" << std::endl;
+            }
 
-    dump_file_ << "\t}\n" << std::endl;
+            dump_file_ << "\t}\n" << std::endl;
 #endif // GC_STW_DEBUG_ON
 
-    for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
-        const Field field = class_word->GetField(i);
-        if (!field.IsPrimitive()) {
-            reg_t obj_ptr = cls->GetField(i);
-            MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+            for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
+                const Field field = class_word->GetField(i);
+                if (!field.IsPrimitive()) {
+                    reg_t obj_ptr = cls->GetField(i);
+                    MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
 
 #ifdef GC_STW_DEBUG_ON
-            dump_file_ << "\tf_" << long(cls + field.GetOffset()) << " -> f_" << long(obj_ptr) << " [lhead = cluster_"
-                       << long(obj_ptr) << "];" << std::endl;
+                    dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " -> el_" << long(obj_ptr)
+                               << " [lhead = cluster_" << long(obj_ptr) << "];" << std::endl;
 #endif // GC_STW_DEBUG_ON
+                }
+            }
+
+            cls->SetMarkWord({.mark = 1});
+            return;
+        }
+        case memory::Type::ARRAY_OBJECT: {
+            types::Array *array = reinterpret_cast<types::Array *>(obj);
+            memory::Type array_type = class_word->GetArrayElementType();
+            size_t length = array->GetLength();
+
+#ifdef GC_STW_DEBUG_ON
+            size_t array_type_size = GetSizeOfType(array_type);
+
+            dump_file_ << "\tsubgraph cluster_arr_" << long(obj) << " {" << std::endl
+                       << "\t\tstyle = filled;\n\t\tcolor = green;" << std::endl
+                       << "\t\tlabel = \"ptr: " << long(obj) << "\";" << std::endl
+                       << "\t\tnode [style = filled, color = grey];" << std::endl;
+
+            for (size_t i = 0; i < length; ++i) {
+                dump_file_ << "\t\tel_"
+                           << long(reinterpret_cast<uint8_t *>(array) + i * array_type_size)
+                           << " [label = \"" << memory::GetStringFromType(array_type) << "_" << std::to_string(i) <<  "\"];"
+                           << std::endl;
+            }
+
+            dump_file_ << "\t}\n" << std::endl;
+#endif // GC_STW_DEBUG_ON
+
+            if (memory::IsReferenceType(array_type)) {
+                for (size_t i = 0; i < length; ++i) {
+                    int64_t obj_ptr = 0;
+                    array->Get(&obj_ptr, i);
+                    if (obj_ptr != 0) {
+                        MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+
+#ifdef GC_STW_DEBUG_ON
+                        dump_file_ << "\tel_"
+                                << long(reinterpret_cast<uint8_t *>(array) +
+                                        i * array_type_size)
+                                << " -> el_" << long(obj_ptr) << " [lhead = cluster_" << long(obj_ptr) << "];"
+                                << std::endl;
+#endif // GC_STW_DEBUG_ON
+                    }
+                }
+            }
+
+            array->SetMarkWord({.mark = 1});
+            return;
+        }
+        default: {
+            std::cerr << "Invalid type of object in STW-GC mark phase: something went wrong" << std::endl;
+            return;
         }
     }
-
-    cls->SetMarkWord({.mark = 1});
 }
 
 bool GarbageCollectorSTW::SetInstrsFrequency(size_t n_instr_frequency)

@@ -23,7 +23,7 @@ Array *Array::Create(memory::Type array_type, size_t length)
                GetStringFromType(array_type).c_str());
         UNREACHABLE();
     }
-    array_obj->SetLength(array_size);
+    array_obj->SetLength(length);
 
     auto classDescrType = GetDefaultClassDescrFromType(array_type);
     auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
