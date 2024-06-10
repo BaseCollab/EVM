@@ -34,7 +34,7 @@ static inline TypeSize GetSizeOfType(Type type)
 {
     switch (type) {
         case Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type) << "]" << std::endl;
+            std::cerr << __func__ << ": invalid type [" << static_cast<int>(type) << "]" << std::endl;
             return TypeSize::ZERO;
         case Type::DOUBLE:
             return TypeSize::DOUBLE;
@@ -47,7 +47,7 @@ static inline TypeSize GetSizeOfType(Type type)
         case Type::ARRAY_OBJECT:
             return TypeSize::ARRAY;
         default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
+            std::cerr << __func__ << ": unsupported type [" << static_cast<int>(type) << "]" << std::endl;
             return TypeSize::ZERO;
     }
 }
@@ -74,7 +74,7 @@ static inline std::string GetStringFromType(Type type)
 {
     switch (type) {
         case Type::INVALID:
-            std::cerr << __func__ << ": invalid array type [" << static_cast<int>(type) << "]" << std::endl;
+            std::cerr << __func__ << ": invalid type [" << static_cast<int>(type) << "]" << std::endl;
             return std::string("<invalid>");
         case Type::DOUBLE:
             return std::string("double");
@@ -87,7 +87,7 @@ static inline std::string GetStringFromType(Type type)
         case Type::ARRAY_OBJECT:
             return std::string("arr");
         default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
+            std::cerr << __func__ << ": unsupported type [" << static_cast<int>(type) << "]" << std::endl;
             return std::string("<unsupported>");
     }
 }
@@ -108,6 +108,11 @@ static inline bool IsReferenceType(Type type)
             std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
             UNREACHABLE();
     }
+}
+
+static inline bool IsPrimitiveType(Type type)
+{
+    return !(IsReferenceType(type));
 }
 
 } // namespace evm::memory

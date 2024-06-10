@@ -55,7 +55,7 @@ TEST_F(InterpreterTest, ADD_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), 1 + -10);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), 1 + -10);
 }
 
 TEST_F(InterpreterTest, SUB_INT64)
@@ -69,7 +69,7 @@ TEST_F(InterpreterTest, SUB_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 - (-23423));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), -11 - (-23423));
 }
 
 TEST_F(InterpreterTest, MUL_INT64)
@@ -83,7 +83,7 @@ TEST_F(InterpreterTest, MUL_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -11 * (-23423));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), -11 * (-23423));
 }
 
 TEST_F(InterpreterTest, DIV_INT64)
@@ -97,7 +97,7 @@ TEST_F(InterpreterTest, DIV_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), -23423 / (-11));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), -23423 / (-11));
 }
 
 TEST_F(InterpreterTest, AND_INT64)
@@ -111,7 +111,7 @@ TEST_F(InterpreterTest, AND_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) & (-234656723));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) & (-234656723));
 }
 
 TEST_F(InterpreterTest, OR_INT64)
@@ -125,7 +125,7 @@ TEST_F(InterpreterTest, OR_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) | (-234656723));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) | (-234656723));
 }
 
 TEST_F(InterpreterTest, XOR_INT64)
@@ -139,7 +139,7 @@ TEST_F(InterpreterTest, XOR_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) ^ (-234656723));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(), (-1234322221) ^ (-234656723));
 }
 
 TEST_F(InterpreterTest, MOV)
@@ -154,8 +154,8 @@ TEST_F(InterpreterTest, MOV)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetDouble(), 3.14);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), -11);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x3)->GetDouble(), 3.14);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), -11);
 }
 
 // Comparison integer operations
@@ -178,10 +178,10 @@ TEST_F(InterpreterTest, SLTI)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, SMEI)
@@ -202,10 +202,10 @@ TEST_F(InterpreterTest, SMEI)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, EQ_INT64)
@@ -226,10 +226,10 @@ TEST_F(InterpreterTest, EQ_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, NEQ_INT64)
@@ -250,10 +250,10 @@ TEST_F(InterpreterTest, NEQ_INT64)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 // Type conversion operations (float64 <-> int64)
@@ -268,7 +268,7 @@ TEST_F(InterpreterTest, CONVIF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetDouble(), -123.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetDouble(), -123.0);
 }
 
 TEST_F(InterpreterTest, CONVFI)
@@ -281,7 +281,7 @@ TEST_F(InterpreterTest, CONVFI)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), -123);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetInt64(), -123);
 }
 
 // Base float64 arithmetic operations
@@ -297,7 +297,7 @@ TEST_F(InterpreterTest, ADDF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 - 10.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 - 10.0);
 }
 
 TEST_F(InterpreterTest, SUBF)
@@ -311,7 +311,7 @@ TEST_F(InterpreterTest, SUBF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 + 10.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetDouble(), 1.0 + 10.0);
 }
 
 TEST_F(InterpreterTest, MULF)
@@ -325,7 +325,7 @@ TEST_F(InterpreterTest, MULF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 * 4.12);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 * 4.12);
 }
 
 TEST_F(InterpreterTest, DIVF)
@@ -339,7 +339,7 @@ TEST_F(InterpreterTest, DIVF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 / 4.12);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetDouble(), -3.14 / 4.12);
 }
 
 // Comparison float64 operations
@@ -362,10 +362,10 @@ TEST_F(InterpreterTest, SLTF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, SMEF)
@@ -386,10 +386,10 @@ TEST_F(InterpreterTest, SMEF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 TEST_F(InterpreterTest, EQF)
@@ -410,10 +410,10 @@ TEST_F(InterpreterTest, EQF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, NEQF)
@@ -434,10 +434,10 @@ TEST_F(InterpreterTest, NEQF)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 1);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x8)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x8)->GetInt64(), 1);
 }
 
 // Primitive maths operations
@@ -455,8 +455,8 @@ TEST_F(InterpreterTest, SIN_COS)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetDouble(), std::sin(23.0));
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetDouble(), std::cos(32.0));
 }
 
 // Control-flow operations
@@ -482,7 +482,7 @@ TEST_F(InterpreterTest, JMP_IMM)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64(), 16);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetInt64(), 16);
 }
 
 TEST_F(InterpreterTest, RACC_ACCR)
@@ -497,7 +497,7 @@ TEST_F(InterpreterTest, RACC_ACCR)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 2.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetDouble(), 2.0);
 }
 
 TEST_F(InterpreterTest, CALL_RET)
@@ -521,7 +521,7 @@ TEST_F(InterpreterTest, CALL_RET)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x1)->GetInt64(), 11 + 1);
 }
 
 // Array-related operations
@@ -543,8 +543,8 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetInt64(), 3);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetInt64(), 6);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x9)->GetInt64(), 3);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetInt64(), 6);
 }
 
 TEST_F(InterpreterTest, ARRAY_INSTRS_2)
@@ -580,9 +580,9 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x9)->GetDouble(), 9.0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x7)->GetDouble(), 7.0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetDouble(), 3.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x9)->GetDouble(), 9.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x7)->GetDouble(), 7.0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x3)->GetDouble(), 3.0);
 }
 
 // String-related operations
@@ -599,8 +599,8 @@ TEST_F(InterpreterTest, STRING_PULL)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x0)->GetInt64(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64());
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x0)->GetInt64(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x1)->GetInt64());
 }
 
 // User-objects operations
@@ -624,7 +624,7 @@ TEST_F(InterpreterTest, CLASS_SECTION)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
 
 TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
@@ -650,7 +650,7 @@ TEST_F(InterpreterTest, CLASS_SECTION_STRING_PULL)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(), 23);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x1)->GetInt64(), 23);
 }
 
 TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_DOUBLE)
@@ -664,7 +664,7 @@ TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_DOUBLE)
         newobj x1, Rectangle
         movif x2, -123.321
         movif x3, 1234567.7654321
-        
+
         obj_set_field x1, Rectangle@x, x2
         obj_set_field x1, Rectangle@y, x3
 
@@ -678,12 +678,12 @@ TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_DOUBLE)
     )";
 
     ExecuteFromSource(source);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetRaw(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetRaw());
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetRaw(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetRaw());
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetDouble(), -123.321);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 1234567.7654321);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetRaw(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetRaw(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x3)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetDouble(), -123.321);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetDouble(), 1234567.7654321);
 }
 
 TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_INT)
@@ -697,7 +697,7 @@ TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_INT)
         newobj x1, Rectangle
         movif x2, -123456789
         movif x3, 987654321
-        
+
         obj_set_field x1, Rectangle@x, x2
         obj_set_field x1, Rectangle@y, x3
 
@@ -711,12 +711,12 @@ TEST_F(InterpreterTest, CLASS_PRIMITIVE_FIELD_INT)
     )";
 
     ExecuteFromSource(source);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetRaw(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetRaw());
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetRaw(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x3)->GetRaw());
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), -123456789);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 987654321);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetRaw(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetRaw(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x3)->GetRaw());
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), -123456789);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 987654321);
 }
 
 TEST_F(InterpreterTest, CLASS_OBJECTS)
@@ -753,8 +753,8 @@ TEST_F(InterpreterTest, CLASS_OBJECTS)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetDouble(), 432.123);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x6)->GetInt64(), -12345);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetDouble(), 432.123);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x6)->GetInt64(), -12345);
 }
 
 TEST_F(InterpreterTest, PRIMITIVE_ARRAY_IN_CLASS)
@@ -776,7 +776,7 @@ TEST_F(InterpreterTest, PRIMITIVE_ARRAY_IN_CLASS)
             jmp_if_imm x4, exit
 
             starr x10, x2, x2
-            
+
             add x2, x2, x3
             jmp_imm loop
 
@@ -786,7 +786,7 @@ TEST_F(InterpreterTest, PRIMITIVE_ARRAY_IN_CLASS)
 
     ExecuteFromSource(source);
 
-    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    uint8_t *array = runtime_->GetInterpreter()->GetCurrFrame()->GetReg(10)->GetPtr();
     ASSERT_NE(array, nullptr);
 
     for (size_t idx = 0; idx < 20; ++idx) {
@@ -842,14 +842,14 @@ TEST_F(InterpreterTest, OBJECT_ARRAY_IN_CLASS)
     size_t field_offset = field.GetOffset();
     ASSERT_EQ(field_offset, 0); // data of 'int x' should align on the zero offset from object header of class
 
-    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    uint8_t *array = runtime_->GetInterpreter()->GetCurrFrame()->GetReg(10)->GetPtr();
     ASSERT_NE(array, nullptr);
 
     for (size_t idx = 0; idx < 10; ++idx) {
         uint64_t *current_foo_pointer =
             reinterpret_cast<uint64_t *>(array + runtime::types::Array::GetDataOffset() + idx * sizeof(uint64_t *));
         auto *klass = reinterpret_cast<runtime::types::Class *>(*current_foo_pointer);
-        int64_t current_value = klass->GetField(0, memory::Type::INT);
+        int64_t current_value = klass->GetField(0);
 
         ASSERT_EQ(current_value, static_cast<int64_t>(idx));
     }
@@ -880,7 +880,7 @@ TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS_2)
     ExecuteFromSource(source);
 }
 
-TEST_F(InterpreterTest, STRING_COMPARASION)
+TEST_F(InterpreterTest, STRING_COMPARISON)
 {
     auto source = R"(
         newstr x0, 'one'
@@ -901,11 +901,11 @@ TEST_F(InterpreterTest, STRING_COMPARASION)
     ExecuteFromSource(source);
 
     // Strings shouldn'e be equal even for the same string-literals
-    ASSERT_NE(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x1)->GetInt64(),
-              runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x2)->GetInt64());
+    ASSERT_NE(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x1)->GetInt64(),
+              runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x2)->GetInt64());
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), 0);
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x5)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x5)->GetInt64(), 0);
 }
 
 TEST_F(InterpreterTest, STRING_CONCAT)
@@ -924,7 +924,7 @@ TEST_F(InterpreterTest, STRING_CONCAT)
 
     ExecuteFromSource(source);
 
-    ASSERT_EQ(runtime_->GetInterpreter()->getCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+    ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
 }
 
 } // namespace evm

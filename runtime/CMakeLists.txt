@@ -5,6 +5,7 @@ project(runtime)
 set(SOURCES
     interpreter/interpreter.cpp
     memory/allocator/bump_allocator.cpp
+    memory/garbage_collector/gc_stw.cpp
     memory/types/array.cpp
     memory/types/string.cpp
     memory/types/class.cpp

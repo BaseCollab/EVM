@@ -5,10 +5,9 @@
 #include "common/constants.h"
 #include "runtime/memory/frame.h"
 #include "runtime/memory/reg.h"
-#include "isa/opcodes.h"
 
 #include <cstddef>
-#include <stack>
+#include <vector>
 
 namespace evm::file_format {
 class File;
@@ -25,15 +24,28 @@ public:
     ~Interpreter() = default;
 
     void Run(file_format::File *file, const byte_t *bytecode, size_t entrypoint);
-    const Frame *getCurrFrame() const;
+    const Frame *GetCurrFrame() const;
+    const std::vector<Frame> &GetFramesStack() const;
+
+    void MarkAccum(bool is_root);
+    bool IsAccumMarked() const;
+
+    Register GetAccum() const;
+
+    void MigrateToNewFrame(size_t new_pc, size_t restore_pc,
+                           const std::array<Register, Frame::N_PASSED_ARGS_DEFAULT> &passed_args);
+    void ReturnToPrevFrame();
 
 private:
-    std::stack<Frame> frames_;
+    std::vector<Frame> frames_;
 
     Frame *frame_cur_ {nullptr};
     size_t pc_ {0}; // pc of the current frame
 
+    size_t instr_counter_ {0}; // for GC/JIT work
+
     Register accum_;
+    bool is_accum_root_ {false};
 };
 
 } // namespace evm::runtime

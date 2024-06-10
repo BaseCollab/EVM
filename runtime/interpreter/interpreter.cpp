@@ -1,6 +1,8 @@
+#include "runtime/interpreter/interpreter.h"
 #include "common/constants.h"
 #include "common/config.h"
 #include "runtime/interpreter/interpreter-inl.h"
+#include "runtime/memory/reg.h"
 #include "runtime/memory/types/array.h"
 #include "file_format/file.h"
 #include "isa/macros.h"
@@ -44,6 +46,12 @@ namespace evm::runtime {
 #define RS3_I_FRAME(frame) frame->GetReg(RS3_IDX())->GetInt64()
 #define RS3_F_FRAME(frame) frame->GetReg(RS3_IDX())->GetDouble()
 
+#define RD_MARK_REG_AS_ROOT(frame, is_obj) \
+    frame->MarkReg(RD_IDX(), is_obj)
+
+#define RS1_IS_MARKED_AS_ROOT(frame) \
+    frame->IsRegMarked(RS1_IDX())
+
 void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t entrypoint)
 {
     #define DEFINE_INSTR(instr, opcode, interpret) \
@@ -55,15 +63,15 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
 
     #undef DEFINE_INSTR
 
-    frames_.push(Frame(0, Frame::N_FRAME_LOCAL_REGS_DEFAULT));
-    frame_cur_ = &frames_.top();
+    frames_.emplace_back(Frame(0, {}));
+    frame_cur_ = &frames_.back();
 
     pc_ = entrypoint;
 
-    #define CALL_REG1()          ISA_CALL_GET_REG1(bytecode + pc_)
-    #define CALL_REG2()          ISA_CALL_GET_REG2(bytecode + pc_)
-    #define CALL_REG3()          ISA_CALL_GET_REG3(bytecode + pc_)
-    #define CALL_REG4()          ISA_CALL_GET_REG4(bytecode + pc_)
+    #define CALL_REG1()          *frame_cur_->GetReg(ISA_CALL_GET_REG1(bytecode + pc_))
+    #define CALL_REG2()          *frame_cur_->GetReg(ISA_CALL_GET_REG2(bytecode + pc_))
+    #define CALL_REG3()          *frame_cur_->GetReg(ISA_CALL_GET_REG3(bytecode + pc_))
+    #define CALL_REG4()          *frame_cur_->GetReg(ISA_CALL_GET_REG4(bytecode + pc_))
 
     #define RD_IDX()             ISA_GET_RD (bytecode + pc_)
     #define RS1_IDX()            ISA_GET_RS1(bytecode + pc_)
@@ -106,22 +114,17 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define GET_I_ACCUM() accum_.GetInt64()
     #define GET_F_ACCUM() accum_.GetDouble()
 
-    #define FRAME_NEW_MIGRATE(restore_pc, new_pc)                            \
-        frame_cur_->SetRestorePC(restore_pc);                                \
-        frames_.push(Frame(new_pc, Frame::N_FRAME_LOCAL_REGS_DEFAULT,        \
-                     *frame_cur_->GetReg(CALL_REG1()),                       \
-                     *frame_cur_->GetReg(CALL_REG2()),                       \
-                     *frame_cur_->GetReg(CALL_REG3()),                       \
-                     *frame_cur_->GetReg(CALL_REG4())));                     \
-        PC_ASSIGN(new_pc);                                                   \
-        frame_cur_ = &frames_.top();
+    #define MARK_RD_AS_ROOT(is_obj) \
+        RD_MARK_REG_AS_ROOT(frame_cur_, is_obj)
 
-    #define FRAME_OLD_MIGRATE()                                              \
-        frames_.pop();                                                       \
-        frame_cur_ = &frames_.top();                                         \
-        PC_ASSIGN(frame_cur_->GetRestorePC());
+    #define IS_RS1_MARKED_AS_ROOT() \
+        RS1_IS_MARKED_AS_ROOT(frame_cur_)
 
-    #define DISPATCH() goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
+    #define CHECK_GC_INVOKE() \
+        Runtime::GetInstance()->GetGC()->UpdateState();
+
+    #define DISPATCH() \
+        goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
 
     goto *dispatch_table[static_cast<byte_t>(bytecode[pc_])];
 
@@ -129,6 +132,7 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     instr:                                            \
         PRINT_DEBUG(instr);                           \
         interpret;                                    \
+        CHECK_GC_INVOKE();                            \
         DISPATCH();
 
     #include "isa/isa.def"
@@ -136,9 +140,45 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #undef DEFINE_INSTR
 }
 
-const Frame *Interpreter::getCurrFrame() const
+const std::vector<Frame> &Interpreter::GetFramesStack() const
+{
+    return frames_;
+}
+
+const Frame *Interpreter::GetCurrFrame() const
 {
     return frame_cur_;
+}
+
+void Interpreter::MigrateToNewFrame(size_t new_pc, size_t restore_pc,
+                                    const std::array<Register, Frame::N_PASSED_ARGS_DEFAULT> &passed_args)
+{
+    frame_cur_->SetRestorePC(restore_pc);
+    frames_.emplace_back(Frame(new_pc, passed_args));
+    pc_ = new_pc;
+    frame_cur_ = &frames_.back();
+}
+
+void Interpreter::ReturnToPrevFrame()
+{
+    frames_.pop_back();
+    frame_cur_ = &frames_.back();
+    pc_ = frame_cur_->GetRestorePC();
+}
+
+void Interpreter::MarkAccum(bool is_root)
+{
+    is_accum_root_ = is_root;
+}
+
+bool Interpreter::IsAccumMarked() const
+{
+    return is_accum_root_;
+}
+
+Register Interpreter::GetAccum() const
+{
+    return accum_;
 }
 
 #pragma GCC diagnostic pop

@@ -33,7 +33,7 @@ void Class::InitFields(file_format::Class &asm_class)
             class_obj->SetClassWord(class_description);
             class_obj->InitFields(field_asm_class);
 
-            SetField(idx, memory::Type::CLASS_OBJECT, bitops::BitCast<int64_t>(class_obj));
+            SetField(idx, bitops::BitCast<int64_t>(class_obj));
         } else if (current_asm_field.IsArrayObject()) {
             printf("Array_size = %ld\n", current_asm_field.GetArraySize());
 
@@ -46,17 +46,22 @@ void Class::InitFields(file_format::Class &asm_class)
                 array_obj->GetClassWord()->SetArrayElementType(element_type);
             }
 
-            SetField(idx, memory::Type::ARRAY_OBJECT, bitops::BitCast<int64_t>(array_obj));
+            SetField(idx, bitops::BitCast<int64_t>(array_obj));
         }
     }
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());
 }
 
-int64_t Class::GetField(size_t field_idx, memory::Type field_type)
+bool Class::FieldIsPrimitive(size_t field_idx)
 {
-    assert(memory::GetSizeOfType(field_type) == sizeof(int64_t));
+    const Field &field = GetClassWord()->GetField(field_idx);
+    return field.IsPrimitive();
+}
 
-    auto offset = GetClassWord()->GetField(field_idx).GetOffset();
+int64_t Class::GetField(size_t field_idx)
+{
+    const Field &field = GetClassWord()->GetField(field_idx);
+    auto offset = field.GetOffset();
 
     int64_t raw_field = 0;
     uint8_t *field_ptr = reinterpret_cast<uint8_t *>(this) + GetDataOffset() + offset;
@@ -65,10 +70,8 @@ int64_t Class::GetField(size_t field_idx, memory::Type field_type)
     return raw_field;
 }
 
-void Class::SetField(size_t field_idx, memory::Type field_type, int64_t data)
+void Class::SetField(size_t field_idx, int64_t data)
 {
-    assert(memory::GetSizeOfType(field_type) == sizeof(int64_t));
-
     printf("[Class::SetField] field_idx = %ld\n", field_idx);
     auto offset = GetClassWord()->GetField(field_idx).GetOffset();
     uint8_t *field_ptr = reinterpret_cast<uint8_t *>(this) + GetDataOffset() + offset;

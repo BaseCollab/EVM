@@ -2,6 +2,7 @@
 #include "runtime/memory/types/string.h"
 #include "common/utils/crc32.h"
 
+#include <cassert>
 #include <cstring>
 #include <iostream>
 

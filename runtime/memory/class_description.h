@@ -56,14 +56,14 @@ public:
         return element_type_;
     }
 
-    size_t GetClassSize() const
-    {
-        return fields_num_ * 8;
-    }
-
     size_t GetFieldsNum() const
     {
         return fields_num_;
+    }
+
+    size_t GetClassSize() const
+    {
+        return GetFieldsNum() * 8;
     }
 
     const Field &GetField(size_t field_idx)

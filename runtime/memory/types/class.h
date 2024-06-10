@@ -23,9 +23,10 @@ public:
 
     void InitFields(file_format::Class &asm_class);
 
-    int64_t GetField(size_t field_idx, memory::Type field_type);
+    int64_t GetField(size_t field_idx);
+    void SetField(size_t field_idx, int64_t data);
 
-    void SetField(size_t field_idx, memory::Type field_type, int64_t data);
+    bool FieldIsPrimitive(size_t field_idx);
 
 private:
     __extension__ uint8_t data_[0];
