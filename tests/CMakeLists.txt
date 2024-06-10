@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
+add_compile_options(-Wno-invalid-offsetof)
+
 add_subdirectory(interpreter)
 add_subdirectory(memory)
 

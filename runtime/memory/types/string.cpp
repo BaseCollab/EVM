@@ -65,11 +65,23 @@ String *String::ConcatStrings(String *lhs_string, String *rhs_string)
     std::memcpy(concat_data, lhs_string->GetData(), lhs_length);
     std::memcpy(concat_data + lhs_length, rhs_string->GetData(), rhs_length);
 
-    auto *concat_string = String::Create(concat_data, concat_length);
+    auto *concat_string_obj = String::Create(concat_data, concat_length);
+    if (UNLIKELY(concat_string_obj == nullptr)) {
+        printf("[%s] Can not create concat string from \"%s\" and \"%s\"\n", __func__, lhs_string->GetData(),
+               rhs_string->GetData());
+        UNREACHABLE();
+    }
 
     delete[] concat_data;
 
-    return concat_string;
+    auto *class_description =
+        Runtime::GetInstance()->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
+    assert(class_description != nullptr);
+    assert(class_description->IsStringObject());
+
+    concat_string_obj->SetClassWord(class_description);
+
+    return concat_string_obj;
 }
 
 } // namespace evm::runtime::types
