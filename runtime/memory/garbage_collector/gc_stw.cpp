@@ -24,9 +24,9 @@ void GarbageCollectorSTW::Mark()
 
     auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
 
-    const std::vector<Frame> frames = interpreter->GetFramesStack();
+    const std::vector<Frame> &frames = interpreter->GetFramesStack();
     for (size_t i = 0, size = frames.size(); i < size; ++i) {
-        auto frame_reg_bitset = frames[i].GetObjectBitMask();
+        auto &frame_reg_bitset = frames[i].GetObjectBitMask();
         for (size_t reg = 0; reg < frame_reg_bitset.size(); ++reg) {
             if (frame_reg_bitset.test(reg) == true) {
                 reg_t obj_ptr = frames[i].GetReg(reg)->GetRaw();
@@ -118,8 +118,8 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                     MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
 
 #ifdef GC_STW_DEBUG_ON
-                    dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " -> el_" << long(obj_ptr)
-                               << " [lhead = cluster_" << long(obj_ptr) << "];" << std::endl;
+                    dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " -> el_"
+                               << long(obj_ptr) << " [lhead = cluster_" << long(obj_ptr) << "];" << std::endl;
 #endif // GC_STW_DEBUG_ON
                 }
             }
@@ -141,10 +141,9 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                        << "\t\tnode [style = filled, color = grey];" << std::endl;
 
             for (size_t i = 0; i < length; ++i) {
-                dump_file_ << "\t\tel_"
-                           << long(reinterpret_cast<uint8_t *>(array) + i * array_type_size)
-                           << " [label = \"" << memory::GetStringFromType(array_type) << "_" << std::to_string(i) <<  "\"];"
-                           << std::endl;
+                dump_file_ << "\t\tel_" << long(reinterpret_cast<uint8_t *>(array) + i * array_type_size)
+                           << " [label = \"" << memory::GetStringFromType(array_type) << "_" << std::to_string(i)
+                           << "\"];" << std::endl;
             }
 
             dump_file_ << "\t}\n" << std::endl;
@@ -158,11 +157,9 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                         MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
 
 #ifdef GC_STW_DEBUG_ON
-                        dump_file_ << "\tel_"
-                                << long(reinterpret_cast<uint8_t *>(array) +
-                                        i * array_type_size)
-                                << " -> el_" << long(obj_ptr) << " [lhead = cluster_" << long(obj_ptr) << "];"
-                                << std::endl;
+                        dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(array) + i * array_type_size)
+                                   << " -> el_" << long(obj_ptr) << " [lhead = cluster_" << long(obj_ptr) << "];"
+                                   << std::endl;
 #endif // GC_STW_DEBUG_ON
                     }
                 }

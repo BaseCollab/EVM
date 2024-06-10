@@ -110,6 +110,11 @@ static inline bool IsReferenceType(Type type)
     }
 }
 
+static inline bool IsPrimitiveType(Type type)
+{
+    return !(IsReferenceType(type));
+}
+
 } // namespace evm::memory
 
 #endif // EVM_MEMORY_TYPE_H
