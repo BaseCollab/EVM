@@ -103,7 +103,7 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                        << "\t\tnode [style = filled, color = grey];" << std::endl;
 
             for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
-                const Field field = class_word->GetField(i);
+                const Field &field = class_word->GetField(i);
                 dump_file_ << "\t\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " [label = \""
                            << memory::GetStringFromType(field.GetType()) << "\"];" << std::endl;
             }
@@ -112,7 +112,7 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
 #endif // GC_STW_DEBUG_ON
 
             for (size_t i = 0, size = class_word->GetFieldsNum(); i < size; ++i) {
-                const Field field = class_word->GetField(i);
+                const Field &field = class_word->GetField(i);
                 if (!field.IsPrimitive()) {
                     reg_t obj_ptr = cls->GetField(i);
                     MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));

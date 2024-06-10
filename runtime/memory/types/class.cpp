@@ -54,13 +54,13 @@ void Class::InitFields(file_format::Class &asm_class)
 
 bool Class::FieldIsPrimitive(size_t field_idx)
 {
-    const Field field = GetClassWord()->GetField(field_idx);
+    const Field &field = GetClassWord()->GetField(field_idx);
     return field.IsPrimitive();
 }
 
 int64_t Class::GetField(size_t field_idx)
 {
-    const Field field = GetClassWord()->GetField(field_idx);
+    const Field &field = GetClassWord()->GetField(field_idx);
     auto offset = field.GetOffset();
 
     int64_t raw_field = 0;
