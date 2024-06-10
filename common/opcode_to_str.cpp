@@ -2,9 +2,6 @@
 #include "common/utils/string_operations.h"
 #include "isa/opcodes.h"
 
-#include <cctype>
-#include <algorithm>
-
 namespace evm::common {
 
 // clang-format off

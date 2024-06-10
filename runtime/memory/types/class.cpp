@@ -1,9 +1,8 @@
+#include "common/utils/bitops.h"
 #include "runtime/memory/types/class.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/runtime.h"
-#include "common/utils/bitops.h"
-
-#include <cassert>
+#include "file_format/file.h"
 
 namespace evm::runtime::types {
 

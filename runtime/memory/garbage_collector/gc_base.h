@@ -1,8 +1,7 @@
 #ifndef EVM_RUNTIME_GARBAGE_COLLECTOR_H
 #define EVM_RUNTIME_GARBAGE_COLLECTOR_H
 
-#include "runtime/interpreter/interpreter.h"
-#include "runtime/memory/allocator/allocator.h"
+#include "common/macros.h"
 
 namespace evm::runtime {
 

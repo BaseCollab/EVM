@@ -1,11 +1,8 @@
 #ifndef EVM_MEMORY_REG_H
 #define EVM_MEMORY_REG_H
 
-#include "common/macros.h"
 #include "common/constants.h"
 #include "common/config.h"
-
-#include <cstddef>
 
 namespace evm::runtime {
 

@@ -1,8 +1,7 @@
 #include "bump_allocator.h"
-#include "runtime/memory/types/array.h"
 
 #include <iostream>
-#include <cassert>
+#include <cstddef>
 
 namespace evm::runtime {
 

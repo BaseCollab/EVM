@@ -7,7 +7,6 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include <iostream>
 
 namespace evm {
 

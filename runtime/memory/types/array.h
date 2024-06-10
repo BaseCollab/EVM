@@ -8,7 +8,6 @@
 
 #include <cstddef>
 #include <cstring>
-#include <string_view>
 
 namespace evm::runtime::types {
 

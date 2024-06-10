@@ -2,7 +2,7 @@
 #define EVM_RUNTIME_MEMORY_TYPES_CLASS
 
 #include "runtime/memory/object_header.h"
-#include "file_format/file.h"
+#include "file_format/class_section.h"
 
 #include <cstddef>
 

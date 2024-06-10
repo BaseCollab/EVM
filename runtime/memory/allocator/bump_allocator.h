@@ -3,6 +3,9 @@
 
 #include "allocator.h"
 
+#include <cstddef>
+#include <cstdint>
+
 namespace evm::runtime {
 
 class Array;

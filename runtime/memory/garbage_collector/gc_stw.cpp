@@ -1,11 +1,9 @@
 #include "runtime/memory/garbage_collector/gc_stw.h"
-#include "runtime/memory/allocator/allocator.h"
 #include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/runtime.h"
 #include "runtime/memory/type.h"
 #include "runtime/memory/types/class.h"
-#include "isa/macros.h"
 
 #include <vector>
 #include <bitset>
