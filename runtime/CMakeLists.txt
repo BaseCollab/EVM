@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(runtime)
 
+add_compile_options(-Wno-invalid-offsetof)
+
 set(SOURCES
     interpreter/interpreter.cpp
     memory/allocator/bump_allocator.cpp

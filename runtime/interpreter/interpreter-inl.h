@@ -52,12 +52,12 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
 
     auto *class_description =
         runtime->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
-    assert(class_description->IsStringObject());
 
     if (UNLIKELY(class_description == nullptr)) {
         printf("HandleCreateStringObject::ClassDescription for string should be initialized due Runtime creation\n");
         UNREACHABLE();
     }
+    assert(class_description->IsStringObject());
 
     auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->data()), string->size());
     if (UNLIKELY(string_obj == nullptr)) {
