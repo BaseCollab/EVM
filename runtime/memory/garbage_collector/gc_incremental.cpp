@@ -8,8 +8,6 @@
 #include <vector>
 #include <bitset>
 #include <iostream>
-// #include <fstream>
-// #include <string>
 
 namespace evm::runtime {
 
@@ -23,7 +21,7 @@ void GarbageCollectorIncremental::MarkRoots()
         for (size_t reg = 0; reg < frame_reg_bitset.size(); ++reg) {
             if (frame_reg_bitset.test(reg) == true) {
                 ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(frames[i].GetReg(reg)->GetRaw());
-                obj_ptr->SetMarkWord({.mark = 1}); // mark object as grey
+                obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // mark object as grey
                 grey_objects_.push(reinterpret_cast<ObjectHeader *>(obj_ptr));
             }
         }
@@ -31,7 +29,7 @@ void GarbageCollectorIncremental::MarkRoots()
 
     if (interpreter->IsAccumMarked()) {
         ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(interpreter->GetAccum().GetRaw());
-        obj_ptr->SetMarkWord({.mark = 1}); // mark object as grey
+        obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // mark object as grey
         grey_objects_.push(reinterpret_cast<ObjectHeader *>(obj_ptr));
     }
 }
@@ -48,9 +46,7 @@ void GarbageCollectorIncremental::MarkStep()
             }
 
             ObjectHeader *grey_obj = grey_objects_.front();
-            MarkWord mark_word = grey_obj->GetMarkWord();
-
-            if (mark_word.neighbour == 0) { // only if object is grey
+            if (grey_obj->GetMarkWord().neighbour == 0) { // only if object is grey
                 VisitNeighbours(grey_obj);
                 grey_obj->SetMarkWord({.mark = 1, .neighbour = 1}); // mark as black object
             }
