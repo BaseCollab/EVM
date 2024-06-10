@@ -786,7 +786,7 @@ TEST_F(InterpreterTest, PRIMITIVE_ARRAY_IN_CLASS)
 
     ExecuteFromSource(source);
 
-    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    uint8_t *array = runtime_->GetInterpreter()->GetCurrFrame()->GetReg(10)->GetPtr();
     ASSERT_NE(array, nullptr);
 
     for (size_t idx = 0; idx < 20; ++idx) {
@@ -842,14 +842,14 @@ TEST_F(InterpreterTest, OBJECT_ARRAY_IN_CLASS)
     size_t field_offset = field.GetOffset();
     ASSERT_EQ(field_offset, 0); // data of 'int x' should align on the zero offset from object header of class
 
-    uint8_t *array = runtime_->GetInterpreter()->getCurrFrame()->GetReg(10)->GetPtr();
+    uint8_t *array = runtime_->GetInterpreter()->GetCurrFrame()->GetReg(10)->GetPtr();
     ASSERT_NE(array, nullptr);
 
     for (size_t idx = 0; idx < 10; ++idx) {
         uint64_t *current_foo_pointer =
             reinterpret_cast<uint64_t *>(array + runtime::types::Array::GetDataOffset() + idx * sizeof(uint64_t *));
         auto *klass = reinterpret_cast<runtime::types::Class *>(*current_foo_pointer);
-        int64_t current_value = klass->GetField(0, memory::Type::INT);
+        int64_t current_value = klass->GetField(0);
 
         ASSERT_EQ(current_value, static_cast<int64_t>(idx));
     }

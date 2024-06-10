@@ -123,7 +123,7 @@ ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg
 
     frame->GetReg(reg_idx)->SetInt64(raw_field);
 
-    return is_primitive;
+    return !is_primitive;
 }
 
 // reg_idx -- register from which value will be set to field_idx

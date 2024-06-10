@@ -66,11 +66,6 @@ public:
         return GetFieldsNum() * 8;
     }
 
-    size_t GetFieldsNum() const
-    {
-        return fields_num_;
-    }
-
     const Field &GetField(size_t field_idx)
     {
         // printf("[ClassDescription::GetField] fields_num = %ld, fields_ptr = %p, field_idx = %ld\n", fields_num_,

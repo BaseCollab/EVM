@@ -33,7 +33,7 @@ void Class::InitFields(file_format::Class &asm_class)
             class_obj->SetClassWord(class_description);
             class_obj->InitFields(field_asm_class);
 
-            SetField(idx, memory::Type::CLASS_OBJECT, bitops::BitCast<int64_t>(class_obj));
+            SetField(idx, bitops::BitCast<int64_t>(class_obj));
         } else if (current_asm_field.IsArrayObject()) {
             printf("Array_size = %ld\n", current_asm_field.GetArraySize());
 
@@ -46,7 +46,7 @@ void Class::InitFields(file_format::Class &asm_class)
                 array_obj->GetClassWord()->SetArrayElementType(element_type);
             }
 
-            SetField(idx, memory::Type::ARRAY_OBJECT, bitops::BitCast<int64_t>(array_obj));
+            SetField(idx, bitops::BitCast<int64_t>(array_obj));
         }
     }
     // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());

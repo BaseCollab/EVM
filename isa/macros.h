@@ -39,9 +39,6 @@ using instr_size_t = word_t;
         __val;                                                                \
     })
 
-#define UNLIKELY(expr) __builtin_expect(!!(expr), 0)
-#define LIKELY(expr) __builtin_expect(!!(expr), 1)
-
 // Stupid temporary DSL for testing
 // TODO: write assembler and remove all this stuff
 #define PUT_A_INSTR(opcode, rd, rs1, rs2)                   opcode, rd, rs1, rs2
