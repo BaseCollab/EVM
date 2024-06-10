@@ -121,10 +121,8 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define IS_RS1_MARKED_AS_ROOT() \
         RS1_IS_MARKED_AS_ROOT(frame_cur_)
 
-    #define CHECK_GC_INVOKE()
-
-    // #define CHECK_GC_INVOKE() \
-    //     Runtime::GetInstance()->GetGC()->UpdateState();
+    #define CHECK_GC_INVOKE() \
+        Runtime::GetInstance()->GetGC()->UpdateState();
 
     #define DISPATCH() \
         goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];

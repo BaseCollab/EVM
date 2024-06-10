@@ -83,9 +83,8 @@ void GarbageCollectorIncremental::VisitNeighbours(ObjectHeader *obj)
                         continue;
                     }
 
-                    MarkWord mark_word = obj_ptr->GetMarkWord();
-                    if (mark_word.mark == 0) {             // white object
-                        obj_ptr->SetMarkWord({.mark = 1}); // make object grey
+                    if (obj_ptr->GetMarkWord().mark == 0) {                // white object
+                        obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // make object grey
                         grey_objects_.push(obj_ptr);
                     }
                 }
@@ -106,9 +105,8 @@ void GarbageCollectorIncremental::VisitNeighbours(ObjectHeader *obj)
                     }
 
                     ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(obj_ptr_val);
-                    MarkWord mark_word = obj_ptr->GetMarkWord();
-                    if (mark_word.mark == 0) {             // white object
-                        obj_ptr->SetMarkWord({.mark = 1}); // make object grey
+                    if (obj_ptr->GetMarkWord().mark == 0) {                // white object
+                        obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // make object grey
                         grey_objects_.push(obj_ptr);
                     }
                 }
@@ -126,9 +124,8 @@ void GarbageCollectorIncremental::MarkFinalize()
 {
     while (!grey_objects_.empty()) {
         ObjectHeader *grey_obj = grey_objects_.front();
-        MarkWord mark_word = grey_obj->GetMarkWord();
 
-        if (mark_word.neighbour == 0) { // only if object is grey
+        if (grey_obj->GetMarkWord().neighbour == 0) { // only if object is grey
             VisitNeighbours(grey_obj);
             grey_obj->SetMarkWord({.mark = 1, .neighbour = 1}); // mark as black object
         }
