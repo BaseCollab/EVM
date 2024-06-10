@@ -38,6 +38,11 @@ void *HeapManager::AllocateObject(size_t size)
     return alloc_obj;
 }
 
+void HeapManager::DeallocateObject(void *obj_ptr)
+{
+    object_allocator_->Dealloc(obj_ptr);
+}
+
 void *HeapManager::AllocateInternalObject(size_t size)
 {
     return object_allocator_->Alloc(size);

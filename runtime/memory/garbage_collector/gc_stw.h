@@ -20,11 +20,10 @@ public:
     GarbageCollectorSTW() : GarbageCollector() {}
     ~GarbageCollectorSTW() {}
 
-    void UpdateState();
-
     bool SetInstrsFrequency(size_t n_instr_frequency);
     size_t GetInstrsFrequency() const;
 
+    void UpdateState();
     void CleanMemory();
 
 private:

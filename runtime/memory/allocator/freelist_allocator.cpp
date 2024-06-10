@@ -9,7 +9,7 @@ void *FreelistAllocator::Alloc(size_t size)
     Node *prev_node = nullptr;
     Node *finded_memory_node = FindFirstFit(size, &prev_node);
     if (UNLIKELY(finded_memory_node == nullptr)) {
-        printf("[%s] No free memory in freelist allocator\n", __func__);
+        // printf("[%s] No free memory in freelist allocator\n", __func__);
         UNREACHABLE();
     }
 

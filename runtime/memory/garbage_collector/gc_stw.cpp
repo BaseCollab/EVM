@@ -57,20 +57,13 @@ void GarbageCollectorSTW::Sweep()
         if (mark_word.mark == 1) {
             obj->SetMarkWord({.mark = 0});
         } else {
-            continue;
-            // deallocate this obj (need new allocator)
+            heap_manager->DeallocateObject(obj);
         }
     }
 
     n_completed_sweeps_++;
 
     return;
-}
-
-void GarbageCollectorSTW::CleanMemory()
-{
-    Mark();
-    Sweep();
 }
 
 void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
@@ -113,7 +106,9 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                 const Field &field = class_word->GetField(i);
                 if (!field.IsPrimitive()) {
                     reg_t obj_ptr = cls->GetField(i);
-                    MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+                    if (obj_ptr != 0) {
+                        MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+                    }
 
 #ifdef GC_STW_DEBUG_ON
                     dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " -> el_"
@@ -194,6 +189,12 @@ void GarbageCollectorSTW::UpdateState()
         instrs_counter_ = 0;
         CleanMemory();
     }
+}
+
+void GarbageCollectorSTW::CleanMemory()
+{
+    Mark();
+    Sweep();
 }
 
 } // namespace evm::runtime

@@ -17,19 +17,26 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
 
     auto *array_obj = types::Array::Create(array_type, size);
     if (UNLIKELY(array_obj == nullptr)) {
-        printf("[HandleCreateStringObject] Error when creating object for array of type \"%s\"\n",
-               GetStringFromType(array_type).c_str());
+        // printf("[HandleCreateStringObject] Error when creating object for array of type \"%s\"\n",
+        //        GetStringFromType(array_type).c_str());
         UNREACHABLE();
     }
 
     return reinterpret_cast<int64_t>(array_obj);
 }
 
-ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx)
+ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx, bool *load_obj)
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
+    assert(array != nullptr);
+
     int64_t value = 0;
     array->Get(&value, idx);
+
+    auto arr_type = array->GetClassWord()->GetArrayElementType();
+    bool is_primitive = !memory::IsReferenceType(arr_type);
+    *load_obj = (!is_primitive) && (value != 0);
+
     return value;
 }
 
@@ -37,7 +44,20 @@ ALWAYS_INLINE void HandleStoreToArray(int64_t array_ptr, int64_t array_idx, int6
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
     assert(array != nullptr);
-    printf("array_ptr = %p, idx = %ld, src_reg_value = %ld\n", (void *)array_ptr, array_idx, src_reg_value);
+
+    auto *gc = runtime::Runtime::GetInstance()->GetGC();
+    auto arr_type = array->GetClassWord()->GetArrayElementType();
+    auto arr_mark_word = array->GetMarkWord();
+
+    if (memory::IsReferenceType(arr_type) && src_reg_value != 0) {
+        auto *obj_ptr = reinterpret_cast<ObjectHeader *>(src_reg_value);
+        if (obj_ptr->GetMarkWord().mark == 0 && arr_mark_word.mark == 1 && arr_mark_word.neighbour == 1) {
+            array->SetMarkWord({.mark = 1, .neighbour = 0});
+            gc->AddGreyObject(array);
+        }
+    }
+
+    // printf("array_ptr = %p, idx = %ld, src_reg_value = %ld\n", (void *)array_ptr, array_idx, src_reg_value);
     array->Set(src_reg_value, array_idx);
 }
 
@@ -54,7 +74,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
         runtime->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
 
     if (UNLIKELY(class_description == nullptr)) {
-        printf("HandleCreateStringObject::ClassDescription for string should be initialized due Runtime creation\n");
+        // printf("HandleCreateStringObject::ClassDescription for string should be initialized due Runtime creation\n");
         UNREACHABLE();
     }
     assert(class_description->IsStringObject());
@@ -62,7 +82,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
     // string->size + 1 because of \0 at the end of c_string
     auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->c_str()), string->size() + 1);
     if (UNLIKELY(string_obj == nullptr)) {
-        printf("HandleCreateStringObject:: Error when creating object for string \"%s\"\n", string->c_str());
+        // printf("HandleCreateStringObject:: Error when creating object for string \"%s\"\n", string->c_str());
         UNREACHABLE();
     }
 
@@ -74,7 +94,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
 ALWAYS_INLINE void HandlePrintString(int64_t string_ptr)
 {
     auto *string = reinterpret_cast<types::String *>(string_ptr);
-    printf("Print_str = %s\n", string->GetData());
+    // printf("Print_str = %s\n", string->GetData());
 }
 
 ALWAYS_INLINE int64_t HandleStringConcatenation(int64_t lhs_string, int64_t rhs_string)
@@ -113,30 +133,39 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
 }
 
 // reg_idx -- register in which object field will be set after getting from object
-ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
+ALWAYS_INLINE int64_t HandleObjGetField(int16_t field_idx, int64_t obj_ptr, bool *load_obj)
 {
-    auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
+    auto *cls = reinterpret_cast<types::Class *>(obj_ptr);
     assert(cls != nullptr);
 
     // int64_t because all existing field types take up 8 bytes
     int64_t raw_field = cls->GetField(static_cast<size_t>(field_idx));
-    bool is_primitive = cls->FieldIsPrimitive(static_cast<size_t>(field_idx));
+    bool is_primitive = cls->IsFieldPrimitive(static_cast<size_t>(field_idx));
+    *load_obj = (!is_primitive) && (raw_field != 0);
 
-    frame->GetReg(reg_idx)->SetInt64(raw_field);
-
-    return !is_primitive;
+    return raw_field;
 }
 
-// reg_idx -- register from which value will be set to field_idx
-ALWAYS_INLINE void HandleObjSetField(Frame *frame, int16_t field_idx, byte_t reg_idx, byte_t obj_ptr_reg)
+// reg -- register value which will be set to field_idx
+ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t obj_ptr)
 {
-    auto *cls = reinterpret_cast<types::Class *>(frame->GetReg(obj_ptr_reg)->GetRaw());
+    auto *cls = reinterpret_cast<types::Class *>(obj_ptr);
     assert(cls != nullptr);
 
+    auto *gc = runtime::Runtime::GetInstance()->GetGC();
+    auto field_type = cls->GetClassWord()->GetField(field_idx).GetType();
+    auto cls_mark_word = cls->GetMarkWord();
+
+    if (memory::IsReferenceType(field_type) && reg != 0) {
+        auto *obj_ptr = reinterpret_cast<ObjectHeader *>(reg);
+        if (obj_ptr->GetMarkWord().mark == 0 && cls_mark_word.mark == 1 && cls_mark_word.neighbour == 1) {
+            cls->SetMarkWord({.mark = 1, .neighbour = 0});
+            gc->AddGreyObject(cls);
+        }
+    }
+
     // printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", cls, field_idx, field_type);
-    // int64_t because all existing field types take up 8 bytes
-    int64_t data = frame->GetReg(reg_idx)->GetInt64();
-    cls->SetField(static_cast<size_t>(field_idx), data);
+    cls->SetField(static_cast<size_t>(field_idx), reg);
 }
 
 } // namespace evm::runtime

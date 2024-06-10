@@ -25,6 +25,8 @@ public:
     const std::vector<ObjectHeader *> &GetObjectsList() const;
 
     void *AllocateObject(size_t size);
+    void DeallocateObject(void *obj_ptr);
+
     void *AllocateInternalObject(size_t size);
 
     // TODO: implement AllocateFrame function

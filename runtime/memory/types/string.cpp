@@ -67,8 +67,8 @@ String *String::ConcatStrings(String *lhs_string, String *rhs_string)
 
     auto *concat_string_obj = String::Create(concat_data, concat_length);
     if (UNLIKELY(concat_string_obj == nullptr)) {
-        printf("[%s] Can not create concat string from \"%s\" and \"%s\"\n", __func__, lhs_string->GetData(),
-               rhs_string->GetData());
+        // printf("[%s] Can not create concat string from \"%s\" and \"%s\"\n", __func__, lhs_string->GetData(),
+        //        rhs_string->GetData());
         UNREACHABLE();
     }
 
