@@ -25,11 +25,18 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
     return reinterpret_cast<int64_t>(array_obj);
 }
 
-ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx)
+ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx, bool *load_obj)
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);
     int64_t value = 0;
     array->Get(&value, idx);
+
+    if (memory::IsReferenceType(array->GetClassWord()->GetArrayElementType()) && value != 0) {
+        *load_obj = true;
+    } else {
+        *load_obj = false;
+    }
+
     return value;
 }
 
@@ -124,7 +131,7 @@ ALWAYS_INLINE bool HandleObjGetField(Frame *frame, int16_t field_idx, byte_t reg
 
     frame->GetReg(reg_idx)->SetInt64(raw_field);
 
-    return !is_primitive;
+    return (!is_primitive) && (raw_field != 0);
 }
 
 // reg_idx -- register from which value will be set to field_idx

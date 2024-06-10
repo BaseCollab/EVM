@@ -130,10 +130,12 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
 
     #define DEFINE_INSTR(instr, opcode, interpret)    \
     instr:                                            \
+    {                                                 \
         PRINT_DEBUG(instr);                           \
         interpret;                                    \
         CHECK_GC_INVOKE();                            \
-        DISPATCH();
+        DISPATCH();                                   \
+    }
 
     #include "isa/isa.def"
 

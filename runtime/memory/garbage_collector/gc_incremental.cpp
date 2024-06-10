@@ -84,7 +84,7 @@ void GarbageCollectorIncremental::VisitNeighbours(ObjectHeader *obj)
                     }
 
                     MarkWord mark_word = obj_ptr->GetMarkWord();
-                    if (mark_word.mark == 0) { // white object
+                    if (mark_word.mark == 0) {             // white object
                         obj_ptr->SetMarkWord({.mark = 1}); // make object grey
                         grey_objects_.push(obj_ptr);
                     }
@@ -107,7 +107,7 @@ void GarbageCollectorIncremental::VisitNeighbours(ObjectHeader *obj)
 
                     ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(obj_ptr_val);
                     MarkWord mark_word = obj_ptr->GetMarkWord();
-                    if (mark_word.mark == 0) { // white object
+                    if (mark_word.mark == 0) {             // white object
                         obj_ptr->SetMarkWord({.mark = 1}); // make object grey
                         grey_objects_.push(obj_ptr);
                     }

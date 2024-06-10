@@ -409,8 +409,6 @@ DEFINE_INSTR
 (
     /// newarr rd, type, size
     /// pseudo: new type(size)
-    /// TODO: Add object/str/array types additionally to primitive ones
-    /// TODO: refactore implementation
     NEWARR, 0x28,
     {
         RD_I_ASSIGN(HandleCreateArrayObject(GET_ARRAY_TYPE(), IMM_I32()));
@@ -424,11 +422,11 @@ DEFINE_INSTR
     /// larr rd, rs1(ptr), rs2(idx)
     /// pseudo: rd = ptr[idx]
     /// Load element from array to register
-    /// TODO: refactore implementation
     LARR, 0x29,
     {
-        RD_I_ASSIGN(HandleLoadFromArray(RS1_I(), RS2_I()));
-        MARK_RD_AS_ROOT(false); // TODO: change IsElementObj() if enable recursive object allocation
+        bool is_arr_el_obj = false;
+        RD_I_ASSIGN(HandleLoadFromArray(RS1_I(), RS2_I(), &is_arr_el_obj));
+        MARK_RD_AS_ROOT(is_arr_el_obj);
         PC_ADD(0x4);// 0x4 bytes per instruction, not branch instruction
     }
 )
@@ -439,7 +437,6 @@ DEFINE_INSTR
     /// val = registers[src_reg_idx]
     /// pseudo: ptr[idx] = val
     /// Store element from register to array
-    /// TODO: refactore implementation
     STARR, 0x2a,
     {
         HandleStoreToArray(RS1_I(), RS2_I(), RS3_I());
