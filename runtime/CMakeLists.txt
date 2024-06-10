@@ -9,6 +9,7 @@ set(SOURCES
     memory/allocator/bump_allocator.cpp
     memory/allocator/freelist_allocator.cpp
     memory/garbage_collector/gc_stw.cpp
+    memory/garbage_collector/gc_incremental.cpp
     memory/types/array.cpp
     memory/types/string.cpp
     memory/types/class.cpp

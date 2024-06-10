@@ -67,12 +67,6 @@ void GarbageCollectorSTW::Sweep()
     return;
 }
 
-void GarbageCollectorSTW::CleanMemory()
-{
-    Mark();
-    Sweep();
-}
-
 void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
 {
     auto mark_word = obj->GetMarkWord();
@@ -194,6 +188,12 @@ void GarbageCollectorSTW::UpdateState()
         instrs_counter_ = 0;
         CleanMemory();
     }
+}
+
+void GarbageCollectorSTW::CleanMemory()
+{
+    Mark();
+    Sweep();
 }
 
 } // namespace evm::runtime
