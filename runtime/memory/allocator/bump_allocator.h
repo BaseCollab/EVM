@@ -32,7 +32,10 @@ public:
     NO_MOVE_SEMANTIC(BumpAllocator);
 
     explicit BumpAllocator(uint8_t *heap, size_t heap_capacity)
-        : heap_(heap), next_alloc_(heap_), heap_capacity_(heap_capacity)
+        : AllocatorBase(AllocatorBase::AllocatorType::BUMP),
+          heap_(heap),
+          next_alloc_(heap_),
+          heap_capacity_(heap_capacity)
     {
     }
     ~BumpAllocator() override = default;

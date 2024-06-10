@@ -7,6 +7,7 @@ add_compile_options(-Wno-invalid-offsetof)
 set(SOURCES
     interpreter/interpreter.cpp
     memory/allocator/bump_allocator.cpp
+    memory/allocator/freelist_allocator.cpp
     memory/garbage_collector/gc_stw.cpp
     memory/types/array.cpp
     memory/types/string.cpp
