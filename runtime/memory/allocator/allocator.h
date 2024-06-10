@@ -13,13 +13,14 @@ public:
     enum class AllocatorType {
         INVALID = -1,
         BUMP = 0,
+        FREELIST = 1,
     };
 
 public:
     NO_COPY_SEMANTIC(AllocatorBase);
     NO_MOVE_SEMANTIC(AllocatorBase);
 
-    explicit AllocatorBase() = default;
+    explicit AllocatorBase(AllocatorType allocator_type) : allocator_type_(allocator_type) {};
     virtual ~AllocatorBase() = default;
 
     AllocatorType GetAllocatorType() const
@@ -32,7 +33,7 @@ public:
     virtual size_t GetHeapCapacity() const = 0;
 
 private:
-    AllocatorType allocator_type_ {AllocatorType::BUMP};
+    AllocatorType allocator_type_ {AllocatorType::INVALID};
 };
 
 } // namespace evm::runtime

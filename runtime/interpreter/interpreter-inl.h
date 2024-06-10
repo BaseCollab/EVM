@@ -59,7 +59,8 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
     }
     assert(class_description->IsStringObject());
 
-    auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->data()), string->size());
+    // string->size + 1 because of \0 at the end of c_string
+    auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->c_str()), string->size() + 1);
     if (UNLIKELY(string_obj == nullptr)) {
         printf("HandleCreateStringObject:: Error when creating object for string \"%s\"\n", string->c_str());
         UNREACHABLE();

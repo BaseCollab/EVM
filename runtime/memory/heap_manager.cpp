@@ -1,5 +1,5 @@
 #include "runtime/memory/heap_manager.h"
-#include "runtime/memory/allocator/bump_allocator.h"
+#include "runtime/memory/allocator/freelist_allocator.h"
 
 #include <sys/mman.h>
 #include <iostream>
@@ -15,7 +15,7 @@ HeapManager::HeapManager(size_t size) : heap_size_(size)
         return;
     }
 
-    object_allocator_ = std::make_unique<BumpAllocator>(heap_, heap_size_);
+    object_allocator_ = std::make_unique<FreelistAllocator>(heap_, heap_size_);
 }
 
 HeapManager::~HeapManager()
