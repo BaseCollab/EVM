@@ -2,10 +2,10 @@
 #define EVM_MEMORY_TYPE_H
 
 #include "common/macros.h"
-#include "common/constants.h"
 
 #include <iostream>
 #include <string>
+#include <cstdint>
 
 namespace evm::memory {
 

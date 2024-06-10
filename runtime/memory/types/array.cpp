@@ -1,7 +1,6 @@
 #include "runtime/memory/types/array.h"
 #include "runtime/memory/type.h"
 #include "runtime/runtime.h"
-#include "runtime/memory/allocator/bump_allocator.h"
 
 #include <cassert>
 #include <iostream>
@@ -76,7 +75,7 @@ void Array::Set(int64_t value, size_t idx)
         UNREACHABLE();
     }
 
-    size_t elem_size = GetSizeOfType(array_type);
+    size_t elem_size = memory::GetSizeOfType(array_type);
 
     uint8_t *data = reinterpret_cast<uint8_t *>(this) + Array::GetDataOffset();
 
@@ -93,7 +92,7 @@ void Array::Get(int64_t *value, size_t idx) const
         UNREACHABLE();
     }
 
-    size_t elem_size = GetSizeOfType(array_type);
+    size_t elem_size = memory::GetSizeOfType(array_type);
     const uint8_t *data = reinterpret_cast<const uint8_t *>(this) + Array::GetDataOffset();
 
     std::memcpy(value, data + idx * elem_size, elem_size * sizeof(uint8_t));

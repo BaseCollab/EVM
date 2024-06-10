@@ -5,7 +5,6 @@
 #include "utils/bitops.h"
 
 #include <cstddef>
-#include <cstdint>
 
 namespace evm {
 

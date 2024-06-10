@@ -2,7 +2,6 @@
 #define EVM_ASSEMBLER_ASM_TO_BYTE_ASM_TO_BYTE_H
 
 #include "common/macros.h"
-#include "common/config.h"
 #include "file_format/file.h"
 #include "line.h"
 

@@ -2,7 +2,7 @@
 #include "runtime/memory/field.h"
 #include "runtime/memory/class_manager.h"
 #include "runtime/memory/class_description.h"
-#include "file_format/file.h"
+#include "file_format/class_section.h"
 
 #include <cassert>
 

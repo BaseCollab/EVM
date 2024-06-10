@@ -1,13 +1,10 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <cstring>
-#include <vector>
 #include <cstddef>
 #include <cmath>
 #include <cstring>
 
-#include "isa/macros.h"
-#include "isa/opcodes.h"
 #include "runtime/runtime.h"
 
 #include "assembler/asm2byte/asm2byte.h"

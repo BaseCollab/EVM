@@ -2,8 +2,6 @@
 #define EVM_ASSEMBLER_ASM_TO_BYTE_LINE_H
 
 #include "common/macros.h"
-#include "common/constants.h"
-#include "common/macros.h"
 
 #include <vector>
 #include <string>

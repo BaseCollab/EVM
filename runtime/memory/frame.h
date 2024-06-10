@@ -2,7 +2,6 @@
 #define EVM_MEMORY_FRAME_H
 
 #include "common/macros.h"
-#include "common/constants.h"
 #include "runtime/memory/reg.h"
 
 #include <array>
@@ -18,6 +17,9 @@ public:
     static constexpr size_t N_FRAME_LOCAL_REGS_DEFAULT = N_FRAME_REGS_DEFAULT - N_PASSED_ARGS_DEFAULT;
 
 public:
+    DEFAULT_MOVE_SEMANTIC(Frame);
+    NO_COPY_SEMANTIC(Frame);
+
     Frame(size_t restore_pc, const std::array<Register, N_PASSED_ARGS_DEFAULT> &passed_args);
 
     ~Frame() = default;

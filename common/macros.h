@@ -1,7 +1,6 @@
 #ifndef EVM_COMMON_MACROS_H
 #define EVM_COMMON_MACROS_H
 
-#include <cstdint>
 #include <cassert>
 
 #define NO_COPY_CTOR(TypeName) TypeName(const TypeName &) = delete

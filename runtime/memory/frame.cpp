@@ -1,5 +1,3 @@
-#include "common/macros.h"
-#include "common/constants.h"
 #include "frame.h"
 
 #include <cassert>
