@@ -32,7 +32,7 @@ public:
     ~FreelistAllocator() override = default;
 
     void *Alloc(size_t size) override;
-    void Dealloc(void *ptr_to_free);
+    void Dealloc(void *ptr_to_free) override;
 
     size_t GetHeapCapacity() const override
     {

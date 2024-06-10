@@ -124,6 +124,8 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define CHECK_GC_INVOKE() \
         Runtime::GetInstance()->GetGC()->UpdateState();
 
+    // #define CHECK_GC_INVOKE()
+
     #define DISPATCH() \
         goto *dispatch_table[static_cast<byte_t>(bytecode[(pc_)])];
 

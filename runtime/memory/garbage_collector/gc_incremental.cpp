@@ -11,21 +11,22 @@
 
 namespace evm::runtime {
 
-void GarbageCollectorIncremental::MarkRoots()
+void GarbageCollectorIncremental::MarkRootsOfFrame(const Frame &frame)
 {
-    auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
+    auto &frame_reg_bitset = frame.GetObjectBitMask();
 
-    const std::vector<Frame> &frames = interpreter->GetFramesStack();
-    for (size_t i = 0, size = frames.size(); i < size; ++i) {
-        auto &frame_reg_bitset = frames[i].GetObjectBitMask();
-        for (size_t reg = 0; reg < frame_reg_bitset.size(); ++reg) {
-            if (frame_reg_bitset.test(reg) == true) {
-                ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(frames[i].GetReg(reg)->GetRaw());
-                obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // mark object as grey
-                grey_objects_.push(reinterpret_cast<ObjectHeader *>(obj_ptr));
-            }
+    for (size_t reg = 0; reg < frame_reg_bitset.size(); ++reg) {
+        if (frame_reg_bitset.test(reg) == true) {
+            ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(frame.GetReg(reg)->GetRaw());
+            obj_ptr->SetMarkWord({.mark = 1, .neighbour = 0}); // mark object as grey
+            grey_objects_.push(reinterpret_cast<ObjectHeader *>(obj_ptr));
         }
     }
+}
+
+void GarbageCollectorIncremental::MarkRootAccum()
+{
+    auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
 
     if (interpreter->IsAccumMarked()) {
         ObjectHeader *obj_ptr = reinterpret_cast<ObjectHeader *>(interpreter->GetAccum().GetRaw());
@@ -34,11 +35,29 @@ void GarbageCollectorIncremental::MarkRoots()
     }
 }
 
+void GarbageCollectorIncremental::MarkRoots()
+{
+    auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
+
+    const std::vector<Frame> &frames = interpreter->GetFramesStack();
+    for (size_t i = 0, size = frames.size(); i < size; ++i) {
+        MarkRootsOfFrame(frames[i]);
+    }
+
+    MarkRootAccum();
+}
+
 void GarbageCollectorIncremental::MarkStep()
 {
     if (n_completed_marks_ == 0) { // no grey_objects in queue -> store roots to queue
         MarkRoots();
     } else {
+        auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
+        const std::vector<Frame> &frames = interpreter->GetFramesStack();
+
+        MarkRootsOfFrame(frames[frames.size() - 1]); // find new root objects in case of new allocations
+        MarkRootAccum(); // check for new allocated object in accumulator
+
         for (size_t i = 0; i < N_HANDLING_GREY_OBJECTS; ++i) {
             if (grey_objects_.empty()) {
                 CleanMemory();
@@ -141,8 +160,7 @@ void GarbageCollectorIncremental::Sweep()
         if (mark_word.mark == 1) {
             obj->SetMarkWord({.mark = 0});
         } else {
-            continue;
-            // deallocate this obj (need new allocator)
+            heap_manager->DeallocateObject(obj);
         }
     }
 
@@ -184,6 +202,7 @@ void GarbageCollectorIncremental::UpdateState()
 
 void GarbageCollectorIncremental::CleanMemory()
 {
+    std::cout << "CLEAN MEM\n";
     if (!grey_objects_.empty()) { // need to sweep, but grey objects still exist
         MarkFinalize();
     }

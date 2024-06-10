@@ -3,6 +3,7 @@
 
 #include "runtime/memory/garbage_collector/gc_base.h"
 #include "runtime/memory/object_header.h"
+#include "runtime/memory/frame.h"
 
 #include <fstream>
 #include <queue>
@@ -32,7 +33,10 @@ public:
     void AddGreyObject(ObjectHeader *obj);
 
 private:
+    void MarkRootAccum();
+    void MarkRootsOfFrame(const Frame &frame);
     void MarkRoots();
+
     void MarkStep();
     void MarkFinalize();
     void Sweep();

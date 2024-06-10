@@ -34,7 +34,7 @@ void Class::InitFields(file_format::Class &asm_class)
 
             SetField(idx, bitops::BitCast<int64_t>(class_obj));
         } else if (current_asm_field.IsArrayObject()) {
-            printf("Array_size = %ld\n", current_asm_field.GetArraySize());
+            // printf("Array_size = %ld\n", current_asm_field.GetArraySize());
 
             auto element_type = current_asm_field.GetArrayElementType();
 
@@ -71,7 +71,7 @@ int64_t Class::GetField(size_t field_idx)
 
 void Class::SetField(size_t field_idx, int64_t data)
 {
-    printf("[Class::SetField] field_idx = %ld\n", field_idx);
+    // printf("[Class::SetField] field_idx = %ld\n", field_idx);
     auto offset = GetClassWord()->GetField(field_idx).GetOffset();
     uint8_t *field_ptr = reinterpret_cast<uint8_t *>(this) + GetDataOffset() + offset;
 

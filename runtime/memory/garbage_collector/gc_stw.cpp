@@ -57,8 +57,7 @@ void GarbageCollectorSTW::Sweep()
         if (mark_word.mark == 1) {
             obj->SetMarkWord({.mark = 0});
         } else {
-            continue;
-            // deallocate this obj (need new allocator)
+            heap_manager->DeallocateObject(obj);
         }
     }
 
