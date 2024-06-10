@@ -56,7 +56,7 @@ void GarbageCollectorIncremental::MarkStep()
         const std::vector<Frame> &frames = interpreter->GetFramesStack();
 
         MarkRootsOfFrame(frames[frames.size() - 1]); // find new root objects in case of new allocations
-        MarkRootAccum(); // check for new allocated object in accumulator
+        MarkRootAccum();                             // check for new allocated object in accumulator
 
         for (size_t i = 0; i < N_HANDLING_GREY_OBJECTS; ++i) {
             if (grey_objects_.empty()) {
