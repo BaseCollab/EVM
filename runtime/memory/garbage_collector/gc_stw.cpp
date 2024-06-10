@@ -107,7 +107,9 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
                 const Field &field = class_word->GetField(i);
                 if (!field.IsPrimitive()) {
                     reg_t obj_ptr = cls->GetField(i);
-                    MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+                    if (obj_ptr != 0) {
+                        MarkObjectRecursive(reinterpret_cast<ObjectHeader *>(obj_ptr));
+                    }
 
 #ifdef GC_STW_DEBUG_ON
                     dump_file_ << "\tel_" << long(reinterpret_cast<uint8_t *>(cls) + field.GetOffset()) << " -> el_"
