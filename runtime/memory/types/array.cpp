@@ -26,6 +26,11 @@ Array *Array::Create(memory::Type array_type, size_t length)
 
     auto classDescrType = GetDefaultClassDescrFromType(array_type);
     auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
+
+    if (classDescrType == ClassManager::DefaultClassDescr::OBJECT_ARRAY) {
+        class_description->SetArrayElementType(array_type);
+    }
+
     if (UNLIKELY(class_description == nullptr)) {
         PrintErr("ClassDescription for array should be initialized due Runtime creation");
         UNREACHABLE();
@@ -52,9 +57,16 @@ ClassManager::DefaultClassDescr Array::GetDefaultClassDescrFromType(memory::Type
         case memory::Type::ARRAY_OBJECT:
             return ClassManager::DefaultClassDescr::OBJECT_ARRAY;
 
-        default:
+        case memory::Type::INVALID:
+            PrintErr("Invalid array type");
             UNREACHABLE();
     }
+
+    if (static_cast<int64_t>(array_type) >= 0) {
+        return ClassManager::DefaultClassDescr::OBJECT_ARRAY;
+    }
+
+    return ClassManager::DefaultClassDescr::INVALID;
 }
 
 void Array::ValidateAddressingInArray(size_t idx) const
