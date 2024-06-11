@@ -6,7 +6,6 @@ namespace evm {
 
 int Main(int argc, char *argv[])
 {
-    // TODO: improve error handling
     if (argc != 2) {
         PrintErr("Input file required");
         return 1;
