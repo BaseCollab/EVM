@@ -29,7 +29,7 @@ public:
     }
 
     virtual void *Alloc(size_t size) = 0;
-    virtual void Dealloc(void *ptr) {}
+    virtual void Dealloc([[maybe_unused]] void *ptr) {}
 
     virtual size_t GetHeapCapacity() const = 0;
 
