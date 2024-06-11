@@ -19,7 +19,8 @@ void Class::InitFields(file_format::Class &asm_class)
         auto &current_asm_field = (*asm_fields)[idx];
         if (current_asm_field.IsClassObject()) {
             auto &field_asm_class = file->GetClassFromClassSection(current_asm_field.GetClassRefIdx());
-            PrintLog("field ", current_asm_field.GetName().c_str(), ", name of class ", field_asm_class.GetName().c_str());
+            PrintLog("field ", current_asm_field.GetName().c_str(), ", name of class ",
+                     field_asm_class.GetName().c_str());
 
             auto *class_description = class_manager->GetClassDescriptionFromCache(field_asm_class.GetName());
             if (class_description == nullptr) {
