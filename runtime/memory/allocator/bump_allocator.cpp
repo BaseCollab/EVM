@@ -1,6 +1,6 @@
+#include "common/logs.h"
 #include "bump_allocator.h"
 
-#include <iostream>
 #include <cstddef>
 
 namespace evm::runtime {
@@ -9,7 +9,7 @@ namespace evm::runtime {
 void *BumpAllocator::Alloc(size_t size)
 {
     if (size > heap_capacity_ - busy_size_) {
-        std::cerr << "BumpAllocator::Alloc failed, size is too big" << std::endl;
+        PrintErr("BumpAllocator::Alloc failed, size is too big");
         return nullptr;
     }
 

@@ -1,3 +1,4 @@
+#include "common/logs.h"
 #include "common/opcode_to_str.h"
 #include "common/str_to_opcode.h"
 #include "common/utils/string_operations.h"
@@ -12,7 +13,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 
 namespace evm::asm2byte {
 
@@ -21,7 +21,7 @@ bool AsmToByte::ParseAsm(file_format::File *file_arch)
     PrepareLinesFromBuffer();
 
     if (!GenRawInstructions(file_arch)) {
-        std::cerr << "Error in " << __func__ << std::endl;
+        PrintErr("Something went wrong");
         return false;
     }
 
@@ -46,13 +46,13 @@ bool AsmToByte::ParseAsmString(const std::string &asm_string, file_format::File 
 bool AsmToByte::ReadAsmFile(const char *filename)
 {
     if (filename == nullptr) {
-        std::cerr << "Filename is nullptr" << std::endl;
+        PrintErr("Filename argument is nullptr");
         return false;
     }
 
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
     if (!file) {
-        std::cerr << "Error when opening file " << filename << std::endl;
+        PrintErr("Filename ", filename, " didn't open due to some error");
         return false;
     }
 
@@ -62,7 +62,7 @@ bool AsmToByte::ReadAsmFile(const char *filename)
     file_buffer_.resize(filesize);
 
     if (!file.read(file_buffer_.data(), filesize)) {
-        std::cerr << "Can not read file in buffer" << std::endl;
+        PrintErr("Cannot read file into buffer");
         return false;
     }
 
@@ -107,7 +107,7 @@ void AsmToByte::PrepareLinesFromBuffer()
                 else
                     in_string = false;
             } else if (std::isprint(file_buffer_[i]) == 0) {
-                std::cerr << "Invalid symbol is assembler file: " << file_buffer_[i] << std::endl;
+                PrintErr("Invalid symbol is assembler file: ", file_buffer_[i]);
             }
         }
     } while (++i < file_buffer_.size());
@@ -157,7 +157,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
                 class_idx = class_section->GetIdxOfInstance(line_args[1]);
                 if (class_idx == -1) {
-                    std::cerr << "Usage of undefined class \"" << line_args[1] << "\"" << std::endl;
+                    PrintErr("Usage of undefined class \"", line_args[1], "\"");
                     return false;
                 }
             }
@@ -174,14 +174,14 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                     array_size = std::stol(line_args[idx_of_name].substr(
                         size_occurance_start + 1, size_occurance_end - size_occurance_start - 1));
                     if (array_size <= 0) {
-                        std::cerr << "Invalid size of array \"" << line_args[idx_of_name] << "\"" << std::endl;
+                        PrintErr("Invalid size of array \"", line_args[idx_of_name], "\"");
                         return false;
                     }
 
                     class_field.SetName(line_args[idx_of_name].substr(0, size_occurance_start));
                     type = file_format::ClassField::Type::ARRAY_OBJECT;
                 } else {
-                    std::cerr << "Invalid array declaration of class \"" << line_args[1] << "\"" << std::endl;
+                    PrintErr("Invalid array declaration of class \"", line_args[1], "\"");
                     return false;
                 }
             }
@@ -198,7 +198,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
         // If we here, only assembler instruction is assumed to be in a line
         Opcode opcode = common::StringToOpcode(line_args[0]);
         if (opcode == Opcode::INVALID) {
-            std::cerr << "Invalid instruction type" << std::endl;
+            PrintErr("Invalid instruction type");
             return false;
         }
 
@@ -305,8 +305,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 if (common::IsNumber<int32_t>(line_args[2])) {
                     immediate = std::stol(line_args[2]);
                 } else if (common::IsNumber<double>(line_args[2])) {
-                    std::cerr << "Error immediate in jump arg " << std::stol(line_args[2]) << "; Arg should be integer"
-                              << std::endl;
+                    PrintErr("Error immediate in jump arg ", std::stol(line_args[2]), "; Arg should be integer");
                     return false;
                 } else {
                     code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
@@ -341,8 +340,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 if (common::IsNumber<int32_t>(line_args[1])) {
                     immediate = std::stol(line_args[1]);
                 } else if (common::IsNumber<double>(line_args[1])) {
-                    std::cerr << "Error immediate in jump arg " << std::stol(line_args[1]) << "; Arg should be integer"
-                              << std::endl;
+                    PrintErr("Error immediate in jump arg ", std::stol(line_args[1]), "; Arg should be integer");
                     return false;
                 } else {
                     code_section->AddInstrToResolve(line_args[1], instr, file_format::CodeSection::ResolutionReason::LABEL_REF);
@@ -393,8 +391,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 if (common::IsNumber<int32_t>(line_args[3])) {
                     arr_size = std::stol(line_args[3]);
                 } else {
-                    std::cerr << "Error immediate in newarr arg " << std::stol(line_args[1]) << "; Arg should be integer"
-                              << std::endl;
+                    PrintErr("Error immediate in newarr arg ", std::stol(line_args[1]), "; Arg should be integer");
                     return false;
                 }
 
@@ -431,7 +428,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             }
 
             default:
-                std::cerr << __func__ << ": cannot handle instruction " << line_args[0] << std::endl;
+                PrintErr("Cannot handle instruction ", line_args[0]);
                 return false;
         }
         // clang-format on
@@ -446,7 +443,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 int AsmToByte::GetRegisterIdxFromString(const std::string &reg_name)
 {
     if (reg_name.front() != 'x') {
-        std::cerr << "Invalid register prefix: " << reg_name << "; Only x prefix is support" << std::endl;
+        PrintErr("Invalid register prefix: ", reg_name, "; Only x prefix is support");
         return -1;
     }
 
@@ -456,7 +453,7 @@ int AsmToByte::GetRegisterIdxFromString(const std::string &reg_name)
     }
 
     if (it != reg_name.end()) {
-        std::cerr << "Invalid register name: " << reg_name << "; Only <x number> format is supported" << std::endl;
+        PrintErr("Invalid register name: ", reg_name, "; Only <x number> format is supported");
         return false;
     }
 

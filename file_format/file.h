@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__FILE_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__FILE_H
 
+#include "common/logs.h"
 #include "common/macros.h"
 #include "common/constants.h"
 #include "common/emittable.h"
@@ -48,7 +49,7 @@ public:
         string_pool->SetOffset(header_.GetDataOffset());
 
         if (string_pool->ResolveInstrs() == false) {
-            std::cerr << "Couldn't resolve all strings pool references" << std::endl;
+            PrintErr("Couldn't resolve all strings pool references");
             return false;
         }
 
@@ -57,7 +58,7 @@ public:
 
         code_section_.SetOffset(class_section->GetOffset() + class_section->GetSize());
         if (code_section_.ResolveInstrs(class_section) == false) {
-            std::cerr << "Couldn't resolve some dependencies in code section" << std::endl;
+            PrintErr("Couldn't resolve some dependencies in code section");
             return false;
         }
 

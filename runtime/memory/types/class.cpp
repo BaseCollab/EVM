@@ -8,7 +8,7 @@ namespace evm::runtime::types {
 
 void Class::InitFields(file_format::Class &asm_class)
 {
-    // printf("Init fields start, class = %s\n", asm_class.GetName().c_str());
+    PrintLog("Init fields start, class = ", asm_class.GetName().c_str());
     auto *heap_manager = Runtime::GetInstance()->GetHeapManager();
     auto *class_manager = Runtime::GetInstance()->GetClassManager();
     auto *file = Runtime::GetInstance()->GetExecutableFile();
@@ -19,8 +19,8 @@ void Class::InitFields(file_format::Class &asm_class)
         auto &current_asm_field = (*asm_fields)[idx];
         if (current_asm_field.IsClassObject()) {
             auto &field_asm_class = file->GetClassFromClassSection(current_asm_field.GetClassRefIdx());
-            // printf("field %s, name of class %s\n", current_asm_field.GetName().c_str(),
-            //        field_asm_class.GetName().c_str());
+            PrintLog("field ", current_asm_field.GetName().c_str(), ", name of class ",
+                     field_asm_class.GetName().c_str());
 
             auto *class_description = class_manager->GetClassDescriptionFromCache(field_asm_class.GetName());
             if (class_description == nullptr) {
@@ -34,7 +34,7 @@ void Class::InitFields(file_format::Class &asm_class)
 
             SetField(idx, bitops::BitCast<int64_t>(class_obj));
         } else if (current_asm_field.IsArrayObject()) {
-            // printf("Array_size = %ld\n", current_asm_field.GetArraySize());
+            PrintLog("Array_size = ", current_asm_field.GetArraySize());
 
             auto element_type = current_asm_field.GetArrayElementType();
 
@@ -48,7 +48,8 @@ void Class::InitFields(file_format::Class &asm_class)
             SetField(idx, bitops::BitCast<int64_t>(array_obj));
         }
     }
-    // printf("Init fields end, class = %s\n", asm_class.GetName().c_str());
+
+    PrintLog("Init fields end, class = ", asm_class.GetName().c_str());
 }
 
 bool Class::IsFieldPrimitive(size_t field_idx)
@@ -71,7 +72,7 @@ int64_t Class::GetField(size_t field_idx)
 
 void Class::SetField(size_t field_idx, int64_t data)
 {
-    // printf("[Class::SetField] field_idx = %ld\n", field_idx);
+    PrintLog("field_idx = ", field_idx);
     auto offset = GetClassWord()->GetField(field_idx).GetOffset();
     uint8_t *field_ptr = reinterpret_cast<uint8_t *>(this) + GetDataOffset() + offset;
 

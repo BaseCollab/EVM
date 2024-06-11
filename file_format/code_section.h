@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 
+#include "common/logs.h"
 #include "common/config.h"
 #include "common/utils/bitops.h"
 #include "common/macros.h"
@@ -51,8 +52,8 @@ public:
     Instruction *AddInstr(const std::string &name, const Opcode opcode)
     {
         if (need_to_validate_last_instr_ == true) {
-            std::cerr << __func__ << ": cannot add instruction [" << name << ", opcode=" << (int)opcode
-                      << "] without validating previous instruction" << std::endl;
+            PrintErr("Cannot add instruction [", name, ", opcode=", (int)opcode,
+                     "] without validating previous instruction");
             return nullptr;
         }
 
@@ -97,11 +98,11 @@ public:
         bool resolved_class_fields = (ResolveClassFieldsRefs(class_section) == 0);
 
         if (!resolved_labels) {
-            std::cerr << __func__ << ": couldn't resolve all labels" << std::endl;
+            PrintErr("Couldn't resolve all labels");
         } else if (!resolved_classes) {
-            std::cerr << __func__ << ": couldn't resolve all class names" << std::endl;
+            PrintErr("Couldn't resolve all class names");
         } else if (!resolved_class_fields) {
-            std::cerr << __func__ << ": couldn't resolve all class fields" << std::endl;
+            PrintErr("Couldn't resolve all class fields");
         }
 
         return resolved_labels && resolved_classes && resolved_class_fields;
@@ -169,8 +170,8 @@ private:
 
                     if (class_num >= 0) {
                         if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
-                            std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES
-                                      << " (access in class-section for class #" << class_num << std::endl;
+                            PrintErr("Amount of classes is more than ", MAX_SUPPORTED_CLASSES,
+                                     " (access in class-section for class #", class_num);
                             return false;
                         }
                     } else {
@@ -207,8 +208,8 @@ private:
                 n_unresolved_class_fields_offsets++;
                 continue;
             } else if (static_cast<dword_t>(class_num) & ~bitops::Ones<MAX_SUPPORTED_CLASSES_LOG2 - 1, 0>()) {
-                std::cerr << __func__ << ": amount of classes is more than " << MAX_SUPPORTED_CLASSES
-                          << " (access in class-section for class #" << class_num << std::endl;
+                PrintErr("Amount of classes is more than ", MAX_SUPPORTED_CLASSES,
+                         " (access in class-section for class #", class_num);
                 return false;
             }
 

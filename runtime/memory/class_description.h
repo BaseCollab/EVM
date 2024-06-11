@@ -68,8 +68,7 @@ public:
 
     const Field &GetField(size_t field_idx)
     {
-        // printf("[ClassDescription::GetField] fields_num = %ld, fields_ptr = %p, field_idx = %ld\n", fields_num_,
-        //        static_cast<void *>(fields_), field_idx);
+        PrintLog("fields_num = ", fields_num_, ", fields_ptr = ", (long)fields_, ", field_idx = ", field_idx);
         assert(field_idx < fields_num_);
         return fields_[field_idx];
     }

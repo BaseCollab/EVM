@@ -1,6 +1,7 @@
 #ifndef EVM_RUNTIME_INTERPRETER_INL_H
 #define EVM_RUNTIME_INTERPRETER_INL_H
 
+#include "common/logs.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/memory/types/string.h"
@@ -17,8 +18,7 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
 
     auto *array_obj = types::Array::Create(array_type, size);
     if (UNLIKELY(array_obj == nullptr)) {
-        // printf("[HandleCreateStringObject] Error when creating object for array of type \"%s\"\n",
-        //        GetStringFromType(array_type).c_str());
+        PrintErr("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
         UNREACHABLE();
     }
 
@@ -57,7 +57,7 @@ ALWAYS_INLINE void HandleStoreToArray(int64_t array_ptr, int64_t array_idx, int6
         }
     }
 
-    // printf("array_ptr = %p, idx = %ld, src_reg_value = %ld\n", (void *)array_ptr, array_idx, src_reg_value);
+    PrintLog("array_ptr = ", (void *)array_ptr, ", idx = ", array_idx, ", src_reg_value = ", src_reg_value);
     array->Set(src_reg_value, array_idx);
 }
 
@@ -74,7 +74,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
         runtime->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
 
     if (UNLIKELY(class_description == nullptr)) {
-        // printf("HandleCreateStringObject::ClassDescription for string should be initialized due Runtime creation\n");
+        PrintErr("ClassDescription for string should be initialized due Runtime creation");
         UNREACHABLE();
     }
     assert(class_description->IsStringObject());
@@ -82,7 +82,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
     // string->size + 1 because of \0 at the end of c_string
     auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->c_str()), string->size() + 1);
     if (UNLIKELY(string_obj == nullptr)) {
-        // printf("HandleCreateStringObject:: Error when creating object for string \"%s\"\n", string->c_str());
+        PrintErr("Error when creating object for string \"", string->c_str(), "\"");
         UNREACHABLE();
     }
 
@@ -94,7 +94,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
 ALWAYS_INLINE void HandlePrintString(int64_t string_ptr)
 {
     auto *string = reinterpret_cast<types::String *>(string_ptr);
-    printf("Print_str = %s\n", string->GetData());
+    printf("%s\n", string->GetData());
 }
 
 ALWAYS_INLINE int64_t HandleStringConcatenation(int64_t lhs_string, int64_t rhs_string)
@@ -128,7 +128,7 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
     class_obj->SetClassWord(class_description);
     class_obj->InitFields(asm_class);
 
-    // printf("obj_ptr = %p, class_size = %ld, \n", class_obj, class_description->GetClassSize());
+    PrintLog("obj_ptr = ", (long)class_obj, ", class_size = ", class_description->GetClassSize());
     return reinterpret_cast<int64_t>(class_obj);
 }
 
@@ -147,9 +147,9 @@ ALWAYS_INLINE int64_t HandleObjGetField(int16_t field_idx, int64_t obj_ptr, bool
 }
 
 // reg -- register value which will be set to field_idx
-ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t object_ptr)
+ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t obj_ptr_val)
 {
-    auto *cls = reinterpret_cast<types::Class *>(object_ptr);
+    auto *cls = reinterpret_cast<types::Class *>(obj_ptr_val);
     assert(cls != nullptr);
 
     auto *gc = runtime::Runtime::GetInstance()->GetGC();
@@ -164,7 +164,7 @@ ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t obj
         }
     }
 
-    // printf("obj_ptr = %p, field_idx = %d; field_type = %d\n", cls, field_idx, field_type);
+    PrintLog("obj_ptr = ", (long)cls, ", field_idx = ", field_idx, ", field_type = ", static_cast<int>(field_type));
     cls->SetField(static_cast<size_t>(field_idx), reg);
 }
 

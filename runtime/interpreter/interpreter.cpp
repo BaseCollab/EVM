@@ -7,10 +7,8 @@
 #include "file_format/file.h"
 #include "isa/macros.h"
 
-#include <iostream>
 #include <cstring>
 #include <type_traits>
-#include <cstdio>
 #include <cmath>
 
 namespace evm::runtime {

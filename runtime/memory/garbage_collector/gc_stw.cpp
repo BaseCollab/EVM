@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <bitset>
-#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -162,7 +161,7 @@ void GarbageCollectorSTW::MarkObjectRecursive(ObjectHeader *obj)
             return;
         }
         default: {
-            std::cerr << "Invalid type of object in STW-GC mark phase: something went wrong" << std::endl;
+            PrintErr("Invalid type of object in STW-GC mark phase: something went wrong");
             return;
         }
     }
