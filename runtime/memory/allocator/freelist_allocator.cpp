@@ -22,8 +22,7 @@ void *FreelistAllocator::Alloc(size_t size)
 
     // Create new node in free blocks list
     if (remainder_block_size >= sizeof(Node)) {
-        uint8_t *remainder_block_ptr =
-            reinterpret_cast<uint8_t *>(found_memory_node) + size + sizeof(AllocationHeader);
+        uint8_t *remainder_block_ptr = reinterpret_cast<uint8_t *>(found_memory_node) + size + sizeof(AllocationHeader);
         Node *remainder_block_node = reinterpret_cast<Node *>(remainder_block_ptr);
 
         remainder_block_node->block_size_ = remainder_block_size - sizeof(AllocationHeader);
