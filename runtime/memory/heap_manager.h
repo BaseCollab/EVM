@@ -4,9 +4,9 @@
 #include "runtime/memory/allocator/allocator.h"
 #include "runtime/memory/object_header.h"
 
-#include <vector>
 #include <cstddef>
 #include <memory>
+#include <unordered_set>
 
 namespace evm::runtime {
 class Frame;
@@ -22,7 +22,7 @@ public:
     explicit HeapManager(size_t heap_size);
     ~HeapManager();
 
-    const std::vector<ObjectHeader *> &GetObjectsList() const;
+    const std::unordered_set<ObjectHeader *> &GetObjectsList() const;
 
     void *AllocateObject(size_t size);
     void DeallocateObject(void *obj_ptr);
@@ -39,7 +39,7 @@ private:
     std::unique_ptr<AllocatorBase> object_allocator_;
     // TODO: create allocator for internal allocations.
 
-    std::vector<ObjectHeader *> objects_;
+    std::unordered_set<ObjectHeader *> objects_;
 };
 
 } // namespace evm::runtime

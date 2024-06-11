@@ -219,6 +219,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::SUB:
             case Opcode::MUL:
             case Opcode::DIV:
+            case Opcode::REM:
 
             case Opcode::AND:
             case Opcode::OR:

@@ -134,6 +134,7 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     instr:                                            \
     {                                                 \
         interpret;                                    \
+        PRINT_DEBUG(instr)                            \
         CHECK_GC_INVOKE();                            \
         DISPATCH();                                   \
     }

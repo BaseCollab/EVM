@@ -1,8 +1,10 @@
 #include "common/logs.h"
 #include "runtime/memory/heap_manager.h"
 #include "runtime/memory/allocator/freelist_allocator.h"
+#include "runtime/memory/object_header.h"
 
 #include <sys/mman.h>
+#include <unordered_set>
 
 namespace evm::runtime {
 
@@ -26,26 +28,30 @@ HeapManager::~HeapManager()
     }
 }
 
-const std::vector<ObjectHeader *> &HeapManager::GetObjectsList() const
+const std::unordered_set<ObjectHeader *> &HeapManager::GetObjectsList() const
 {
     return objects_;
 }
 
 void *HeapManager::AllocateObject(size_t size)
 {
-    void *alloc_obj = object_allocator_->Alloc(size);
+    auto *alloc_obj = reinterpret_cast<ObjectHeader *>(object_allocator_->Alloc(size));
     if (!alloc_obj) {
         PrintErr("Failed to allocate for size ", size);
         return nullptr;
     }
 
-    objects_.push_back(reinterpret_cast<ObjectHeader *>(alloc_obj));
+    objects_.insert({alloc_obj});
     return alloc_obj;
 }
 
 void HeapManager::DeallocateObject(void *obj_ptr)
 {
     object_allocator_->Dealloc(obj_ptr);
+    auto found_iter = objects_.find(reinterpret_cast<ObjectHeader *>(obj_ptr));
+    if (found_iter != objects_.end()) {
+        objects_.erase(found_iter);
+    }
 }
 
 void *HeapManager::AllocateInternalObject(size_t size)

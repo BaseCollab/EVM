@@ -1,5 +1,6 @@
 #include "common/logs.h"
 #include "runtime/memory/allocator/freelist_allocator.h"
+#include <cstdio>
 
 namespace evm::runtime {
 
@@ -58,7 +59,7 @@ void FreelistAllocator::Dealloc(void *ptr)
     node->block_size_ = block_size;
     node->next_ = nullptr;
 
-    PrintErr("Dealloc ", block_size, " ptr ", (long)ptr);
+    PrintLog("Dealloc ", block_size, " ptr ", (long)ptr);
 
     if (tail_node_ == nullptr) {
         // It means that all memory was allocated
@@ -79,16 +80,10 @@ Node *FreelistAllocator::FindFirstFit(size_t size, Node **previous_node)
     Node *curr_node = head_node_;
     Node *prev_node = nullptr;
 
-    PrintErr("START");
-
     while (true) {
-        PrintErr("1 ", curr_node->block_size_, " ", size);
         if (curr_node->block_size_ >= size) {
             break;
         }
-        std::cerr << std::hex;
-        PrintErr("2 ", curr_node->block_size_, " ", size, " ", curr_node->next_);
-        std::cerr << std::dec;
         if (curr_node->next_ == nullptr) {
             prev_node = curr_node;
             curr_node = nullptr;
@@ -97,8 +92,6 @@ Node *FreelistAllocator::FindFirstFit(size_t size, Node **previous_node)
         prev_node = curr_node;
         curr_node = curr_node->next_;
     }
-
-    PrintErr("END");
 
     if (prev_node != nullptr) {
         *previous_node = prev_node;
@@ -128,20 +121,6 @@ void FreelistAllocator::RemoveNode(Node *prev_node, Node *node_to_remove)
 void FreelistAllocator::InsertNode(Node *prev_node, Node *new_node)
 {
     assert(new_node != nullptr);
-
-    // if (prev_node == nullptr) {
-    //     if (head_node_ == nullptr) {
-    //         head_node_ = new_node;
-    //         tail_node_ = new_node;
-    //         return;
-    //     }
-
-    //     if (head_node_->next_ == nullptr) {
-    //         tail_node_ = new_node;
-    //     }
-    //     head_node_->next_ = new_node;
-    //     return;
-    // }
 
     if (prev_node->next_ == nullptr) {
         prev_node->next_ = new_node;
