@@ -27,12 +27,15 @@ public:
     {
         // place first node at the beginnig of the heap
         head_node_ = reinterpret_cast<Node *>(heap_);
-        head_node_->block_size_ = heap_capacity_;
+        head_node_->next_ = nullptr;
+        head_node_->block_size_ = heap_capacity_ - sizeof(AllocationHeader);
+
+        tail_node_ = head_node_;
     }
     ~FreelistAllocator() override = default;
 
     void *Alloc(size_t size) override;
-    void Dealloc(void *ptr_to_free) override;
+    void Dealloc(void *ptr) override;
 
     size_t GetHeapCapacity() const override
     {
@@ -57,7 +60,7 @@ private:
     size_t used_memory_size_ {0};
 
     Node *head_node_ {nullptr};
-    Node *last_freespace_node_ {nullptr};
+    Node *tail_node_ {nullptr};
 };
 
 } // namespace evm::runtime

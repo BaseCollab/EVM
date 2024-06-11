@@ -9,7 +9,11 @@ namespace evm::runtime {
 
 class FreeListAllocatorTest : public testing::Test {
 public:
-    static constexpr size_t TEST_HEAP_SIZE = 32 * MBYTE_SIZE;
+    static constexpr size_t ALLOCATION_HEADER_SIZE = sizeof(AllocationHeader);
+    static constexpr size_t TEST_OBJECT_SIZE = 1000;
+    static constexpr size_t NUMBER_OF_TEST_OBJECTS = 1000;
+    static constexpr size_t FULL_TEST_OBJECT_SIZE = TEST_OBJECT_SIZE + ALLOCATION_HEADER_SIZE;
+    static constexpr size_t TEST_HEAP_SIZE = NUMBER_OF_TEST_OBJECTS * FULL_TEST_OBJECT_SIZE;
 
     void SetUp() override
     {
@@ -33,44 +37,73 @@ protected:
 
 TEST_F(FreeListAllocatorTest, Allocate)
 {
-    constexpr size_t TEST_SIZE = 1000;
+    void *allocated_ptr[NUMBER_OF_TEST_OBJECTS] = {};
+    allocated_ptr[0] = allocator_->Alloc(TEST_OBJECT_SIZE);
+    ASSERT_NE(allocated_ptr[0], nullptr);
 
-    void *allocated_ptr[TEST_SIZE] = {};
-    allocated_ptr[0] = allocator_->Alloc(TEST_SIZE);
     uint8_t *first_object = reinterpret_cast<uint8_t *>(allocated_ptr[0]);
 
-    for (size_t idx = 1; idx < TEST_SIZE; ++idx) {
-        allocated_ptr[idx] = allocator_->Alloc(TEST_SIZE);
+    for (size_t idx = 1; idx < NUMBER_OF_TEST_OBJECTS; ++idx) {
+        allocated_ptr[idx] = allocator_->Alloc(TEST_OBJECT_SIZE);
+
+        ASSERT_NE(allocated_ptr[idx], nullptr);
+
         ASSERT_EQ(reinterpret_cast<uint8_t *>(allocated_ptr[idx]),
-                  first_object + idx * (TEST_SIZE + sizeof(AllocationHeader)));
+                  first_object + idx * (TEST_OBJECT_SIZE + sizeof(AllocationHeader)));
     }
 
-    ASSERT_EQ(allocator_->GetUsedMemorySize(), TEST_SIZE * (TEST_SIZE + sizeof(AllocationHeader)));
+    ASSERT_EQ(allocator_->Alloc(TEST_OBJECT_SIZE), nullptr);
+    ASSERT_EQ(allocator_->GetUsedMemorySize(), NUMBER_OF_TEST_OBJECTS * FULL_TEST_OBJECT_SIZE);
 }
 
 TEST_F(FreeListAllocatorTest, Deallocate)
 {
-    constexpr size_t TEST_SIZE = 1000;
-
-    void *allocated_ptr[TEST_SIZE] = {};
-    allocated_ptr[0] = allocator_->Alloc(TEST_SIZE);
+    void *allocated_ptr[NUMBER_OF_TEST_OBJECTS] = {};
+    allocated_ptr[0] = allocator_->Alloc(TEST_OBJECT_SIZE);
     uint8_t *first_object = reinterpret_cast<uint8_t *>(allocated_ptr[0]);
 
-    for (size_t idx = 1; idx < TEST_SIZE; ++idx) {
-        allocated_ptr[idx] = allocator_->Alloc(TEST_SIZE);
+    for (size_t idx = 1; idx < NUMBER_OF_TEST_OBJECTS; ++idx) {
+        allocated_ptr[idx] = allocator_->Alloc(TEST_OBJECT_SIZE);
     }
 
     size_t before_dealloc_used_memory = allocator_->GetUsedMemorySize();
 
-    uint8_t *deallocate_pos = first_object + 10 * (TEST_SIZE + sizeof(AllocationHeader));
+    uint8_t *deallocate_pos = first_object + 10 * FULL_TEST_OBJECT_SIZE;
     allocator_->Dealloc(deallocate_pos);
 
     size_t after_dealloc_used_memory = allocator_->GetUsedMemorySize();
-    ASSERT_EQ(after_dealloc_used_memory, before_dealloc_used_memory - TEST_SIZE - sizeof(AllocationHeader));
+    ASSERT_EQ(after_dealloc_used_memory, before_dealloc_used_memory - FULL_TEST_OBJECT_SIZE);
 
-    uint8_t *new_allocation = static_cast<uint8_t *>(allocator_->Alloc(TEST_SIZE));
+    uint8_t *new_allocation = static_cast<uint8_t *>(allocator_->Alloc(TEST_OBJECT_SIZE));
 
     ASSERT_EQ(deallocate_pos, new_allocation);
+}
+
+TEST_F(FreeListAllocatorTest, DeallocateManyObjects)
+{
+    void *allocated_ptr[NUMBER_OF_TEST_OBJECTS] = {};
+    allocated_ptr[0] = allocator_->Alloc(TEST_OBJECT_SIZE);
+    uint8_t *first_object = reinterpret_cast<uint8_t *>(allocated_ptr[0]);
+
+    for (size_t idx = 1; idx < NUMBER_OF_TEST_OBJECTS; ++idx) {
+        allocated_ptr[idx] = allocator_->Alloc(TEST_OBJECT_SIZE);
+    }
+
+    constexpr size_t DEALLOC_POSITIONS_SIZE = 8;
+    size_t dealloc_positions[DEALLOC_POSITIONS_SIZE] = {10, 11, 12, 200, 201, 300, 400, 500};
+    uint8_t *dealloc_pointers[DEALLOC_POSITIONS_SIZE] = {};
+
+    for (size_t idx = 0; idx < DEALLOC_POSITIONS_SIZE; ++idx) {
+        dealloc_pointers[idx] = first_object + dealloc_positions[idx] * FULL_TEST_OBJECT_SIZE;
+        allocator_->Dealloc(dealloc_pointers[idx]);
+    }
+
+    for (size_t idx = 0; idx < DEALLOC_POSITIONS_SIZE; ++idx) {
+        uint8_t *new_allocation = static_cast<uint8_t *>(allocator_->Alloc(TEST_OBJECT_SIZE));
+        uint8_t *deallocate_pos = dealloc_pointers[idx];
+
+        ASSERT_EQ(deallocate_pos, new_allocation);
+    }
 }
 
 } // namespace evm::runtime

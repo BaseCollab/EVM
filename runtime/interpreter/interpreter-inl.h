@@ -94,7 +94,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
 ALWAYS_INLINE void HandlePrintString(int64_t string_ptr)
 {
     auto *string = reinterpret_cast<types::String *>(string_ptr);
-    // printf("Print_str = %s\n", string->GetData());
+    printf("Print_str = %s\n", string->GetData());
 }
 
 ALWAYS_INLINE int64_t HandleStringConcatenation(int64_t lhs_string, int64_t rhs_string)
@@ -147,9 +147,9 @@ ALWAYS_INLINE int64_t HandleObjGetField(int16_t field_idx, int64_t obj_ptr, bool
 }
 
 // reg -- register value which will be set to field_idx
-ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t obj_ptr)
+ALWAYS_INLINE void HandleObjSetField(int16_t field_idx, int64_t reg, int64_t object_ptr)
 {
-    auto *cls = reinterpret_cast<types::Class *>(obj_ptr);
+    auto *cls = reinterpret_cast<types::Class *>(object_ptr);
     assert(cls != nullptr);
 
     auto *gc = runtime::Runtime::GetInstance()->GetGC();
