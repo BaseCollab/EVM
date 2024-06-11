@@ -46,10 +46,14 @@ static inline TypeSize GetSizeOfType(Type type)
             return TypeSize::STRING;
         case Type::ARRAY_OBJECT:
             return TypeSize::ARRAY;
-        default:
-            PrintErr("Unsupported type [", static_cast<int>(type), "]");
-            return TypeSize::ZERO;
     }
+
+    if (static_cast<int64_t>(type) >= 0) {
+        return TypeSize::OBJECT;
+    }
+
+    PrintErr("Unsupported type [", static_cast<int>(type), "]");
+    return TypeSize::ZERO;
 }
 
 static inline Type GetTypeFromString(std::string_view string)
@@ -104,10 +108,15 @@ static inline bool IsReferenceType(Type type)
         case Type::ARRAY_OBJECT:
             return true;
 
-        default:
-            PrintErr("Unsupported type [", static_cast<int>(type), "]");
+        case Type::INVALID:
+            PrintErr("Invalid type");
             UNREACHABLE();
     }
+
+    if (static_cast<int64_t>(type) >= 0) {
+        return true;
+    }
+    UNREACHABLE();
 }
 
 static inline bool IsPrimitiveType(Type type)

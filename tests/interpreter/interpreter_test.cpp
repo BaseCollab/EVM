@@ -877,6 +877,60 @@ TEST_F(InterpreterTest, CLASS_ARRAY_OBJECTS_2)
     ExecuteFromSource(source);
 }
 
+TEST_F(InterpreterTest, ARRAY_OF_OBJECTS)
+{
+    auto source = R"(
+        .class Foo
+            int x;
+        .class
+
+        movif x1, 10
+        movif x2, 0
+        movif x3, 1
+
+        newarr x10, Foo, 10
+
+        loop:
+            smei x4, x2, x1
+            jmp_if_imm x4, exit
+
+            newobj x11, Foo
+            obj_set_field x11, Foo@x, x2
+            starr x10, x2, x11
+
+            add x2, x2, x3
+            jmp_imm loop
+
+        exit:
+            exit
+    )";
+
+    ExecuteFromSource(source);
+
+    auto *foo_obj_description = runtime_->GetClassManager()->GetClassDescriptionFromCache("Foo");
+    size_t foo_obj_size = foo_obj_description->GetClassSize();
+    ASSERT_EQ(foo_obj_size, 8); // size same as 'int x'
+
+    size_t fields_num = foo_obj_description->GetFieldsNum();
+    ASSERT_EQ(fields_num, 1); // only one field -- 'int x'
+
+    const auto &field = foo_obj_description->GetField(0);
+    size_t field_offset = field.GetOffset();
+    ASSERT_EQ(field_offset, 0); // data of 'int x' should align on the zero offset from object header of class
+
+    uint8_t *array = runtime_->GetInterpreter()->GetCurrFrame()->GetReg(10)->GetPtr();
+    ASSERT_NE(array, nullptr);
+
+    for (size_t idx = 0; idx < 10; ++idx) {
+        uint64_t *current_foo_pointer =
+            reinterpret_cast<uint64_t *>(array + runtime::types::Array::GetDataOffset() + idx * sizeof(uint64_t *));
+        auto *klass = reinterpret_cast<runtime::types::Class *>(*current_foo_pointer);
+        int64_t current_value = klass->GetField(0);
+
+        ASSERT_EQ(current_value, static_cast<int64_t>(idx));
+    }
+}
+
 TEST_F(InterpreterTest, STRING_COMPARISON)
 {
     auto source = R"(
