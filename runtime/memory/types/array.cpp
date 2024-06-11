@@ -24,10 +24,10 @@ Array *Array::Create(memory::Type array_type, size_t length)
     }
     array_obj->SetLength(length);
 
-    auto classDescrType = GetDefaultClassDescrFromType(array_type);
-    auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
+    auto class_descr_type = GetDefaultClassDescrFromType(array_type);
+    auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(class_descr_type);
 
-    if (classDescrType == ClassManager::DefaultClassDescr::OBJECT_ARRAY) {
+    if (class_descr_type == ClassManager::DefaultClassDescr::OBJECT_ARRAY) {
         class_description->SetArrayElementType(array_type);
     }
 

@@ -117,6 +117,7 @@ static inline bool IsReferenceType(Type type)
         return true;
     }
     UNREACHABLE();
+    return false;
 }
 
 static inline bool IsPrimitiveType(Type type)

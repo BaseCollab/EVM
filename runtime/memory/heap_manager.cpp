@@ -34,6 +34,11 @@ const std::vector<ObjectHeader *> &HeapManager::GetObjectsList() const
 void *HeapManager::AllocateObject(size_t size)
 {
     void *alloc_obj = object_allocator_->Alloc(size);
+    if (!alloc_obj) {
+        PrintErr("Failed to allocate for size ", size);
+        return nullptr;
+    }
+
     objects_.push_back(reinterpret_cast<ObjectHeader *>(alloc_obj));
     return alloc_obj;
 }

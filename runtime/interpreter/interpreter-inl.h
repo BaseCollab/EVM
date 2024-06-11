@@ -2,6 +2,7 @@
 #define EVM_RUNTIME_INTERPRETER_INL_H
 
 #include "common/logs.h"
+#include "common/macros.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/memory/types/string.h"
@@ -131,6 +132,11 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
 
     auto *class_obj = static_cast<types::Class *>(
         heap_manager->AllocateObject(sizeof(ObjectHeader) + class_description->GetClassSize()));
+    if (!class_obj) {
+        PrintErr("Cannot create class object for \"", asm_class.GetName(), "\"");
+        UNREACHABLE();
+    }
+
     class_obj->SetClassWord(class_description);
     class_obj->InitFields(asm_class);
 

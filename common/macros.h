@@ -45,6 +45,6 @@
 #define LIKELY(exp) (__builtin_expect((exp) != 0, true))
 #define UNLIKELY(exp) (__builtin_expect((exp) != 0, false))
 
-#define UNREACHABLE() assert(false && "This line should be unreachable!")
+#define UNREACHABLE() __builtin_unreachable();
 
 #endif // EVM_COMMON_MACROS_H

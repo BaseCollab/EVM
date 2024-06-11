@@ -888,7 +888,7 @@ TEST_F(InterpreterTest, ARRAY_OF_OBJECTS)
         movif x2, 0
         movif x3, 1
 
-        newarr x10, Foo, 10
+        newarr_imm x10, Foo, 10
 
         loop:
             smei x4, x2, x1
@@ -990,7 +990,7 @@ TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
             class Bar y;
         .class
 
-        movif x1, 4000000
+        movif x1, 200000
         movif x2, 1000
 
         movif x10, foo
@@ -998,10 +998,8 @@ TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
         jmp_imm exit
 
     foo:
-        printi x0
-        printi x1
-        printi x2
-        printi x3
+        movif x90, 3
+        movif x91, 5
 
         newarr x10, Foo, x1
         movif x11, 0
@@ -1013,7 +1011,10 @@ TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
         smei x21, x20, x0
         jmp_if_imm x21, foo_exit
 
-        printi x20
+        newobj x22, Foo
+        obj_set_field x22, Foo@x, x20
+
+        mov x11, x22
 
         add x20, x20, x19
         jmp_imm foo_loop

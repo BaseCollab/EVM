@@ -13,7 +13,7 @@ namespace evm::runtime {
 class GarbageCollectorIncremental : public GarbageCollector {
 public:
     // Each N_INSTRS_FREQUENCY instructions CleanMemory() is invoked
-    static constexpr size_t N_MARK_INSTRS_FREQUENCY_DEFAULT = 1;
+    static constexpr size_t N_MARK_INSTRS_FREQUENCY_DEFAULT = 100;
     static constexpr size_t N_MARKS_SWEEP_PERIOD_RATIO = 10;
     static constexpr size_t N_HANDLING_GREY_OBJECTS = 10; // per MarkStep()
 
