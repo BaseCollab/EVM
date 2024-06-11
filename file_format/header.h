@@ -114,8 +114,9 @@ public:
 
         parsed_size += Emittable::ParseBytecode<EmitMagic>(in_arr + parsed_size, &magic);
         if (magic != MAGIC_NUMBER) {
-            std::cerr << "Magic number of input file is invalid: " << std::hex << magic << "instead of " << MAGIC_NUMBER
-                      << std::dec << std::endl;
+            std::cerr << std::hex;
+            PrintErr("Magic number of input file is invalid: ", magic, " instead of ", MAGIC_NUMBER);
+            std::cerr << std::dec;
             return 0;
         }
 

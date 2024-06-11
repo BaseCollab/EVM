@@ -129,7 +129,7 @@ void GarbageCollectorIncremental::VisitNeighbours(ObjectHeader *obj)
             return;
         }
         default: {
-            std::cerr << "Invalid type of object in GC-incremental mark-step phase: something went wrong" << std::endl;
+            PrintErr("Invalid type of object in GC-incremental mark-step phase: something went wrong");
             return;
         }
     }
@@ -202,7 +202,6 @@ void GarbageCollectorIncremental::UpdateState()
 
 void GarbageCollectorIncremental::CleanMemory()
 {
-    std::cout << "CLEAN MEM\n";
     if (!grey_objects_.empty()) { // need to sweep, but grey objects still exist
         MarkFinalize();
     }

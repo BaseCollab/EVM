@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "common/logs.h"
 #include "assembler/asm2byte/asm2byte.h"
 #include "runtime/runtime.h"
 
@@ -9,7 +10,7 @@ int Main(int argc, char *argv[])
 {
     // TODO: improve error handling
     if (argc != 2) {
-        std::cerr << "input file required" << std::endl;
+        PrintErr("Input file required");
         return 1;
     }
 
@@ -18,7 +19,7 @@ int Main(int argc, char *argv[])
     asm2byte.ParseAsmFile(argv[1], &file);
 
     if (!runtime::Runtime::Create()) {
-        std::cerr << "Failed to create runtime" << std::endl;
+        PrintErr("Failed to create runtime");
         return 1;
     }
 

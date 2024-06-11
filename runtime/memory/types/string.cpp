@@ -17,7 +17,7 @@ String *String::Create(const uint8_t *data, size_t length)
     auto *string = static_cast<String *>(Runtime::GetInstance()->GetHeapManager()->AllocateObject(string_size));
 
     if (string == nullptr) {
-        std::cerr << "Can't create string." << std::endl;
+        PrintErr("Can't create string");
         return nullptr;
     }
 
@@ -67,8 +67,6 @@ String *String::ConcatStrings(String *lhs_string, String *rhs_string)
 
     auto *concat_string_obj = String::Create(concat_data, concat_length);
     if (UNLIKELY(concat_string_obj == nullptr)) {
-        // printf("[%s] Can not create concat string from \"%s\" and \"%s\"\n", __func__, lhs_string->GetData(),
-        //        rhs_string->GetData());
         UNREACHABLE();
     }
 

@@ -11,7 +11,7 @@ HeapManager::HeapManager(size_t size) : heap_size_(size)
     heap_ =
         static_cast<uint8_t *>(mmap(nullptr, heap_size_, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
     if (heap_ == nullptr) {
-        std::cerr << "HeapManager::Failed to mmap heap, errno = " << errno << std::endl;
+        PrintErr("Failed to mmap heap, errno = ", errno);
         return;
     }
 
@@ -22,7 +22,7 @@ HeapManager::~HeapManager()
 {
     int success = munmap(heap_, heap_size_);
     if (success == -1) {
-        std::cerr << "HeapManager::Errors in munmap, errno = " << errno << std::endl;
+        PrintErr("Errors in munmap, errno = ", errno);
     }
 }
 

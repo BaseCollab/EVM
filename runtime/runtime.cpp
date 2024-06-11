@@ -1,8 +1,7 @@
+#include "common/logs.h"
 #include "runtime/runtime.h"
 #include "file_format/file.h"
-#include "runtime/memory/garbage_collector/gc_stw.h"
-
-#include <iostream>
+#include "runtime/memory/garbage_collector/gc_incremental.h"
 
 namespace evm::runtime {
 
@@ -12,13 +11,13 @@ Runtime *Runtime::instance_ = nullptr;
 bool Runtime::Create()
 {
     if (instance_ != nullptr) {
-        std::cerr << "Runtime already exists." << std::endl;
+        PrintErr("Runtime already exists");
         return false;
     }
 
     instance_ = new Runtime();
     if (instance_ == nullptr) {
-        std::cerr << "Error when allocating runtime." << std::endl;
+        PrintErr("Error when allocating runtime");
         return false;
     }
 

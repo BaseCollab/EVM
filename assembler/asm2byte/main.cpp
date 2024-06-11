@@ -7,7 +7,7 @@ namespace evm::asm2byte {
 int Main(int argc, char *argv[])
 {
     if (argc != 2) {
-        std::cerr << "Only filename arg is required" << std::endl;
+        PrintErr("Only filename arg is required");
         return EXIT_FAILURE;
     }
 
@@ -16,13 +16,13 @@ int Main(int argc, char *argv[])
     auto asm2byte = AsmToByte();
     bool parsed = asm2byte.ParseAsmFile(argv[1], &file_arch);
     if (!parsed) {
-        std::cerr << "Error when parsing asm file '" << argv[1] << "'" << std::endl;
+        PrintErr("Error when parsing asm file '", argv[1], "'");
         return EXIT_FAILURE;
     }
 
     bool dumped = file_arch.EmitBytecode();
     if (!dumped) {
-        std::cerr << "Error when dumping bytecode of file '" << argv[1] << "'" << std::endl;
+        PrintErr("Error when dumping bytecode of file '", argv[1], "'");
         return EXIT_FAILURE;
     }
 

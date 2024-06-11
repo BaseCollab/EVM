@@ -12,14 +12,14 @@ Array *Array::Create(memory::Type array_type, size_t length)
 {
     auto *runtime = Runtime::GetInstance();
 
-    std::cout << "array_type = " << (int)array_type << std::endl;
+    PrintLog("Array_type = ", static_cast<int>(array_type));
+
     size_t elem_size = memory::GetSizeOfType(array_type);
     size_t array_size = Array::GetDataOffset() + length * elem_size;
 
     auto *array_obj = reinterpret_cast<Array *>(runtime->GetHeapManager()->AllocateObject(array_size));
     if (UNLIKELY(array_obj == nullptr)) {
-        // printf("[%s] Error when creating object for array of type \"%s\"\n", __func__,
-        //        GetStringFromType(array_type).c_str());
+        PrintLog("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
         UNREACHABLE();
     }
     array_obj->SetLength(length);
@@ -27,7 +27,7 @@ Array *Array::Create(memory::Type array_type, size_t length)
     auto classDescrType = GetDefaultClassDescrFromType(array_type);
     auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
     if (UNLIKELY(class_description == nullptr)) {
-        // printf("[%s] ClassDescription for array should be initialized due Runtime creation\n", __func__);
+        PrintLog("ClassDescription for array should be initialized due Runtime creation");
         UNREACHABLE();
     }
 
@@ -60,7 +60,7 @@ ClassManager::DefaultClassDescr Array::GetDefaultClassDescrFromType(memory::Type
 void Array::ValidateAddressingInArray(size_t idx) const
 {
     if (idx >= length_) {
-        // printf("[%s] Get by invalid idx = %ld in array of length %ld\n", __func__, idx, length_);
+        PrintLog("Get by invalid idx = ", idx, " in array of length ", length_);
         UNREACHABLE();
     }
 }
@@ -71,7 +71,7 @@ void Array::Set(int64_t value, size_t idx)
 
     auto array_type = GetClassWord()->GetArrayElementType();
     if (UNLIKELY(array_type == memory::Type::INVALID)) {
-        // printf("[%s] Array type is INVALID in array object header\n", __func__);
+        PrintLog("Array type is INVALID in array object header");
         UNREACHABLE();
     }
 
@@ -88,7 +88,7 @@ void Array::Get(int64_t *value, size_t idx) const
 
     auto array_type = GetClassWord()->GetArrayElementType();
     if (UNLIKELY(array_type == memory::Type::INVALID)) {
-        // printf("[%s] Array type is INVALID in array object header\n", __func__);
+        PrintLog("Array type is INVALID in array object header");
         UNREACHABLE();
     }
 

@@ -1,9 +1,9 @@
 #ifndef EVM_MEMORY_TYPE_H
 #define EVM_MEMORY_TYPE_H
 
+#include "common/logs.h"
 #include "common/macros.h"
 
-#include <iostream>
 #include <string>
 #include <cstdint>
 
@@ -34,7 +34,7 @@ static inline TypeSize GetSizeOfType(Type type)
 {
     switch (type) {
         case Type::INVALID:
-            std::cerr << __func__ << ": invalid type [" << static_cast<int>(type) << "]" << std::endl;
+            PrintErr("Invalid type [", static_cast<int>(type), "]");
             return TypeSize::ZERO;
         case Type::DOUBLE:
             return TypeSize::DOUBLE;
@@ -47,7 +47,7 @@ static inline TypeSize GetSizeOfType(Type type)
         case Type::ARRAY_OBJECT:
             return TypeSize::ARRAY;
         default:
-            std::cerr << __func__ << ": unsupported type [" << static_cast<int>(type) << "]" << std::endl;
+            PrintErr("Unsupported type [", static_cast<int>(type), "]");
             return TypeSize::ZERO;
     }
 }
@@ -74,7 +74,7 @@ static inline std::string GetStringFromType(Type type)
 {
     switch (type) {
         case Type::INVALID:
-            std::cerr << __func__ << ": invalid type [" << static_cast<int>(type) << "]" << std::endl;
+            PrintErr("Invalid type [", static_cast<int>(type), "]");
             return std::string("<invalid>");
         case Type::DOUBLE:
             return std::string("double");
@@ -87,7 +87,7 @@ static inline std::string GetStringFromType(Type type)
         case Type::ARRAY_OBJECT:
             return std::string("arr");
         default:
-            std::cerr << __func__ << ": unsupported type [" << static_cast<int>(type) << "]" << std::endl;
+            PrintErr("Unsupported type [", static_cast<int>(type), "]");
             return std::string("<unsupported>");
     }
 }
@@ -105,7 +105,7 @@ static inline bool IsReferenceType(Type type)
             return true;
 
         default:
-            std::cerr << __func__ << ": unsupported array type [" << static_cast<int>(type) << "]" << std::endl;
+            PrintErr("Unsupported type [", static_cast<int>(type), "]");
             UNREACHABLE();
     }
 }

@@ -1,5 +1,5 @@
+#include "common/logs.h"
 #include "runtime/memory/allocator/freelist_allocator.h"
-#include <iostream>
 
 namespace evm::runtime {
 
