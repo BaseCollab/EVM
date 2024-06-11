@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "common/logs.h"
 #include "assembler/asm2byte/asm2byte.h"
 #include "runtime/runtime.h"

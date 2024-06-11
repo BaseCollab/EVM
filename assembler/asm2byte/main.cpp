@@ -1,6 +1,5 @@
 #include "asm2byte.h"
 #include <cstdlib>
-#include <iostream>
 
 namespace evm::asm2byte {
 

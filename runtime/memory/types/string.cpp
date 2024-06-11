@@ -1,10 +1,10 @@
+#include "common/logs.h"
+#include "common/utils/crc32.h"
 #include "runtime/runtime.h"
 #include "runtime/memory/types/string.h"
-#include "common/utils/crc32.h"
 
 #include <cassert>
 #include <cstring>
-#include <iostream>
 
 namespace evm::runtime::types {
 
@@ -67,6 +67,7 @@ String *String::ConcatStrings(String *lhs_string, String *rhs_string)
 
     auto *concat_string_obj = String::Create(concat_data, concat_length);
     if (UNLIKELY(concat_string_obj == nullptr)) {
+        PrintErr("String concatenation failed");
         UNREACHABLE();
     }
 

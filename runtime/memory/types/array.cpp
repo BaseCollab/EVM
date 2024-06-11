@@ -1,9 +1,9 @@
+#include "common/logs.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/memory/type.h"
 #include "runtime/runtime.h"
 
 #include <cassert>
-#include <iostream>
 
 namespace evm::runtime::types {
 
@@ -19,7 +19,7 @@ Array *Array::Create(memory::Type array_type, size_t length)
 
     auto *array_obj = reinterpret_cast<Array *>(runtime->GetHeapManager()->AllocateObject(array_size));
     if (UNLIKELY(array_obj == nullptr)) {
-        PrintLog("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
+        PrintErr("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
         UNREACHABLE();
     }
     array_obj->SetLength(length);
@@ -27,7 +27,7 @@ Array *Array::Create(memory::Type array_type, size_t length)
     auto classDescrType = GetDefaultClassDescrFromType(array_type);
     auto *class_description = runtime->GetClassManager()->GetDefaultClassDescription(classDescrType);
     if (UNLIKELY(class_description == nullptr)) {
-        PrintLog("ClassDescription for array should be initialized due Runtime creation");
+        PrintErr("ClassDescription for array should be initialized due Runtime creation");
         UNREACHABLE();
     }
 
@@ -60,7 +60,7 @@ ClassManager::DefaultClassDescr Array::GetDefaultClassDescrFromType(memory::Type
 void Array::ValidateAddressingInArray(size_t idx) const
 {
     if (idx >= length_) {
-        PrintLog("Get by invalid idx = ", idx, " in array of length ", length_);
+        PrintErr("Get by invalid idx = ", idx, " in array of length ", length_);
         UNREACHABLE();
     }
 }
@@ -71,7 +71,7 @@ void Array::Set(int64_t value, size_t idx)
 
     auto array_type = GetClassWord()->GetArrayElementType();
     if (UNLIKELY(array_type == memory::Type::INVALID)) {
-        PrintLog("Array type is INVALID in array object header");
+        PrintErr("Array type is INVALID in array object header");
         UNREACHABLE();
     }
 
@@ -88,7 +88,7 @@ void Array::Get(int64_t *value, size_t idx) const
 
     auto array_type = GetClassWord()->GetArrayElementType();
     if (UNLIKELY(array_type == memory::Type::INVALID)) {
-        PrintLog("Array type is INVALID in array object header");
+        PrintErr("Array type is INVALID in array object header");
         UNREACHABLE();
     }
 

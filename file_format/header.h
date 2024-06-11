@@ -7,7 +7,6 @@
 #include "class_section.h"
 #include "string_pool.h"
 
-#include <iostream>
 #include <cassert>
 #include <vector>
 #include <string>

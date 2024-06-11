@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
 
 namespace evm::asm2byte {
 

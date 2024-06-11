@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__CODE_SECTION_H
 
+#include "common/logs.h"
 #include "common/config.h"
 #include "common/utils/bitops.h"
 #include "common/macros.h"

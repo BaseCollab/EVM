@@ -18,7 +18,7 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
 
     auto *array_obj = types::Array::Create(array_type, size);
     if (UNLIKELY(array_obj == nullptr)) {
-        PrintLog("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
+        PrintErr("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
         UNREACHABLE();
     }
 
@@ -74,7 +74,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
         runtime->GetClassManager()->GetDefaultClassDescription(ClassManager::DefaultClassDescr::STRING);
 
     if (UNLIKELY(class_description == nullptr)) {
-        PrintLog("ClassDescription for string should be initialized due Runtime creation");
+        PrintErr("ClassDescription for string should be initialized due Runtime creation");
         UNREACHABLE();
     }
     assert(class_description->IsStringObject());
@@ -82,7 +82,7 @@ ALWAYS_INLINE int64_t HandleCreateStringObject(int32_t string_offset)
     // string->size + 1 because of \0 at the end of c_string
     auto *string_obj = types::String::Create(reinterpret_cast<const uint8_t *>(string->c_str()), string->size() + 1);
     if (UNLIKELY(string_obj == nullptr)) {
-        PrintLog("Error when creating object for string \"", string->c_str(), "\"");
+        PrintErr("Error when creating object for string \"", string->c_str(), "\"");
         UNREACHABLE();
     }
 

@@ -1,3 +1,4 @@
+#include "common/logs.h"
 #include "runtime/memory/garbage_collector/gc_incremental.h"
 #include "runtime/memory/frame.h"
 #include "runtime/memory/types/array.h"
@@ -7,7 +8,6 @@
 
 #include <vector>
 #include <bitset>
-#include <iostream>
 
 namespace evm::runtime {
 
@@ -49,29 +49,26 @@ void GarbageCollectorIncremental::MarkRoots()
 
 void GarbageCollectorIncremental::MarkStep()
 {
-    if (n_completed_marks_ == 0) { // no grey_objects in queue -> store roots to queue
-        MarkRoots();
-    } else {
-        auto interpreter = runtime::Runtime::GetInstance()->GetInterpreter();
-        const std::vector<Frame> &frames = interpreter->GetFramesStack();
+    MarkRoots();
 
-        MarkRootsOfFrame(frames[frames.size() - 1]); // find new root objects in case of new allocations
-        MarkRootAccum();                             // check for new allocated object in accumulator
+    if (n_completed_marks_ == 0) { // first mark in sweep-phase should only mark roots
+        n_completed_marks_++;
+        return;
+    }
 
-        for (size_t i = 0; i < N_HANDLING_GREY_OBJECTS; ++i) {
-            if (grey_objects_.empty()) {
-                CleanMemory();
-                return;
-            }
-
-            ObjectHeader *grey_obj = grey_objects_.front();
-            if (grey_obj->GetMarkWord().neighbour == 0) { // only if object is grey
-                VisitNeighbours(grey_obj);
-                grey_obj->SetMarkWord({.mark = 1, .neighbour = 1}); // mark as black object
-            }
-
-            grey_objects_.pop();
+    for (size_t i = 0; i < N_HANDLING_GREY_OBJECTS; ++i) {
+        if (grey_objects_.empty()) {
+            CleanMemory();
+            return;
         }
+
+        ObjectHeader *grey_obj = grey_objects_.front();
+        if (grey_obj->GetMarkWord().neighbour == 0) { // only if object is grey
+            VisitNeighbours(grey_obj);
+            grey_obj->SetMarkWord({.mark = 1, .neighbour = 1}); // mark as black object
+        }
+
+        grey_objects_.pop();
     }
 
     n_completed_marks_++;

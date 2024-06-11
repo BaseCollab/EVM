@@ -1,6 +1,7 @@
 #ifndef EVM_ASSEMBLER_ASM_TO_BYTE__FILE_H
 #define EVM_ASSEMBLER_ASM_TO_BYTE__FILE_H
 
+#include "common/logs.h"
 #include "common/macros.h"
 #include "common/constants.h"
 #include "common/emittable.h"
