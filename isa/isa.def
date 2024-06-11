@@ -407,9 +407,9 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
-    /// newarr rd, type, size
+    /// newarr_imm rd, type, size
     /// pseudo: new type(size)
-    NEWARR, 0x28,
+    NEWARR_IMM, 0x28,
     {
         RD_I_ASSIGN(HandleCreateArrayObject(GET_ARRAY_TYPE(), IMM_I32()));
         MARK_RD_AS_ROOT(true);
@@ -419,10 +419,33 @@ DEFINE_INSTR
 
 DEFINE_INSTR
 (
+    /// newarr rd, type, rs1(size)
+    /// pseudo: new type(size)
+    NEWARR, 0x29,
+    {
+        RD_I_ASSIGN(HandleCreateArrayObject(GET_ARRAY_TYPE(), GET_ARRAY_SIZE()));
+        MARK_RD_AS_ROOT(true);
+        PC_ADD(0x6); // 0x6 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
+    /// newarr rd, rs1(arr_ptr)
+    ARR_SIZE, 0x2a,
+    {
+        RD_I_ASSIGN(HandleGetArraySize(RS1_I()));
+        MARK_RD_AS_ROOT(false);
+        PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
+    }
+)
+
+DEFINE_INSTR
+(
     /// larr rd, rs1(ptr), rs2(idx)
     /// pseudo: rd = ptr[idx]
     /// Load element from array to register
-    LARR, 0x29,
+    LARR, 0x2b,
     {
         bool is_arr_el_obj = false;
         RD_I_ASSIGN(HandleLoadFromArray(RS1_I(), RS2_I(), &is_arr_el_obj));
@@ -437,7 +460,7 @@ DEFINE_INSTR
     /// val = registers[src_reg_idx]
     /// pseudo: ptr[idx] = val
     /// Store element from register to array
-    STARR, 0x2a,
+    STARR, 0x2c,
     {
         HandleStoreToArray(RS1_I(), RS2_I(), RS3_I());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
@@ -449,7 +472,7 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Put offset in string-pool to register
-    STR_IMMUT, 0x2b,
+    STR_IMMUT, 0x2d,
     {
         RD_I_ASSIGN(IMM_I32());
         PC_ADD(0x8); // 0x4 bytes per instruction, not branch instruction
@@ -460,7 +483,7 @@ DEFINE_INSTR
 (
     /// newstr rd(ptr), imm(str_offset)
     /// Create string-object from offset in string-pool, put ptr to register
-    NEWSTR, 0x2c,
+    NEWSTR, 0x2e,
     {
         RD_I_ASSIGN(HandleCreateStringObject(IMM_I32()));
         MARK_RD_AS_ROOT(true);
@@ -472,7 +495,7 @@ DEFINE_INSTR
 (
     /// strconcat rd, rs1, rs2
     /// Create new string-object with concatenated string
-    STRCONCAT, 0x2d,
+    STRCONCAT, 0x2f,
     {
         RD_I_ASSIGN(HandleStringConcatenation(RS1_I(), RS2_I()));
         MARK_RD_AS_ROOT(true);
@@ -488,7 +511,7 @@ DEFINE_INSTR
     /// Negative value if rs1 appears before rs2 in lexicographical order.
     /// Zero if rs1 and rs2 compare equal.
     /// Positive value if rs1 appears rs2 rhs in lexicographical order.
-    STRCMP, 0x2e,
+    STRCMP, 0x30,
     {
         RD_I_ASSIGN(HandleStringComparison(RS1_I(), RS2_I()));
         MARK_RD_AS_ROOT(false);
@@ -500,7 +523,7 @@ DEFINE_INSTR
 (
     /// print_str rs1(ptr)
     /// Print string-object
-    PRINT_STR, 0x2f,
+    PRINT_STR, 0x31,
     {
         HandlePrintString(RS1_I());
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
@@ -510,7 +533,7 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Print immutable string from offset in string-pool
-    PRINT_STR_IMMUT, 0x30,
+    PRINT_STR_IMMUT, 0x32,
     {
         printf("%s\n", BYTECODE_OFFSET(RS1_I()));
         PC_ADD(0x4); // 0x4 bytes per instruction, not branch instruction
@@ -523,7 +546,7 @@ DEFINE_INSTR
 (
     /// newobj rd, rs1(offset)
     /// Create object, put ptr to register
-    NEWOBJ, 0x31,
+    NEWOBJ, 0x33,
     {
         RD_I_ASSIGN(HandleCreateObject(file, GET_OBJ_TYPE()));
         MARK_RD_AS_ROOT(true);
@@ -534,7 +557,7 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Put field of an object to register (by class offset)
-    OBJ_GET_FIELD, 0x32,
+    OBJ_GET_FIELD, 0x34,
     {
         bool is_field_obj = false;
         OBJ_RS_OP_ASSIGN(HandleObjGetField(GET_OBJ_FIELD_IDX(), GET_OBJ_RS(), &is_field_obj));
@@ -546,7 +569,7 @@ DEFINE_INSTR
 DEFINE_INSTR
 (
     /// Set field of an object from register (by class offset)
-    OBJ_SET_FIELD, 0x33,
+    OBJ_SET_FIELD, 0x35,
     {
         HandleObjSetField(GET_OBJ_FIELD_IDX(), GET_OBJ_OP_RS(), GET_OBJ_RS());
         MARK_RD_AS_ROOT(false);
@@ -560,7 +583,7 @@ DEFINE_INSTR
 (
     /// Create object, which is a copy of another object
     /// Works for objects-classes, strings, arrays
-    CPOBJ, 0x34,
+    CPOBJ, 0x36,
     {
         /// TODO: add implementation
         MARK_RD_AS_ROOT(true);

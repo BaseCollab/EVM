@@ -25,6 +25,12 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
     return reinterpret_cast<int64_t>(array_obj);
 }
 
+ALWAYS_INLINE int64_t HandleGetArraySize(int64_t array_ptr)
+{
+    auto *array = reinterpret_cast<types::Array *>(array_ptr);
+    return array->GetLength();
+}
+
 ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx, bool *load_obj)
 {
     auto *array = reinterpret_cast<types::Array *>(array_ptr);

@@ -526,7 +526,7 @@ TEST_F(InterpreterTest, CALL_RET)
 TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 {
     auto source = R"(
-        newarr x0, int, 10
+        newarr_imm x0, int, 10
         movif x10, 3
         starr x0, x10, x10
 
@@ -547,7 +547,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 {
     auto source = R"(
-        newarr x0, double, 11
+        newarr_imm x0, double, 11
         movif x10, 0
         movif x11, 10
 
@@ -977,5 +977,109 @@ TEST_F(InterpreterTest, STRING_CONCAT)
 
     ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
 }
+
+TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
+{
+    auto source = R"(
+        .class Bar
+            int a;
+        .class
+
+        .class Foo
+            int x;
+            class Bar y;
+        .class
+
+        movif x1, 4000000
+        movif x2, 1000
+
+        movif x10, foo
+        call x10, x1, x2
+        jmp_imm exit
+
+    foo:
+        printi x0
+        printi x1
+        printi x2
+        printi x3
+
+        newarr x10, Foo, x1
+        movif x11, 0
+
+        movif x19, 1
+        movif x20, 1
+
+    foo_loop:
+        smei x21, x20, x0
+        jmp_if_imm x21, foo_exit
+
+        printi x20
+
+        add x20, x20, x19
+        jmp_imm foo_loop
+
+    foo_exit:
+        ret
+
+    exit:
+        exit
+    )";
+
+    ExecuteFromSource(source);
+
+    // ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+}
+
+// TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
+// {
+//     auto source = R"(
+
+//     dump:
+//         arr_size x10, x0
+//         movif x9, 0
+//         movif x8, 1
+//         movif x7, 0
+//         str_immut x100, 'Foo:null'
+//         str_immut x101, 'Foo.Bar:null'
+
+//     dump_loop:
+//         smei x30, x9, x10
+//         jpm_if x30, dump_exit
+
+//         newobj x20, Foo
+//         larr x20, x0, x9
+
+//         eqi x20, x7
+//         jmp_if x20, obj_not_zero_1
+
+//         print_str_immut x100
+//         jmp_imm dump_loop_end
+
+//     obj_not_zero_1:
+//         obj_get_field x21, Foo@y, x20
+
+//         eqi x21, x7
+//         jmp_if x20, obj_not_zero_2
+
+//         print_str_immut x101
+//         jmp_imm dump_loop_end
+
+//     obj_not_zero_2:
+//         obj_get_field x22, Bar@a, x21
+//         printi x22
+//         jmp_imm dump_loop_end
+
+//     dump_loop_end:
+//         add x9, x9, x8
+//         jmp_imm dump_loop
+
+//     dump_exit:
+//         ret
+//     )";
+
+//     ExecuteFromSource(source);
+
+//     // ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+// }
 
 } // namespace evm

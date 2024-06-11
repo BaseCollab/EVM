@@ -79,6 +79,7 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     #define IMM_F()                 ISA_GET_IMM(bytecode + pc_, double)
     #define IMM_I32()               ISA_GET_IMM(bytecode + pc_, int32_t)
 
+    #define GET_ARRAY_SIZE()        frame_cur_->GetReg(ISA_GET_ARRAY_SIZE_RS(bytecode + pc_))->GetRaw()
     #define GET_ARRAY_TYPE()        ISA_GET_ARRAY_TYPE(bytecode + pc_)
     #define GET_OBJ_TYPE()          ISA_GET_OBJ_TYPE(bytecode + pc_)
     #define GET_OBJ_FIELD_IDX()     ISA_GET_OBJ_TYPE(bytecode + pc_)
