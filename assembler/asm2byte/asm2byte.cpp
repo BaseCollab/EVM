@@ -219,6 +219,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
             case Opcode::SUB:
             case Opcode::MUL:
             case Opcode::DIV:
+            case Opcode::REM:
 
             case Opcode::AND:
             case Opcode::OR:
@@ -266,6 +267,8 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
             case Opcode::CONVIF:
             case Opcode::CONVFI:
+
+            case Opcode::ARR_SIZE:
 
             case Opcode::SIN:
             case Opcode::COS: {
@@ -383,7 +386,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 break;
             }
 
-            case Opcode::NEWARR: {
+            case Opcode::NEWARR_IMM: {
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
 
@@ -396,6 +399,13 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
                 }
 
                 instr->Set32Imm(arr_size);
+                break;
+            }
+
+            case Opcode::NEWARR: {
+                instr->SetRd(GetRegisterIdxFromString(line_args[1]));
+                code_section->AddInstrToResolve(line_args[2], instr, file_format::CodeSection::ResolutionReason::CLASS_REF);
+                instr->SetArrSizeRs(GetRegisterIdxFromString(line_args[3]));
                 break;
             }
 

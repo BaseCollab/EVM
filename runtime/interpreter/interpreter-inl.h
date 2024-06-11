@@ -2,6 +2,7 @@
 #define EVM_RUNTIME_INTERPRETER_INL_H
 
 #include "common/logs.h"
+#include "common/macros.h"
 #include "runtime/interpreter/interpreter.h"
 #include "runtime/memory/types/array.h"
 #include "runtime/memory/types/string.h"
@@ -23,6 +24,12 @@ ALWAYS_INLINE int64_t HandleCreateArrayObject(hword_t type, int32_t size)
     }
 
     return reinterpret_cast<int64_t>(array_obj);
+}
+
+ALWAYS_INLINE int64_t HandleGetArraySize(int64_t array_ptr)
+{
+    auto *array = reinterpret_cast<types::Array *>(array_ptr);
+    return array->GetLength();
 }
 
 ALWAYS_INLINE int64_t HandleLoadFromArray(int64_t array_ptr, int64_t idx, bool *load_obj)
@@ -125,6 +132,11 @@ ALWAYS_INLINE int64_t HandleCreateObject(file_format::File *file, int16_t class_
 
     auto *class_obj = static_cast<types::Class *>(
         heap_manager->AllocateObject(sizeof(ObjectHeader) + class_description->GetClassSize()));
+    if (!class_obj) {
+        PrintErr("Cannot create class object for \"", asm_class.GetName(), "\"");
+        UNREACHABLE();
+    }
+
     class_obj->SetClassWord(class_description);
     class_obj->InitFields(asm_class);
 

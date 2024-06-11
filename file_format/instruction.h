@@ -93,6 +93,12 @@ public:
         obj_op_ = true;
     }
 
+    void SetArrSizeRs(int8_t size_rs)
+    {
+        arr_size_rs_ = size_rs;
+        new_arr_ = true;
+    }
+
     bool IsObjInstr() const
     {
         return obj_op_;
@@ -158,7 +164,7 @@ public:
 
     size_t GetBytesSize() const
     {
-        return MINIMAL_INSTR_SIZE + obj_op_ * 2 + imm_.num_bytes_ +
+        return MINIMAL_INSTR_SIZE + (obj_op_ || new_arr_) * 2 + imm_.num_bytes_ +
                (have_args_ == true) * runtime::Frame::N_PASSED_ARGS_DEFAULT;
     }
 
@@ -172,6 +178,9 @@ public:
         if (obj_op_ == true) {
             out_arr->push_back(obj_rs_);
             out_arr->push_back(obj_field_type_);
+        } else if (new_arr_) {
+            out_arr->push_back(arr_size_rs_);
+            out_arr->push_back(0); // for alognment
         }
 
         if (imm_.is_set_) {
@@ -202,6 +211,9 @@ private:
     byte_t obj_rs_ {0};
     int8_t obj_field_type_ {0};
     bool obj_op_ = false;
+
+    byte_t arr_size_rs_ {0};
+    bool new_arr_ = false;
 
     Immediate imm_;
 

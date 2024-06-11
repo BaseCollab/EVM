@@ -16,6 +16,7 @@ using instr_size_t = word_t;
 #define ISA_GET_RS3(instr_ptr) ISA_GET_RD(instr_ptr)
 
 #define ISA_GET_ARRAY_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 2))
+#define ISA_GET_ARRAY_SIZE_RS(instr_ptr) *(instr_ptr + 4)
 
 /// All types are always objects, not need additional checks
 #define ISA_GET_OBJ_TYPE(instr_ptr) *(reinterpret_cast<const hword_t *>(instr_ptr + 2))

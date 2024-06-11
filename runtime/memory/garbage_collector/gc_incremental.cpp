@@ -153,11 +153,11 @@ void GarbageCollectorIncremental::Sweep()
     auto objects_list = heap_manager->GetObjectsList();
 
     for (auto obj : objects_list) {
-        auto mark_word = obj->GetMarkWord();
-        if (mark_word.mark == 1) {
+        if (obj->GetMarkWord().mark == 1) {
             obj->SetMarkWord({.mark = 0});
         } else {
             heap_manager->DeallocateObject(obj);
+            PrintLog(long(obj->GetClassWord()->GetObjectType()));
         }
     }
 

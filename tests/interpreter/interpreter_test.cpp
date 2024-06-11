@@ -526,7 +526,7 @@ TEST_F(InterpreterTest, CALL_RET)
 TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 {
     auto source = R"(
-        newarr x0, int, 10
+        newarr_imm x0, int, 10
         movif x10, 3
         starr x0, x10, x10
 
@@ -547,7 +547,7 @@ TEST_F(InterpreterTest, ARRAY_INSTRS_1)
 TEST_F(InterpreterTest, ARRAY_INSTRS_2)
 {
     auto source = R"(
-        newarr x0, double, 11
+        newarr_imm x0, double, 11
         movif x10, 0
         movif x11, 10
 
@@ -888,7 +888,7 @@ TEST_F(InterpreterTest, ARRAY_OF_OBJECTS)
         movif x2, 0
         movif x3, 1
 
-        newarr x10, Foo, 10
+        newarr_imm x10, Foo, 10
 
         loop:
             smei x4, x2, x1
@@ -976,6 +976,129 @@ TEST_F(InterpreterTest, STRING_CONCAT)
     ExecuteFromSource(source);
 
     ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
+}
+
+TEST_F(InterpreterTest, ALLOCATION_GC_TEST)
+{
+    auto source = R"(
+        .class Bar
+            int a;
+        .class
+
+        .class Foo
+            int x;
+            class Bar y;
+        .class
+
+        movif x1, 40000
+        movif x2, 1000
+
+        movif x10, foo
+        call x10, x1, x2
+        jmp_imm exit
+
+    foo:
+        movif x90, 3
+        movif x91, 5
+        movif x92, 0
+        movif x93, -1
+
+        newarr x10, Foo, x1
+        movif x11, 0
+
+        movif x19, 1
+        movif x20, 1
+
+    foo_loop:
+        smei x21, x20, x0
+        jmp_if_imm x21, foo_exit
+
+        newobj x22, Foo
+        obj_set_field x22, Foo@x, x20
+
+        rem x23, x20, x90
+        neqi x24, x23, x92
+        jmp_if_imm x24, skip_arr_inter
+
+        add x24, x1, x93
+        rem x24, x20, x24
+        starr x10, x24, x22
+
+    skip_arr_inter:
+
+        newobj x32, Bar
+        obj_set_field x32, Bar@a, x20
+
+        rem x23, x20, x91
+        neqi x24, x23, x92
+        jmp_if_imm x24, skip_obj_inter
+
+        obj_set_field x22, Foo@y, x32
+
+    skip_obj_inter:
+
+        mov x11, x22
+
+        movif x40, dump
+        call x40, x10
+
+        add x20, x20, x19
+        jmp_imm foo_loop
+
+    foo_exit:
+        ret
+
+    dump:
+        jmp_imm dump_exit
+
+        arr_size x10, x0
+        movif x9, 0
+        movif x8, 1
+        movif x7, 0
+        str_immut x100, 'Foo:null'
+        str_immut x101, 'Foo.Bar:null'
+
+    dump_loop:
+        smei x30, x9, x10
+        jmp_if_imm x30, dump_exit
+
+        newobj x20, Foo
+        larr x20, x0, x9
+
+        eqi x25, x20, x7
+        jmp_if_imm x25, obj_not_zero_1
+
+        print_str_immut x100
+        jmp_imm dump_loop_end
+
+    obj_not_zero_1:
+        obj_get_field x21, Foo@y, x20
+
+        eqi x25, x21, x7
+        jmp_if_imm x25, obj_not_zero_2
+
+        print_str_immut x101
+        jmp_imm dump_loop_end
+
+    obj_not_zero_2:
+        obj_get_field x22, Bar@a, x21
+        printi x22
+        jmp_imm dump_loop_end
+
+    dump_loop_end:
+        add x9, x9, x8
+        jmp_if_imm dump_loop
+
+    dump_exit:
+        ret
+
+    exit:
+        exit
+    )";
+
+    ExecuteFromSource(source);
+
+    // ASSERT_EQ(runtime_->GetInterpreter()->GetCurrFrame()->GetReg(0x4)->GetInt64(), 0);
 }
 
 } // namespace evm
