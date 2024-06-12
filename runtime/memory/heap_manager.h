@@ -35,9 +35,10 @@ public:
 private:
     size_t heap_size_ {0};
     uint8_t *heap_ {nullptr};
-    // TODO: use free-list allocator object allocations when this allocator will be implemented.
+    uint8_t *internal_heap_ {nullptr};
+
     std::unique_ptr<AllocatorBase> object_allocator_;
-    // TODO: create allocator for internal allocations.
+    std::unique_ptr<AllocatorBase> internal_allocator_;
 
     std::unordered_set<ObjectHeader *> objects_;
 };

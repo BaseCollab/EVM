@@ -431,7 +431,7 @@ bool AsmToByte::GenRawInstructions(file_format::File *file_arch)
 
                 instr->SetRd(GetRegisterIdxFromString(line_args[1]));
                 instr->SetStringOp(line_args[2]);
-
+                instr->Set32Imm(0);
                 string_pool->AddInstrToResolve(instr);
 
                 break;
