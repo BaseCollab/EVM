@@ -276,7 +276,7 @@ DEFINE_INSTR
     SCANI, 0x1b,
     {
         int64_t __tmp {0};
-        scanf("%ld", &__tmp);
+        if(scanf("%ld", &__tmp)) {};
         RD_I_ASSIGN(__tmp);
 
         MARK_RD_AS_ROOT(false);
@@ -289,7 +289,7 @@ DEFINE_INSTR
     SCANF, 0x1c,
     {
         double __tmp {0.0};
-        scanf("%lf", &__tmp);
+        if(scanf("%lf", &__tmp)) {};
         RD_F_ASSIGN(__tmp);
 
         MARK_RD_AS_ROOT(false);
