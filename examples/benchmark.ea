@@ -34,6 +34,7 @@ foo_loop:
 
     newobj x22, Foo
     obj_set_field x22, Foo@x, x20
+    obj_set_field x22, Foo@y, x92
 
     rem x23, x20, x90
     neqi x24, x23, x92
@@ -49,14 +50,8 @@ after_set_to_array:
 
     rem x23, x20, x91
     neqi x24, x23, x92
-    jmp_if_imm x24, set_zero_to_bar
-    
-set_obj_to_bar:
+    jmp_if_imm x24, after_set_value_to_bar
     obj_set_field x22, Foo@y, x32
-    jmp_imm after_set_value_to_bar
-
-set_zero_to_bar:
-    obj_set_field x22, Foo@y, x92
 
 after_set_value_to_bar:
     mov x11, x22
