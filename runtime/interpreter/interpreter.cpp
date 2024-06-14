@@ -24,13 +24,7 @@ namespace evm::runtime {
 
 // clang-format off
 
-#define DEBUG_LOG
-
-#ifdef DEBUG_LOG
-#define PRINT_DEBUG(name) std::cerr << #name << ", pc = " << pc_ << std::endl;
-#else
-#define PRINT_DEBUG(name)
-#endif
+#define PRINT_INSTR(name) PrintLog(#name, ", pc = ", pc_)
 
 #define RD_I_FRAME_ASSIGN(frame, value) frame->GetReg(RD_IDX())->SetInt64(value)
 #define RD_F_FRAME_ASSIGN(frame, value) frame->GetReg(RD_IDX())->SetDouble(value)
@@ -134,7 +128,7 @@ void Interpreter::Run(file_format::File *file, const byte_t *bytecode, size_t en
     instr:                                            \
     {                                                 \
         interpret;                                    \
-        PRINT_DEBUG(instr)                            \
+        PRINT_INSTR(instr);                           \
         CHECK_GC_INVOKE();                            \
         DISPATCH();                                   \
     }

@@ -17,11 +17,14 @@ Array *Array::Create(memory::Type array_type, size_t length)
     size_t elem_size = memory::GetSizeOfType(array_type);
     size_t array_size = Array::GetDataOffset() + length * elem_size;
 
-    auto *array_obj = reinterpret_cast<Array *>(runtime->GetHeapManager()->AllocateObject(array_size));
-    if (UNLIKELY(array_obj == nullptr)) {
+    void *array_obj_ptr = runtime->GetHeapManager()->AllocateObject(array_size);
+    if (UNLIKELY(array_obj_ptr == nullptr)) {
         PrintErr("Error when creating object for array of type \"", GetStringFromType(array_type).c_str(), "\"");
         UNREACHABLE();
     }
+
+    std::memset(array_obj_ptr, 0, array_size);
+    auto *array_obj = reinterpret_cast<Array *>(array_obj_ptr);
     array_obj->SetLength(length);
 
     auto class_descr_type = GetDefaultClassDescrFromType(array_type);

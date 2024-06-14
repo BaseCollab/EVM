@@ -35,7 +35,7 @@ function dump(foo: Foo[]): void {
 }
 
 function foo(N : number, M : number) : void {
-    // Do not implement generic types. Just call new array with type descriptor as argument 
+    // Do not implement generic types. Just call new array with type descriptor as argument
     let foo : Foo[] = new Array<Foo>(M)
     // Consider any reference type to be nullable, no need to support union types like X | null separately
     let outer : Foo | null = null
@@ -60,7 +60,7 @@ function foo(N : number, M : number) : void {
 }
 
 function main() : void {
-    let N : number = 4000
+    let N : number = 40000
     let M : number = 1000
     foo(N, M)
 }
